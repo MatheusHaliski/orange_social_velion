@@ -101,6 +101,8 @@ jobs:
           scan-ref: .
           scanners: vuln,misconfig,secret
           severity: HIGH,CRITICAL
+          # Sem isto o SARIF (e o exit-code) incluem todas as severidades
+          limit-severities-for-sarif: true
           ignore-unfixed: true
           format: sarif
           output: trivy-fs.sarif
@@ -143,6 +145,7 @@ jobs:
         with:
           image-ref: orange-social:ci
           severity: HIGH,CRITICAL
+          limit-severities-for-sarif: true
           ignore-unfixed: true
           format: sarif
           output: trivy-image.sarif
