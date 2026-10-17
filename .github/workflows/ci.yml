@@ -93,7 +93,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Trivy filesystem scan
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           scan-type: fs
           scan-ref: .
@@ -105,7 +105,7 @@ jobs:
           exit-code: "1"
       - name: Publicar SARIF
         if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-fs.sarif
           category: trivy-fs
@@ -128,7 +128,7 @@ jobs:
       - name: Build da imagem no daemon local (sem push)
         run: mvn -B -ntp -DskipTests package jib:dockerBuild -Dimage=orange-social:ci
       - name: Trivy image scan
-        uses: aquasecurity/trivy-action@0.30.0
+        uses: aquasecurity/trivy-action@0.35.0
         with:
           image-ref: orange-social:ci
           severity: HIGH,CRITICAL
@@ -138,7 +138,7 @@ jobs:
           exit-code: "1"
       - name: Publicar SARIF
         if: always()
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-image.sarif
           category: trivy-image
