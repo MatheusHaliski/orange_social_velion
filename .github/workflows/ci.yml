@@ -90,7 +90,7 @@ jobs:
             exit 0
           fi
           python3 scripts/check_rf_docs.py --base "$BASE"
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
       - name: Sintaxe Mermaid (renderiza todos os diagramas de docs/)
