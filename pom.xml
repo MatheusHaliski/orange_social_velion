@@ -119,6 +119,13 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
+            <!-- SBOM CycloneDX: o parent do Spring Boot configura o plugin (pluginManagement,
+                 fase generate-resources → META-INF/sbom/application.cdx.json); declará-lo aqui o ativa.
+                 O arquivo vai no jar e na imagem, e o Trivy o usa como fonte de verdade. -->
+            <plugin>
+                <groupId>org.cyclonedx</groupId>
+                <artifactId>cyclonedx-maven-plugin</artifactId>
+            </plugin>
             <!-- Imagem OCI sem Dockerfile, reprodutível (ADR-11); base JRE 25 não-root -->
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>

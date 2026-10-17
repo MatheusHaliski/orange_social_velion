@@ -67,6 +67,7 @@ jobs:
         with:
           name: sbom-cyclonedx
           path: target/classes/META-INF/sbom/application.cdx.json
+          if-no-files-found: error
           retention-days: 90
 
   secrets:
