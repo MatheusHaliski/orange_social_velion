@@ -54,8 +54,8 @@ Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 | OS-02 | Documentação UML em Mermaid (`docs/`) | 🔵 | 3 | 5 diagramas: classes, estados, componentes, sequência, atividades |
 | OS-03 | Docker Compose local: **PostgreSQL 17 + PostGIS, Valkey 9, Cassandra 5, Garage** | 🔵 | 3 | ✅ `docker-compose.yml` + `infra/garage/`; Cassandra no profile `full`; falta validar em máquina com Docker |
 | OS-04 | Pipeline CI no GitHub Actions | 🔵 🔴 | 3 | `mvn verify` + Testcontainers; CodeQL, Dependabot, Gitleaks com push protection, Trivy, SBOM CycloneDX; PR bloqueado se falhar |
-| OS-05 | Migrações versionadas (Flyway) a partir de `schema.sql` | 🔵 | 2 | ✅ `db/migration/V1__baseline.sql` + `SchemaConsistencyTest`; falta rodar `validate` contra o PostGIS real (OS-06) |
-| OS-06 | Testes de integração com Testcontainers 2.0 (PostGIS, Valkey, Cassandra) | 🔵 | 3 | `@ServiceConnection`; repositórios testados contra containers reais |
+| OS-05 | Migrações versionadas (Flyway) a partir de `schema.sql` | 🔵 | 2 | ✅ `V1__baseline.sql` aplicado pelo Flyway e `ddl-auto=validate` verde contra PostGIS real (`UserControlListRepositoryIT`) |
+| OS-06 | Testes de integração com Testcontainers 2.0 (PostGIS, Valkey, Cassandra) | 🔵 | 3 | ✅ `PolyglotContainers` + 3 classes `*IT` rodando em `mvn verify` (failsafe); unitários continuam em `mvn test` |
 | OS-07 **(novo)** | Spring Modulith 2.x: módulos `profile`, `post`, `audio`, `alert`, `trending`, `filter`, `lgpd`, `velion` | 🔵 | 5 | Teste de fronteiras (ArchUnit) verde; Event Publication Registry como outbox no MVP |
 | OS-08 **(novo)** | IaC em OpenTofu: VPC, ECS Fargate, RDS PostgreSQL, ElastiCache Valkey, S3 (sa-east-1) | 🔵 | 8 | `tofu plan` limpo em `dev`; state em S3 com locking; contas separadas por ambiente |
 

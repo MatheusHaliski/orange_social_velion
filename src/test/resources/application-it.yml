@@ -1,0 +1,15 @@
+# Perfil "it": testes de integração com Testcontainers.
+# Host/porta/credenciais vêm de @ServiceConnection; aqui só o que o container não fornece.
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate      # o schema é criado pelo Flyway (V1__baseline.sql); a entidade deve bater
+  flyway:
+    enabled: true
+  cassandra:
+    keyspace-name: orange_social
+    schema-action: none       # schema.cql é aplicado pelo init script do container
+    request:
+      timeout: 20s
+    connection:
+      init-query-timeout: 20s

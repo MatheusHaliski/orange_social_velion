@@ -30,12 +30,13 @@ spring:
     redis:
       host: ${VALKEY_HOST:localhost}
       port: ${VALKEY_PORT:6379}
-    # Cassandra · timeline / logs / notificações
-    cassandra:
-      keyspace-name: orange_social
-      contact-points: ${CASSANDRA_CONTACT_POINTS:localhost:9042}
-      local-datacenter: ${CASSANDRA_DC:datacenter1}
-      schema-action: none
+
+  # Cassandra · timeline / logs / notificações
+  cassandra:
+    keyspace-name: orange_social
+    contact-points: ${CASSANDRA_CONTACT_POINTS:localhost:9042}
+    local-datacenter: ${CASSANDRA_DC:datacenter1}
+    schema-action: none
 
 orange-social:
   storage:

@@ -46,9 +46,14 @@ mvn spring-boot:run                   # Flyway aplica db/migration/V1__baseline.
 Credenciais de desenvolvimento: PostgreSQL `orange`/`orange`; Garage access key `GK0000000000000000orangedev`
 (secret em `infra/garage/init.sh`), bucket `orange-social-media`.
 
-## Build
+## Build e testes
 
 ```bash
-mvn test
+mvn test                        # unitários (sem Docker)
+mvn verify                      # + testes de integração *IT com Testcontainers (PostGIS, Valkey, Cassandra 5)
 python3 scripts/wcag_contrast.py
 ```
+
+Os testes de integração usam `@ServiceConnection` (`src/test/java/com/orangesocial/support/PolyglotContainers.java`)
+e o perfil `it`. Com `testcontainers.reuse.enable=true` em `~/.testcontainers.properties` os containers
+são reaproveitados entre execuções.

@@ -32,6 +32,14 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 CREATE EXTENSION IF NOT EXISTS pg_trgm;    -- busca aproximada por nome (eixo "Nome")
 CREATE EXTENSION IF NOT EXISTS unaccent;   -- ignora acentos em pt-BR
 
+-- unaccent() não é IMMUTABLE (depende do dicionário), logo não pode entrar em índice.
+-- Wrapper imutável fixando o dicionário padrão: usar f_unaccent() nas consultas do eixo "Nome"
+-- para que o planejador aproveite o índice trigram.
+CREATE OR REPLACE FUNCTION f_unaccent(text)
+    RETURNS text
+    LANGUAGE sql IMMUTABLE PARALLEL SAFE STRICT
+    RETURN public.unaccent('public.unaccent', $1);
+
 CREATE TABLE IF NOT EXISTS "VSusercontrolist" (
     id                              BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
 
@@ -42,8 +50,8 @@ CREATE TABLE IF NOT EXISTS "VSusercontrolist" (
     recovery_email                  VARCHAR(254),
 
     -- 5..9 · cidadania e residência
-    citizenship                     CHAR(2),
-    country_of_residence            CHAR(2),
+    citizenship                     VARCHAR(2),
+    country_of_residence            VARCHAR(2),
     state_of_residence              VARCHAR(80),
     city_of_residence               VARCHAR(120),
     address                         VARCHAR(255),
@@ -121,7 +129,7 @@ CREATE INDEX IF NOT EXISTS idx_vsusercontrolist_location
 CREATE INDEX IF NOT EXISTS idx_vsusercontrolist_status
     ON "VSusercontrolist" (account_status);
 CREATE INDEX IF NOT EXISTS idx_vsusercontrolist_name_trgm
-    ON "VSusercontrolist" USING GIN (lower(unaccent(name)) gin_trgm_ops);
+    ON "VSusercontrolist" USING GIN (lower(f_unaccent(name)) gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_vsusercontrolist_point
     ON "VSusercontrolist" USING GIST (last_saved_point);
 CREATE INDEX IF NOT EXISTS idx_vsusercontrolist_interests

@@ -30,7 +30,7 @@ import java.util.List;
  * (PostgreSQL; ver src/main/resources/schema.sql para o de/para dos 19 campos).
  */
 @Entity
-@Table(name = "VSusercontrolist")
+@Table(name = "\"VSusercontrolist\"")  // nome citado: o DDL preserva maiúsculas
 public class UserControlList {
 
     @Id
