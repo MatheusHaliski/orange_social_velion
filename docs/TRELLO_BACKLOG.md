@@ -146,6 +146,21 @@ Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 | OS-63 | RF2 — Configurações (9 seções) e fundo do app (liso, rede, 6 mosaicos com o logo oficial) | 🟠 🟢 | 5 | ✅ API de perfil e preferências; menor de 16 com proteções travadas; ⏳ telas |
 | OS-64 | RF23 — Excluir conta: modal de consequências, 30 dias para reativar e job de eliminação | 🔴 | 5 | ✅ `POST /api/v1/me/deletion`, reativação no login, `AccountDeletionJob`; ⏳ modal no app, passos S3/Cassandra/DEK (OS-44) |
 
+### Background Studio — moldura dos cards e Aura Plus (pesquisa 17/10/2026)
+
+Detalhes em [`PESQUISA_BACKGROUND_STUDIO.md`](PESQUISA_BACKGROUND_STUDIO.md). Depende de OS-23 (publicar post).
+
+| ID | Título | Etiqueta | Pts | Critérios de aceite |
+|---|---|---|---|---|
+| OS-65 | Moldura do post: `post.background` JSONB (só ids), validação no servidor e leitura resolvida | 🔵 🟠 | 5 | V4 com coluna e `background_asset`; ids conferidos contra o catálogo; sem CSS/URL livre; `ALERT` ignora; contraste tinta × container ≥ 4,5:1 senão 422 |
+| OS-66 | Catálogo procedural: `GET /api/v1/backgrounds/catalog` (público, ETag) | 🟠 🔵 | 5 | Cor lisa, gradientes, 12 auras estáticas, 4 materiais; proveniência e licença por item; tela "Créditos e licenças"; tokens web + Skia |
+| OS-67 | Cartela sazonal automática (Hemisfério Sul) | 🟠 | 3 | 12 cartelas; janelas `[início, fim)` em America/Sao_Paulo; Carnaval = Páscoa − 47; prioridades; Black Friday opt-in; variação por UF |
+| OS-68 | Aura Hype conquistada + Metamorfose (Prisma, Constelação, Fio Vivo, Holografia) | 🟠 | 5 | Hype só com post em alta e texto "Em alta"; animação ≤ 5 s, só cards visíveis, orçamento por aparelho; estático com `reduceMotion` |
+| OS-69 | **Aura Plus**: arte animada em vídeo (H.264/AV1) + pôster, nunca GIF | 🟠 🔵 🔴 | 8 | Pipeline ffprobe → ffmpeg → EA IRIS → moderação → variantes ≤ 25/150/400 KB; preferência "Animações de fundo" (Só no Wi-Fi); Pouca Energia → pôster |
+| OS-70 | Arte própria: upload e geração por IA com moderação | 🔴 🟠 | 8 | 16+; quarentena; selo "Gerada por IA"; hash perceptual; notificação de direito autoral; sem GIPHY/Tenor |
+| OS-71 | Layouts e skins (bento, polaroid, revista, tela cheia) para post, story, perfil e destaque | 🟠 | 8 | Atualiza RF24/RF25 e anatomia; layout com arte própria desliga a aba Aura com explicação |
+| OS-72 | Parecer jurídico do Background Studio | 🔴 | 2 | Itens da §8: licenças de stock, IA, retirada por direito autoral, STF art. 19, marcas parceiras |
+
 ### Ecossistema Velion (Backlog)
 
 | ID | Título | Etiqueta | Pts | Critérios de aceite |

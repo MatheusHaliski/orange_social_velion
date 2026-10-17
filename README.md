@@ -41,7 +41,8 @@ src/main/java/com/orangesocial/
   [Sequências](docs/DIAGRAMA_SEQUENCIA.md) · [Atividades](docs/DIAGRAMA_ATIVIDADES.md)
 - [Taxonomia: atores, tipos de usuário, atributos e anatomia dos cards](docs/TAXONOMIA_ATORES_E_CARDS.md)
   ([desenhos](design/prototype/anatomia/))
-- [Pesquisa de tecnologias (ADRs)](docs/PESQUISA_TECNOLOGIAS.md) · [Design system](docs/DESIGN_SYSTEM.md)
+- [Pesquisa de tecnologias (ADRs)](docs/PESQUISA_TECNOLOGIAS.md) · [Design system](docs/DESIGN_SYSTEM.md) ·
+  [Background Studio e Aura Plus (pesquisa)](docs/PESQUISA_BACKGROUND_STUDIO.md)
 - [Backlog para o Trello](docs/TRELLO_BACKLOG.md)
 - [Protótipo de interface](design/prototype/index.html) · [telas renderizadas](design/prototype/screens/) ·
   [marca e logo](design/brand/) ([regras](docs/DESIGN_SYSTEM.md#8-marca))
