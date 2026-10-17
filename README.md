@@ -37,6 +37,7 @@ src/main/java/com/orangesocial/
   [Atividades: cadastro](docs/DIAGRAMA_ATIVIDADES.md)
 - [Pesquisa de tecnologias (ADRs)](docs/PESQUISA_TECNOLOGIAS.md) · [Design system](docs/DESIGN_SYSTEM.md)
 - [Backlog para o Trello](docs/TRELLO_BACKLOG.md)
+- [Protótipo de interface](design/prototype/index.html) · [telas renderizadas](design/prototype/screens/)
 
 ## Ambiente local
 
