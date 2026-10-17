@@ -1,7 +1,7 @@
 # Diagrama de Sequência — Publicação no Audio Feed
 
-Fluxo completo: upload do áudio para o S3, persistência canônica no MySQL, atualização do
-*Trending Score* no Redis (ZSET) e fan-out da timeline no Cassandra.
+Fluxo completo: upload do áudio para o S3, persistência canônica no PostgreSQL, atualização do
+*Trending Score* no Valkey (ZSET) e fan-out da timeline no Cassandra.
 
 ```mermaid
 sequenceDiagram
@@ -10,13 +10,13 @@ sequenceDiagram
     participant SEC as JwtAuthenticationFilter
     participant MC as MediaController
     participant MS as MediaStorageService
-    participant S3 as AWS S3 / MinIO
+    participant S3 as AWS S3
     participant PC as PostController
     participant PS as PostPublishingService
-    participant DB as MySQL (PostRepository)
+    participant DB as PostgreSQL (PostRepository)
     participant EV as DomainEventPublisher
     participant TS as TrendingService
-    participant R as Redis (TrendingScoreRepository)
+    participant R as Valkey (TrendingScoreRepository)
     participant TL as TimelineFanoutWorker
     participant C as Cassandra (PostTimelineRepository)
 
@@ -31,7 +31,7 @@ sequenceDiagram
     U->>S3: PUT áudio (upload direto)
     S3-->>U: 200 ETag
 
-    Note over U,DB: Etapa 2 — publicação (transação MySQL)
+    Note over U,DB: Etapa 2 — publicação (transação PostgreSQL)
     U->>SEC: POST /api/v1/posts {feed: AUDIO, title, objectKey, kind: PODCAST}
     SEC->>PC: requisição autenticada
     PC->>PS: publish(cmd)
@@ -81,6 +81,6 @@ sequenceDiagram
 | 1–9 | Upload direto ao S3 com URL pré-assinada | Áudios/podcasts são grandes; não passam pela JVM |
 | 13 | `HEAD` no S3 antes do INSERT | Garante que o post nunca aponte para mídia inexistente |
 | 15 | `authorCategory` copiada para o post | Permite filtro por cor sem join na leitura |
-| 19+ | Redis e Cassandra após o COMMIT | MySQL é a fonte da verdade; projeções são idempotentes e reconstruíveis |
+| 19+ | Valkey e Cassandra após o COMMIT | PostgreSQL é a fonte da verdade; projeções são idempotentes e reconstruíveis |
 | 25 | `BATCH UNLOGGED` por partição | Fan-out barato; cada linha é independente |
 | 28 | `ZINCRBY` incremental | O ranking reage em tempo real sem recalcular o score inteiro; um job periódico recalcula o *freshness* |

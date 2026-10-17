@@ -27,7 +27,7 @@ import java.util.List;
 
 /**
  * Entidade principal de usuário, mapeada para a tabela {@code VSusercontrolist}
- * (ver src/main/resources/schema.sql para o de/para dos 19 campos).
+ * (PostgreSQL; ver src/main/resources/schema.sql para o de/para dos 19 campos).
  */
 @Entity
 @Table(name = "VSusercontrolist")
@@ -110,7 +110,7 @@ public class UserControlList {
     @Column(name = "sexual_preference", length = 40)
     private String sexualPreference;
 
-    // 16 · Photo — chave do objeto no S3/MinIO, nunca o binário
+    // 16 · Photo — chave do objeto no S3, nunca o binário
     @Column(name = "photo_object_key", length = 512)
     private String photoObjectKey;
 

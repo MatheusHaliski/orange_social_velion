@@ -33,7 +33,7 @@ public class PostTimelineEntity {
     @Column("subtitle")
     private String subtitle;
 
-    /** Chave do objeto no S3/MinIO. */
+    /** Chave do objeto no S3. */
     @Column("media_object_key")
     private String mediaObjectKey;
 

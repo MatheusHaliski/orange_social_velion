@@ -1,6 +1,6 @@
 # Diagrama de Classes — Orange Social
 
-Modelo de domínio central. `VSusercontrolist` é a tabela MySQL; a entidade Java correspondente é
+Modelo de domínio central. `VSusercontrolist` é a tabela PostgreSQL; a entidade Java correspondente é
 `com.orangesocial.domain.model.UserControlList`. Os campos marcados como `«sensível»` são dados
 pessoais sensíveis (LGPD Art. 5º, II) e só são tratados com consentimento específico (Art. 11).
 
@@ -9,7 +9,7 @@ classDiagram
     direction TB
 
     class VSusercontrolist {
-        <<Entity · MySQL>>
+        <<Entity · PostgreSQL>>
         -Long id
         -String name
         -String passwordHash
@@ -77,8 +77,8 @@ classDiagram
         +String city
     }
 
-    class UserConsent {
-        <<Entity · MySQL>>
+    class ConsentEvent {
+        <<Entity · PostgreSQL>>
         -Long id
         -ConsentPurpose purpose
         -String legalBasis
@@ -168,7 +168,7 @@ classDiagram
     }
 
     class VelionPoints {
-        <<Entity · MySQL>>
+        <<Entity · PostgreSQL>>
         -Long userId
         -long balance
         -long lifetimeEarned
@@ -178,7 +178,7 @@ classDiagram
     }
 
     class VelionTrophy {
-        <<Entity · MySQL>>
+        <<Entity · PostgreSQL>>
         -String code
         -Rarity rarity
         -Instant awardedAt
@@ -188,7 +188,7 @@ classDiagram
     VSusercontrolist "1" --> "1" AccountStatus : accountStatus
     VSusercontrolist "1" *-- "0..1" GeoLocation : lastSavedLocation
     VSusercontrolist "1" *-- "0..*" CommunityInterest : communities
-    VSusercontrolist "1" *-- "0..*" UserConsent : consents
+    VSusercontrolist "1" *-- "0..*" ConsentEvent : consents
     VSusercontrolist "1" -- "1" VelionPoints : wallet
     VSusercontrolist "1" -- "0..*" VelionTrophy : trophies
     VSusercontrolist "1" -- "0..*" Post : publica
@@ -207,11 +207,11 @@ classDiagram
 
 | Classe | Armazenamento | Observação |
 |---|---|---|
-| `VSusercontrolist`, `UserConsent`, `VelionPoints`, `VelionTrophy` | MySQL 8.0 | Fonte da verdade, transações ACID |
-| `Post` (+ subclasses) — metadados | MySQL 8.0 | Registro canônico do post |
+| `VSusercontrolist`, `ConsentEvent`, `VelionPoints`, `VelionTrophy` | PostgreSQL 17 + PostGIS | Fonte da verdade, transações ACID |
+| `Post` (+ subclasses) — metadados | PostgreSQL 17 + PostGIS | Registro canônico do post |
 | `Post` — projeção de timeline | Cassandra `post_timeline` | Fan-out on write por seguidor/feed |
-| `Post.trendingScore()` | Redis ZSET `trending:{feed}[:{categoria}]` | Ranking em tempo real |
-| Mídias (`photoObjectKey`, `mediaObjectKeys`, `audioObjectKey`) | AWS S3 / MinIO | O banco guarda apenas a chave do objeto |
+| `Post.trendingScore()` | Valkey ZSET `trending:{feed}[:{categoria}]` | Ranking em tempo real |
+| Mídias (`photoObjectKey`, `mediaObjectKeys`, `audioObjectKey`) | AWS S3 | O banco guarda apenas a chave do objeto |
 
 ## Regras de domínio relevantes
 

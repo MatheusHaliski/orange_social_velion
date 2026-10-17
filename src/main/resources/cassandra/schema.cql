@@ -19,14 +19,14 @@ CREATE TABLE IF NOT EXISTS orange_social.post_timeline (
     media_type        text,        -- TEXT | IMAGE | VIDEO | AUDIO
     title             text,
     subtitle          text,
-    media_object_key  text,        -- chave no S3/MinIO
+    media_object_key  text,        -- chave no S3
     duration_seconds  int,         -- apenas Audio Feed
     country           text,
     city              text,
     created_at        timestamp,
     PRIMARY KEY ((owner_user_id, feed_type, day_bucket), post_id)
 ) WITH CLUSTERING ORDER BY (post_id DESC)
-  AND default_time_to_live = 7776000   -- 90 dias; histórico completo fica no MySQL/S3
+  AND default_time_to_live = 7776000   -- 90 dias; histórico completo fica no PostgreSQL/S3
   AND compaction = {'class': 'TimeWindowCompactionStrategy',
                     'compaction_window_unit': 'DAYS',
                     'compaction_window_size': 1};

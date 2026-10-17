@@ -24,16 +24,16 @@ stateDiagram-v2
     state Active {
         direction LR
         [*] --> Online
-        Online --> Idle : sessão Redis expira
+        Online --> Idle : sessão Valkey expira
         Idle --> Online : novo login (JWT)
     }
 
     note right of Anonymous_LGPD_Deleted
         Estado terminal.
-        MySQL: dados pessoais anonimizados, id mantido.
+        PostgreSQL: dados pessoais anonimizados, id mantido.
         S3: foto e mídias apagadas.
         Cassandra: partições da timeline removidas.
-        Redis: sessões e rankings do usuário removidos.
+        Valkey: sessões e rankings do usuário removidos.
     end note
 ```
 
@@ -41,7 +41,7 @@ stateDiagram-v2
 |---|---|---|
 | `[*] → Pending_Verification` | `POST /api/v1/users` | Grava `VSusercontrolist`, cria consentimentos com `granted=false` (Privacy by Default), envia código |
 | `Pending_Verification → Active` | Código validado | Emite JWT, cria carteira `VelionPoints` |
-| `Active → Suspended` | Moderação | Revoga JWTs (blacklist Redis), oculta posts do ranking |
+| `Active → Suspended` | Moderação | Revoga JWTs (blacklist Valkey), oculta posts do ranking |
 | `Suspended → Active` | Recurso aceito | Restaura posts no ranking |
 | `* → Anonymous_LGPD_Deleted` | Titular, com senha/2FA | Job assíncrono de eliminação + log em `activity_log` (comprovação) |
 
@@ -82,7 +82,7 @@ stateDiagram-v2
     }
 ```
 
-| Estado | Visível no feed | No Redis ZSET | Na timeline Cassandra |
+| Estado | Visível no feed | No Valkey ZSET | Na timeline Cassandra |
 |---|---|---|---|
 | `Draft` | Não | Não | Não |
 | `Published` | Sim | Sim | Sim |

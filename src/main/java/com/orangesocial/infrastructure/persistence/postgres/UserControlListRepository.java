@@ -1,4 +1,4 @@
-package com.orangesocial.infrastructure.persistence.mysql;
+package com.orangesocial.infrastructure.persistence.postgres;
 
 import com.orangesocial.domain.model.AccountStatus;
 import com.orangesocial.domain.model.UserCategoryEnum;

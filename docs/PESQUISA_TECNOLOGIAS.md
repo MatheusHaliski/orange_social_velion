@@ -14,9 +14,9 @@ próprio em [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md).
 
 | # | Achado | Impacto | Ação |
 |---|---|---|---|
-| U1 | **Spring Boot 3.5 perdeu suporte OSS em 30/06/2026** (3.5.16 foi a última; Framework 6.2 e Security 6.5 idem). O Maven Central confirma 4.0.8 e 4.1.1 disponíveis. | O `pom.xml` atual roda sem correções de segurança públicas | Migrar para **Spring Boot 4.1 + Java 25 LTS** antes de montar CI/CD (ADR-01) |
-| U2 | **MySQL 8.0 chegou ao EOL em abril/2026** (8.0.46) | O DDL foi escrito "para MySQL 8.0" | Usar **MySQL 8.4 LTS** no mínimo; avaliar PostgreSQL (ADR-02) |
-| U3 | **MinIO Community foi abandonado** (console removido 06/2025, sem imagens Docker 10/2025, repositório arquivado 02/2026) | `application.yml` e backlog citam MinIO para dev | Trocar por Garage/SeaweedFS/LocalStack em dev; API S3 genérica em produção (ADR-05) |
+| U1 | **Spring Boot 3.5 perdeu suporte OSS em 30/06/2026** (3.5.16 foi a última; Framework 6.2 e Security 6.5 idem). O Maven Central confirma 4.0.8 e 4.1.1 disponíveis. | O `pom.xml` rodava sem correções de segurança públicas | ✅ **Aplicado:** `pom.xml` em **Spring Boot 4.1.1** (`starter-webmvc`), testes verdes. Java 25 LTS é o alvo de CI; local compila com 21 (ADR-01) |
+| U2 | **MySQL 8.0 chegou ao EOL em abril/2026** (8.0.46) | O DDL foi escrito "para MySQL 8.0" | ✅ **Aplicado:** migração para **PostgreSQL 17 + PostGIS** (ADR-02) |
+| U3 | **MinIO Community foi abandonado** (console removido 06/2025, sem imagens Docker 10/2025, repositório arquivado 02/2026) | `application.yml` e backlog citavam MinIO para dev | ✅ **Aplicado:** Garage em dev (`S3_ENDPOINT` :3900); API S3 genérica em produção (ADR-05) |
 | U4 | **ECA Digital (Lei 15.211/2025) em vigor desde 17/03/2026**; ANPD virou agência (Lei 15.352/2026) | Rede social com "provável acesso" por menores: aferição de idade, sem perfilamento de menores, multa até R$ 50 mi | Novos cards no backlog (RF23) e no RIPD (ADR-09) |
 
 ---
@@ -53,10 +53,13 @@ Fontes: [Spring Boot 3.5.16 — última OSS](https://spring.io/blog/2026/06/25/s
 | Suporte | 8.4 LTS até ~2032 | ~5 anos por major |
 | Gerenciado em sa-east-1 | RDS / Aurora MySQL | RDS / Aurora PostgreSQL |
 
-**Decisão:** o requisito original fixa MySQL; **manter MySQL, mas na linha 8.4 LTS**. Registrar
-que PostgreSQL + PostGIS + `pg_trgm` cobriria o filtro de 6 eixos sem motor de busca externo no
-MVP — reavaliar antes do primeiro dado em produção, enquanto a troca ainda custa pouco
-(`schema.sql` é portável). Migrações com **Flyway** (Apache 2.0; Liquibase 5 passou para FSL).
+**Decisão (aprovada em 17/10/2026):** **migrar para PostgreSQL 17 + PostGIS** antes do primeiro
+dado em produção. Motivos: `JSONB` + GIN para as listas e a localização, `GEOGRAPHY` gerada a
+partir de `LastSavedLocation` para o eixo "Local", `pg_trgm` + `unaccent` para o eixo "Nome" — o
+filtro de 6 eixos fica coberto sem motor de busca externo no MVP (OpenSearch entra só com escala,
+ADR-06). Aplicado em `schema.sql`, `pom.xml`, `application.yml` e no pacote
+`infrastructure.persistence.postgres`. Migrações com **Flyway** (Apache 2.0; Liquibase 5 passou
+para FSL).
 
 Fontes: [EOL MySQL 8.0](https://atlasgo.io/blog/2026/05/05/mysql-8-eol) ·
 [Liquibase adota FSL](https://www.liquibase.com/blog/liquibase-community-for-the-future-fsl) ·
@@ -322,7 +325,7 @@ Detalhes e tokens em [`DESIGN_SYSTEM.md`](DESIGN_SYSTEM.md).
 | Camada | Escolha | Substitui / observação |
 |---|---|---|
 | Runtime | Java 25 LTS + Spring Boot 4.1 + virtual threads + Modulith 2 | Boot 3.5.16 (EOL) |
-| Relacional | MySQL 8.4 LTS (RDS → Aurora) + Flyway | MySQL 8.0 (EOL); PostgreSQL fica como alternativa documentada |
+| Relacional | PostgreSQL 17 + PostGIS (RDS → Aurora PostgreSQL) + Flyway | MySQL 8.0 (EOL) |
 | Cache / ranking / sessões | Valkey 9 | Redis 8 (AGPL) — zero mudança de código |
 | Timeline | Cassandra 5.0 (Keyspaces no MVP) → ScyllaDB se precisar | Fan-out híbrido; Alert Feed geográfico |
 | Objetos | S3 sa-east-1 via SDK v2; Garage em dev | MinIO (arquivado) |

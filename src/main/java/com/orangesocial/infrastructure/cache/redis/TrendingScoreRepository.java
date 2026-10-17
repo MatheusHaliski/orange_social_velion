@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.Set;
 
 /**
- * Ranking em tempo real com Redis ZSET.
+ * Ranking em tempo real com ZSET (Valkey, protocolo Redis).
  *
  * <ul>
  *   <li>{@code trending:{feed}} — ranking global do feed</li>

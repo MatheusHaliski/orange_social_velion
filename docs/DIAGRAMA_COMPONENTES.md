@@ -44,20 +44,20 @@ flowchart TB
 
         subgraph Repositories["Repositories"]
             USERR["UserControlListRepository<br/>(JPA)"]
-            CONSR["UserConsentRepository<br/>(JPA)"]
+            CONSR["ConsentEventRepository<br/>(JPA)"]
             POSTR["PostRepository<br/>(JPA)"]
             TIMER["PostTimelineRepository<br/>(Spring Data Cassandra)"]
             TRENDR["TrendingScoreRepository<br/>(StringRedisTemplate · ZSET)"]
-            SESSR["SessionRepository<br/>(Redis)"]
+            SESSR["SessionRepository<br/>(Valkey)"]
             S3A["S3StorageAdapter<br/>(AWS SDK v2)"]
         end
     end
 
     subgraph Data["Persistência Poliglota"]
-        MYSQL[("MySQL 8.0<br/>VSusercontrolist · user_consent<br/>post · velion_points")]
-        REDIS[("Redis<br/>trending:{feed}:{cor}<br/>session:{jwtId}")]
+        MYSQL[("PostgreSQL 17 + PostGIS<br/>VSusercontrolist · consent_event<br/>post · velion_points")]
+        REDIS[("Valkey<br/>trending:{feed}:{cor}<br/>session:{jwtId}")]
         CASS[("Cassandra<br/>post_timeline · activity_log<br/>notification")]
-        S3[("AWS S3 / MinIO<br/>fotos · vídeos · áudios")]
+        S3[("AWS S3<br/>fotos · vídeos · áudios")]
     end
 
     WEB & MOBILE & VELION -->|HTTPS + JWT| JWT
@@ -96,14 +96,14 @@ flowchart TB
 |---|---|---|
 | Segurança | `com.orangesocial.security` | Validação JWT, rate limit, verificação de consentimento antes de tratar dados opcionais, trilha de auditoria |
 | Controllers | `com.orangesocial.api` | DTOs de entrada/saída, validação Bean Validation, códigos HTTP |
-| Services | `com.orangesocial.application` | Casos de uso, transações (`@Transactional` só no MySQL), orquestração entre armazenamentos |
+| Services | `com.orangesocial.application` | Casos de uso, transações (`@Transactional` só no PostgreSQL), orquestração entre armazenamentos |
 | Domínio | `com.orangesocial.domain.model` | Entidades, enums (`UserCategoryEnum`, `AccountStatus`, `FeedType`), regras de transição |
-| Infraestrutura | `com.orangesocial.infrastructure.*` | Adaptadores MySQL (`persistence.mysql`), Cassandra (`persistence.cassandra`), Redis (`cache.redis`), S3 |
+| Infraestrutura | `com.orangesocial.infrastructure.*` | Adaptadores PostgreSQL (`persistence.postgres`), Cassandra (`persistence.cassandra`), Valkey (`cache.redis`), S3 |
 
 ## Consistência entre armazenamentos
 
-- **MySQL é a fonte da verdade.** Cassandra e Redis são projeções reconstruíveis a partir dele.
-- A gravação no MySQL acontece dentro da transação; Cassandra e Redis são atualizados **após o commit**
+- **PostgreSQL é a fonte da verdade.** Cassandra e Valkey são projeções reconstruíveis a partir dele.
+- A gravação no PostgreSQL acontece dentro da transação; Cassandra e Valkey são atualizados **após o commit**
   (`@TransactionalEventListener(phase = AFTER_COMMIT)`), com retentativa idempotente
   (o `post_id` é `timeuuid` gerado uma única vez).
 - Mídia é enviada **antes** da publicação (URL pré-assinada); o post só referencia a chave do objeto.

@@ -1,6 +1,7 @@
 # Trello Backlog — Orange Social
 
 Plano de montagem do quadro **Orange Social · Engenharia** no Trello.
+Atualizado em 17/10/2026 após a pesquisa de tecnologias ([`PESQUISA_TECNOLOGIAS.md`](PESQUISA_TECNOLOGIAS.md)).
 
 ## Listas (da esquerda para a direita)
 
@@ -18,111 +19,130 @@ Plano de montagem do quadro **Orange Social · Engenharia** no Trello.
 | Etiqueta | Cor Trello | Escopo |
 |---|---|---|
 | 🟢 Auth & Cadastro | `green` | `VSusercontrolist`, RF1, RF2 |
-| 🔵 Backend & Persistência | `blue` | Spring Boot, MySQL, Redis, Cassandra, S3 |
-| 🟠 UI/UX & Feed Cards | `orange` | Tokens CSS, componentes, feeds |
-| 🔴 LGPD & Segurança | `red` | RF23, consentimento, direitos do titular |
+| 🔵 Backend & Persistência | `blue` | Spring Boot, PostgreSQL, Valkey, Cassandra, S3, Kafka, OpenSearch |
+| 🟠 UI/UX & Feed Cards | `orange` | Tokens, componentes, feeds, acessibilidade |
+| 🔴 LGPD & Segurança | `red` | RF23, consentimento, direitos do titular, ECA Digital |
 | 🟣 Ecossistema Velion | `purple` | FriendlyEats, Sports, Points, Trophies, Post |
 
 ## Checklist padrão "LGPD Check" (anexar a todo card que trata dado pessoal)
 
-- [ ] Base legal identificada (Art. 7º ou Art. 11)
-- [ ] Campo novo documentado no mapeamento de dados
+- [ ] Base legal identificada (Art. 7º ou Art. 11) e registrada no inventário (Art. 37)
+- [ ] Campo novo documentado no mapeamento de dados e no RIPD
 - [ ] Padrão desligado para tratamentos opcionais (Privacy by Default)
+- [ ] Dado sensível cifrado com a DEK do usuário (crypto-shredding)
 - [ ] Dado incluído na exportação JSON (Art. 18, V)
-- [ ] Dado coberto pelo fluxo de eliminação (Art. 18, VI) em MySQL, Redis, Cassandra e S3
+- [ ] Dado coberto pela saga de eliminação (Art. 18, VI) em PostgreSQL, Valkey, Cassandra e S3
 - [ ] Logs não registram o dado em texto puro
+- [ ] Comportamento definido para conta de menor (ECA Digital)
 
 ---
 
 ## Cards
 
-Formato: **ID · Título** — etiqueta · estimativa (pontos) · lista inicial.
+Formato: **ID · Título** — etiqueta · estimativa (pontos) · critérios de aceite.
+Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 
 ### Sprint 0 — Fundação (Current Sprint)
 
 | ID | Título | Etiqueta | Pts | Critérios de aceite |
 |---|---|---|---|---|
-| OS-01 | Estrutura do repositório, Maven e Spring Boot 3.5 / Java 21 | 🔵 | 2 | `mvn test` verde; pacotes `domain`, `infrastructure`, `config` |
+| OS-01 | Estrutura do repositório, Maven, **Spring Boot 4.1 / Java 25** | 🔵 | 3 | `mvn test` verde; pacotes `domain`, `infrastructure`, `config`; virtual threads ligadas; CI com JDK 25 |
 | OS-02 | Documentação UML em Mermaid (`docs/`) | 🔵 | 3 | 5 diagramas: classes, estados, componentes, sequência, atividades |
-| OS-03 | Docker Compose local: MySQL 8, Redis, Cassandra, MinIO | 🔵 | 3 | `docker compose up` sobe os 4 serviços com healthcheck |
-| OS-04 | Pipeline CI no GitHub Actions (build, testes, análise de dependências) | 🔵 | 2 | PR bloqueado se o CI falhar |
-| OS-05 | Migrações versionadas (Flyway) a partir de `schema.sql` | 🔵 | 2 | `V1__vsusercontrolist.sql` aplicado no boot |
-| OS-06 | Testes de integração com Testcontainers (MySQL, Redis, Cassandra) | 🔵 | 3 | Repositórios testados contra containers reais |
+| OS-03 | Docker Compose local: **PostgreSQL 17 + PostGIS, Valkey 9, Cassandra 5, Garage** | 🔵 | 3 | `docker compose up` sobe os 4 serviços com healthcheck; profile `light` sem Cassandra |
+| OS-04 | Pipeline CI no GitHub Actions | 🔵 🔴 | 3 | `mvn verify` + Testcontainers; CodeQL, Dependabot, Gitleaks com push protection, Trivy, SBOM CycloneDX; PR bloqueado se falhar |
+| OS-05 | Migrações versionadas (Flyway) a partir de `schema.sql` | 🔵 | 2 | `V1__baseline.sql` aplicado no boot; `ddl-auto=validate` passa |
+| OS-06 | Testes de integração com Testcontainers 2.0 (PostGIS, Valkey, Cassandra) | 🔵 | 3 | `@ServiceConnection`; repositórios testados contra containers reais |
+| OS-07 **(novo)** | Spring Modulith 2.x: módulos `profile`, `post`, `audio`, `alert`, `trending`, `filter`, `lgpd`, `velion` | 🔵 | 5 | Teste de fronteiras (ArchUnit) verde; Event Publication Registry como outbox no MVP |
+| OS-08 **(novo)** | IaC em OpenTofu: VPC, ECS Fargate, RDS PostgreSQL, ElastiCache Valkey, S3 (sa-east-1) | 🔵 | 8 | `tofu plan` limpo em `dev`; state em S3 com locking; contas separadas por ambiente |
 
 ### Autenticação & Cadastro (Backlog)
 
 | ID | Título | Etiqueta | Pts | Critérios de aceite |
 |---|---|---|---|---|
-| OS-10 | Entidade `UserControlList` + repositório JPA (19 campos) | 🟢 🔵 | 3 | Mapeamento validado com `ddl-auto=validate` |
-| OS-11 | RF1 — Endpoint de cadastro `POST /api/v1/users` | 🟢 | 5 | Valida e-mail único, senha forte, status `PENDING_VERIFICATION` |
-| OS-12 | Verificação de e-mail/SMS e ativação da conta | 🟢 | 3 | Código expira; transição para `ACTIVE` |
-| OS-13 | Login com JWT + refresh token + sessões no Redis | 🟢 🔴 | 5 | Logout revoga o token; sessão com TTL |
+| OS-10 | Entidade `UserControlList` + repositório JPA (19 campos) | 🟢 🔵 | 3 | Mapeamento validado com `ddl-auto=validate` no PostgreSQL |
+| OS-11 | RF1 — Endpoint de cadastro `POST /api/v1/users` | 🟢 | 5 | E-mail único, senha forte, **Argon2id**, status `PENDING_VERIFICATION` |
+| OS-12 | Verificação de e-mail/SMS e ativação da conta | 🟢 | 3 | Código expira em 7 dias; transição para `ACTIVE`; cadastro não confirmado é eliminado |
+| OS-13 | **Keycloak 26** + sessões opacas no Valkey + passkeys | 🟢 🔴 | 8 | Login com passkey e senha; TOTP; logout revoga sessão imediatamente; JWT ≤ 5 min só entre serviços |
 | OS-14 | RF2 — Edição de perfil (Art. 18, III) | 🟢 🔴 | 3 | Todos os campos editáveis; histórico de alteração no `activity_log` |
 | OS-15 | Seleção encadeada typeofcommunity → selectcountry → selectcity | 🟢 🟠 | 5 | Listas filtradas pelo item anterior; grava `Listofcommunitiesofinterest` |
-| OS-16 | Captura de GPS `LastSavedLocation` com consentimento | 🟢 🔴 | 3 | Sem consentimento não grava; JSON `{lat,lng,timestamp}` |
+| OS-16 | Captura de GPS `LastSavedLocation` com consentimento | 🟢 🔴 | 3 | Sem consentimento não grava; JSONB `{lat,lng,timestamp}`; `last_saved_point` gerado pelo PostGIS |
 | OS-17 | Fluxo de cadastro por Usertype (6 categorias) | 🟢 🟠 | 5 | Campos específicos por categoria; VERMELHO/PRETO com verificação manual |
-| OS-18 | Upload de foto de perfil via URL pré-assinada S3 | 🟢 🔵 | 3 | Banco guarda só a chave do objeto |
+| OS-18 | Upload de foto de perfil via URL pré-assinada S3 | 🟢 🔵 | 3 | Banco guarda só a chave do objeto; EXIF/GPS removidos |
+| OS-19 **(novo)** | Step-up de autenticação (`max_age`/`acr`) para Exportar e Excluir | 🟢 🔴 | 3 | Ações sensíveis exigem reautenticação recente |
 
 ### Backend & Persistência Poliglota (Backlog)
 
 | ID | Título | Etiqueta | Pts | Critérios de aceite |
 |---|---|---|---|---|
-| OS-20 | `TrendingScoreRepository` (Redis ZSET) | 🔵 | 3 | Ranking global e por cor; TTL 48h |
-| OS-21 | Job de recálculo de *freshness* do Trending Score | 🔵 | 3 | Executa a cada 10 min; não bloqueia escrita |
-| OS-22 | `PostTimelineEntity` + fan-out on write no Cassandra | 🔵 | 5 | Partição (owner, feed, dia); escrita após commit no MySQL |
+| OS-20 | `TrendingScoreRepository` (Valkey ZSET) | 🔵 | 3 | Ranking global e por cor; TTL 48h |
+| OS-21 | Trending Score com decaimento temporal e anti-manipulação | 🔵 | 5 | Fórmula `(Σ pesos) / (idade_h + 2)^G`; views únicas via HyperLogLog; tempo mínimo de exibição; z-score congela pico para revisão |
+| OS-22 | `PostTimelineEntity` + fan-out **híbrido** no Cassandra | 🔵 | 8 | On write para < 10k seguidores; merge na leitura (`author_posts`) para contas grandes; inativos > 30 dias sem fan-out |
 | OS-23 | Publicação de post (texto/imagem/vídeo) | 🔵 | 5 | Estados Draft → Published; mídia validada no S3 |
-| OS-24 | Publicação no Audio Feed (podcast, áudio pessoal, música) | 🔵 | 5 | Conforme `DIAGRAMA_SEQUENCIA.md` |
-| OS-25 | Alert Feed: publicação restrita a fontes verificadas | 🔵 🔴 | 5 | Somente VERMELHO verificado; vagas para VERMELHO/AMARELO |
-| OS-26 | Filtro multidimensional (6 eixos) nos 4 feeds | 🔵 | 8 | Categoria, tipo, local, país, cidade, nome combináveis |
+| OS-24 | Publicação no Audio Feed (podcast, áudio pessoal, música) | 🔵 | 5 | Conforme `DIAGRAMA_SEQUENCIA.md`; waveform pré-computado (`audiowaveform`) |
+| OS-25 | Alert Feed **geográfico**: restrito a fontes verificadas | 🔵 🔴 | 8 | Somente VERMELHO verificado; consulta por geohash/município IBGE; sem timeline por seguidor; vagas para VERMELHO/AMARELO |
+| OS-26 | Filtro multidimensional (6 eixos) nos 4 feeds via PostgreSQL | 🔵 | 8 | Categoria, tipo, local (PostGIS `ST_DWithin`), país, cidade, nome (`pg_trgm` + `unaccent`) combináveis |
 | OS-27 | Notificações em Cassandra com TTL | 🔵 | 3 | Lidas/não lidas; TTL 30 dias |
-| OS-28 | Outbox/eventos de domínio para projeções (Redis/Cassandra) | 🔵 | 5 | Reprocessamento idempotente |
+| OS-28 | Outbox transacional + **Kafka 4 + Debezium** | 🔵 | 8 | Tabela `outbox_event`; tópicos por agregado; consumidores idempotentes; nunca dual-write |
+| OS-29 **(novo)** | OpenSearch para busca e facetas (escala) | 🔵 | 8 | Índices `users`/`posts` alimentados por CDC; `geo_point`; `edge_ngram` + `asciifolding` |
+| OS-2A **(novo)** | Pipeline de mídia: libvips (AVIF/WebP), FFmpeg áudio HLS, `VideoProvider` (Stream/Mux) | 🔵 | 8 | `media.uploaded` → processamento → moderação → publicação |
+| OS-2B **(novo)** | Tempo real: SSE + Valkey Pub/Sub; push FCM/APNs; ingestão CAP 1.2 | 🔵 | 8 | p99 criação→push ≤ 5 s; solicitar entitlement Critical Alerts; confirmar acesso à IDAP/MIDR |
+| OS-2C **(novo)** | Observabilidade: Micrometer + OpenTelemetry → Grafana Cloud; SLOs do Alert Feed | 🔵 | 5 | Traces/métricas/logs sem PII; alertas por burn-rate; canário sintético |
 
-### UI/UX, Tokens CSS e Feed Cards (Backlog)
+### UI/UX, Tokens e Feed Cards (Backlog)
 
 | ID | Título | Etiqueta | Pts | Critérios de aceite |
 |---|---|---|---|---|
-| OS-30 | Design tokens: cores das 6 categorias, Orange, base escura | 🟠 | 3 | Tokens exportados para CSS e mobile |
-| OS-31 | TopBar com Segmented Switcher (Profile/Post/Audio/Alert) | 🟠 | 5 | Navegação por teclado; estado persistido |
-| OS-32 | Componente Feed Card (bolinha + borda + classificação) | 🟠 | 5 | Título obrigatório, sem texto corrido no feed |
-| OS-33 | Card de áudio com waveform e player | 🟠 | 5 | Play/pause, duração, acessível |
-| OS-34 | Card de alerta (hazard) e card de vaga | 🟠 | 3 | Destaque visual sem sensacionalismo |
-| OS-35 | Barra de filtros dos 6 eixos | 🟠 | 5 | Chips combináveis; limpar filtros |
+| OS-30 | Design tokens DTCG 2025.10 → Style Dictionary 5 (`packages/tokens`) | 🟠 | 5 | Variáveis CSS/`@theme` e objeto TS gerados; temas claro e escuro |
+| OS-31 | TopBar com Segmented Switcher (Profile/Post/Audio/Alert) | 🟠 | 5 | `role="tablist"`, navegação por teclado; estado persistido |
+| OS-32 | Componente Feed Card (bolinha + glifo + borda + classificação) | 🟠 | 5 | Título obrigatório, sem texto corrido no feed; `aria-label` da categoria |
+| OS-33 | Card de áudio com waveform e player | 🟠 | 5 | Play/pause, duração, acessível; `expo-audio` no mobile |
+| OS-34 | Card de alerta (hazard) e card de vaga | 🟠 | 3 | Fonte verificada e validade visíveis; sem sensacionalismo |
+| OS-35 | Barra de filtros dos 6 eixos | 🟠 | 5 | Chips combináveis; limpar filtros; estado na URL |
 | OS-36 | Indicadores de trending (🔥 📈 ➖ 📉) | 🟠 | 2 | Nunca competem com o título |
-| OS-37 | Acessibilidade: cor nunca é o único sinal (WCAG 1.4.1) | 🟠 🔴 | 3 | Ícone/texto redundante por categoria; contraste AA |
+| OS-37 | Acessibilidade: cor nunca é o único sinal (WCAG 1.4.1 / 1.4.11) | 🟠 🔴 | 3 | Glifo + rótulo por categoria; `scripts/wcag_contrast.py` sem reprovação |
+| OS-38 **(novo)** | Paleta para tema claro e correção do PRETO no tema escuro | 🟠 | 3 | Variantes `700` no tema claro; anel `#D6D0C8` + glifo no PRETO; texto escuro nos botões Orange |
+| OS-39 **(novo)** | Monorepo Turborepo: Next.js 16 (web) + Expo 58 (mobile) + `packages/api` gerado do OpenAPI | 🟠 🔵 | 8 | `apps/web`, `apps/mobile`, pacotes compartilhados; Storybook 10 + axe no CI |
+| OS-3A **(novo)** | Glifos VSL completos (losango, estrela, triângulo, hexágono, retângulo, círculo duplo) | 🟠 | 3 | SVG em `packages/glyphs`; SVGR e `react-native-svg` |
 
 ### LGPD Compliance & Segurança — RF23 (Backlog)
 
 | ID | Título | Etiqueta | Pts | Critérios de aceite |
 |---|---|---|---|---|
-| OS-40 | Tabela `user_consent` + API de consentimentos (Art. 7º, I) | 🔴 | 5 | Toggles desligados por padrão; histórico preservado |
-| OS-41 | Revogação de consentimento em 1 clique (Art. 8º, §5º) | 🔴 | 2 | Revogar é tão fácil quanto consentir |
-| OS-42 | Biometria/reconhecimento facial desligado por padrão (Art. 11) | 🔴 | 3 | Consentimento específico e destacado |
-| OS-43 | Exportar meus dados em JSON (Art. 18, V) | 🔴 | 5 | Job assíncrono; link expira; inclui todos os armazenamentos |
-| OS-44 | Excluir conta com reautenticação (Art. 18, VI) | 🔴 | 8 | Anonimiza MySQL, apaga S3, Cassandra e Redis; estado terminal |
-| OS-45 | Trilha de auditoria de operações (Art. 37) | 🔴 | 3 | Registro em `activity_log` sem dado pessoal em claro |
-| OS-46 | Criptografia de campos sensíveis em repouso | 🔴 | 5 | `sexual_preference`, endereço e telefone criptografados |
-| OS-47 | Rate limiting e proteção contra força bruta no login | 🔴 | 3 | Bloqueio progressivo; alerta de segurança |
-| OS-48 | Página de configurações LGPD (Conta, Privacidade, Seus dados) | 🔴 🟠 | 5 | Cada controle mapeado ao artigo correspondente |
+| OS-40 | `consent_event` append-only + API de consentimentos (Art. 7º, I) | 🔴 | 5 | Toggles desligados por padrão; versão do texto, canal e IP com hash; view `user_consent_current` |
+| OS-41 | Revogação de consentimento em 1 clique (Art. 8º, §5º) | 🔴 | 2 | Revogar é o mesmo controle que consentir; efeito imediato via evento |
+| OS-42 | Reconhecimento facial **on-device**, desligado por padrão (Art. 11) | 🔴 | 5 | Consentimento específico e destacado; template nunca sai do aparelho; bloqueado para menores |
+| OS-43 | Exportar meus dados em JSON (Art. 18, V) | 🔴 | 5 | Step-up; job assíncrono; ZIP cifrado; URL pré-assinada 24–72 h; 1 pedido/dia |
+| OS-44 | Excluir conta — saga idempotente (Art. 18, VI) | 🔴 | 8 | Reautenticar → carência → revogar sessões → anonimizar PostgreSQL → Cassandra → S3 → **destruir DEK** → recibo; reconciliação diária |
+| OS-45 | Trilha de auditoria de operações (Art. 37) | 🔴 | 3 | Eventos com encadeamento de hash em S3 Object Lock; sem PII em claro |
+| OS-46 | Criptografia de campo com **Tink + KMS, DEK por usuário** | 🔴 | 8 | `sexual_preference`, `last_saved_location`, `address`, `cellphone_number`, foto cifrados; `user_id` como dado associado; tabela `user_key` |
+| OS-47 | Rate limiting (Bucket4j + Valkey) e proteção contra força bruta | 🔴 | 3 | Por IP, usuário e rota; mais rígido em login, cadastro, recuperação e exportação |
+| OS-48 | Página de configurações LGPD (Conta, Privacidade, Seus dados) | 🔴 🟠 | 5 | Cada controle mapeado ao artigo; `AlertDialog` acessível para excluir |
+| OS-49 **(novo)** | **ECA Digital**: aferição de idade e modo restrito para menores | 🔴 🟢 | 8 | Sem perfilamento, geolocalização ou publicidade direcionada para menores; supervisão parental; sem biometria |
+| OS-4A **(novo)** | Registro de operações (Art. 37) e **RIPD** versionados no repositório | 🔴 | 5 | YAML com finalidade, base legal, categorias, retenção, operadores, transferências; RIPD aprovado antes do lançamento |
+| OS-4B **(novo)** | OWASP ASVS 5.0 nível 2 (nível 3 em auth e dados sensíveis) + WAF | 🔴 | 5 | Checklist ASVS no PR template; AWS WAF/Cloudflare com regras gerenciadas |
+| OS-4C **(novo)** | Backups em sa-east-1 com Vault Lock; política de retenção ≤ 35 dias; reaplicar exclusões após restore | 🔴 🔵 | 3 | RPO ≤ 5 min, RTO ≤ 4 h; restore testado por trimestre |
+| OS-4D **(novo)** | Moderação automatizada (texto, imagem, áudio) + hash CSAM | 🔴 🔵 | 8 | Pipeline via Kafka; score alto bloqueia, médio vai para fila humana; logs de decisão para apelação |
 
 ### Ecossistema Velion (Backlog)
 
 | ID | Título | Etiqueta | Pts | Critérios de aceite |
 |---|---|---|---|---|
-| OS-50 | Velion Points: carteira, crédito e débito | 🟣 | 5 | Saldo ACID no MySQL; extrato |
-| OS-51 | Velion Trophies: conquistas e raridade (Common → Mythic) | 🟣 | 5 | Regras de concessão por evento |
+| OS-50 | Velion Points: carteira, crédito e débito | 🟣 | 5 | Saldo ACID no PostgreSQL; extrato |
+| OS-51 | Velion Trophies: conquistas e raridade (Common → Mythic) | 🟣 | 5 | Regras de concessão por evento; selo textual além da borda |
 | OS-52 | Velion Post: publicação cruzada entre apps | 🟣 | 5 | Post de outro app aparece no feed correto |
-| OS-53 | Velion FriendlyEats: integração de perfil e avaliações | 🟣 | 8 | SSO e card de restaurante no Post Feed |
+| OS-53 | Velion FriendlyEats: integração de perfil e avaliações | 🟣 | 8 | SSO via Keycloak e card de restaurante no Post Feed |
 | OS-54 | Velion Sports: comunidades de clubes (LARANJA) | 🟣 | 5 | Clubes como comunidades selecionáveis |
-| OS-55 | Contrato de API entre módulos Velion (OpenAPI) | 🟣 🔵 | 3 | Especificação versionada no repositório |
+| OS-55 | Contrato de API entre módulos Velion (OpenAPI) | 🟣 🔵 | 3 | Especificação versionada; `packages/api` gerado a partir dela |
 
 ---
 
 ## Ordem sugerida das sprints
 
-1. **Sprint 0:** OS-01 → OS-06
-2. **Sprint 1:** OS-10, OS-11, OS-12, OS-13, OS-40, OS-30
-3. **Sprint 2:** OS-14, OS-15, OS-16, OS-17, OS-18, OS-41, OS-42, OS-31, OS-32
-4. **Sprint 3:** OS-20, OS-22, OS-23, OS-24, OS-28, OS-33
-5. **Sprint 4:** OS-25, OS-26, OS-27, OS-34, OS-35, OS-36, OS-37
-6. **Sprint 5:** OS-43, OS-44, OS-45, OS-46, OS-47, OS-48
-7. **Sprint 6+:** OS-21, OS-50 → OS-55
+1. **Sprint 0:** OS-01 → OS-08
+2. **Sprint 1:** OS-10, OS-11, OS-12, OS-13, OS-40, OS-46, OS-30
+3. **Sprint 2:** OS-14, OS-15, OS-16, OS-17, OS-18, OS-19, OS-41, OS-49, OS-31, OS-32, OS-38
+4. **Sprint 3:** OS-20, OS-21, OS-22, OS-23, OS-24, OS-28, OS-33, OS-3A
+5. **Sprint 4:** OS-25, OS-26, OS-27, OS-2B, OS-34, OS-35, OS-36, OS-37
+6. **Sprint 5:** OS-43, OS-44, OS-45, OS-47, OS-48, OS-4A, OS-4B, OS-4C
+7. **Sprint 6:** OS-2A, OS-2C, OS-4D, OS-42, OS-39
+8. **Sprint 7+:** OS-29, OS-50 → OS-55
