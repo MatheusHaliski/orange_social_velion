@@ -23,6 +23,19 @@ class TrendingScoreTest {
     }
 
     @Test
+    void viewsCountLogarithmicallySoStaleViralPostsDecay() {
+        // 100k views acumuladas em 48h perdem para 5k views em 2h
+        double stale = TrendingScoreCalculator.score(100_000, 0, 0, 0, 0, 48);
+        double rising = TrendingScoreCalculator.score(5_000, 0, 0, 0, 0, 2);
+        assertThat(rising).isGreaterThan(stale);
+
+        // 10x mais views não vale 10x mais engajamento
+        double e1 = TrendingScoreCalculator.engagement(1_000, 0, 0, 0, 0);
+        double e10 = TrendingScoreCalculator.engagement(10_000, 0, 0, 0, 0);
+        assertThat(e10 / e1).isLessThan(2.0);
+    }
+
+    @Test
     void incrementUpdatesGlobalAndCategoryRankings() {
         StringRedisTemplate redis = mock(StringRedisTemplate.class);
         @SuppressWarnings("unchecked")

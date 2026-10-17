@@ -35,6 +35,17 @@ src/main/java/com/orangesocial/
 - [Pesquisa de tecnologias (ADRs)](docs/PESQUISA_TECNOLOGIAS.md) · [Design system](docs/DESIGN_SYSTEM.md)
 - [Backlog para o Trello](docs/TRELLO_BACKLOG.md)
 
+## Ambiente local
+
+```bash
+docker compose up -d                  # PostgreSQL+PostGIS :5432 · Valkey :6379 · Garage (S3) :3900
+docker compose --profile full up -d   # + Cassandra 5 :9042 (aplica cassandra/schema.cql)
+mvn spring-boot:run                   # Flyway aplica db/migration/V1__baseline.sql
+```
+
+Credenciais de desenvolvimento: PostgreSQL `orange`/`orange`; Garage access key `GK0000000000000000orangedev`
+(secret em `infra/garage/init.sh`), bucket `orange-social-media`.
+
 ## Build
 
 ```bash

@@ -1,0 +1,111 @@
+# Ambiente local Orange Social (card OS-03).
+#
+#   docker compose up -d                 # PostgreSQL + Valkey + Garage  (profile padrão "light")
+#   docker compose --profile full up -d  # + Cassandra 5 (demora ~1 min para ficar saudável)
+#
+# Credenciais abaixo são apenas de desenvolvimento.
+name: orange-social
+
+services:
+  postgres:
+    image: postgis/postgis:17-3.5
+    container_name: os-postgres
+    environment:
+      POSTGRES_DB: orange_social
+      POSTGRES_USER: orange
+      POSTGRES_PASSWORD: orange
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U orange -d orange_social"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  valkey:
+    image: valkey/valkey:9-alpine
+    container_name: os-valkey
+    command: ["valkey-server", "--appendonly", "yes"]
+    ports:
+      - "6379:6379"
+    volumes:
+      - valkey-data:/data
+    healthcheck:
+      test: ["CMD", "valkey-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # Object storage compatível com S3 (substitui o MinIO, arquivado em 2026).
+  # Bucket criado pelo serviço garage-init; endpoint S3 em http://localhost:3900.
+  garage:
+    image: dxflrs/garage:v2.1.0
+    container_name: os-garage
+    ports:
+      - "3900:3900"   # API S3
+      - "3903:3903"   # Admin API
+    volumes:
+      - ./infra/garage/garage.toml:/etc/garage.toml:ro
+      - garage-meta:/var/lib/garage/meta
+      - garage-data:/var/lib/garage/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:3903/health || exit 1"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  garage-init:
+    image: dxflrs/garage:v2.1.0
+    container_name: os-garage-init
+    depends_on:
+      garage:
+        condition: service_healthy
+    volumes:
+      - ./infra/garage/garage.toml:/etc/garage.toml:ro
+      - ./infra/garage/init.sh:/init.sh:ro
+    entrypoint: ["/bin/sh", "/init.sh"]
+    restart: "no"
+
+  cassandra:
+    image: cassandra:5.0
+    container_name: os-cassandra
+    profiles: ["full"]
+    environment:
+      CASSANDRA_CLUSTER_NAME: orange-social
+      CASSANDRA_DC: datacenter1
+      CASSANDRA_ENDPOINT_SNITCH: GossipingPropertyFileSnitch
+      MAX_HEAP_SIZE: 1G
+      HEAP_NEWSIZE: 256M
+    ports:
+      - "9042:9042"
+    volumes:
+      - cassandra-data:/var/lib/cassandra
+      - ./src/main/resources/cassandra/schema.cql:/docker-entrypoint-initdb.d/schema.cql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'DESCRIBE KEYSPACES' localhost 9042 >/dev/null 2>&1 || exit 1"]
+      interval: 15s
+      timeout: 10s
+      retries: 12
+      start_period: 60s
+
+  # Aplica o schema.cql uma vez que o Cassandra estiver saudável.
+  cassandra-init:
+    image: cassandra:5.0
+    container_name: os-cassandra-init
+    profiles: ["full"]
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    volumes:
+      - ./src/main/resources/cassandra/schema.cql:/schema.cql:ro
+    entrypoint: ["/bin/sh", "-c", "cqlsh cassandra 9042 -f /schema.cql"]
+    restart: "no"
+
+volumes:
+  postgres-data:
+  valkey-data:
+  garage-meta:
+  garage-data:
+  cassandra-data:

@@ -48,9 +48,9 @@ Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 |---|---|---|---|---|
 | OS-01 | Estrutura do repositório, Maven, **Spring Boot 4.1 / Java 25** | 🔵 | 3 | `mvn test` verde; pacotes `domain`, `infrastructure`, `config`; virtual threads ligadas; CI com JDK 25 |
 | OS-02 | Documentação UML em Mermaid (`docs/`) | 🔵 | 3 | 5 diagramas: classes, estados, componentes, sequência, atividades |
-| OS-03 | Docker Compose local: **PostgreSQL 17 + PostGIS, Valkey 9, Cassandra 5, Garage** | 🔵 | 3 | `docker compose up` sobe os 4 serviços com healthcheck; profile `light` sem Cassandra |
+| OS-03 | Docker Compose local: **PostgreSQL 17 + PostGIS, Valkey 9, Cassandra 5, Garage** | 🔵 | 3 | ✅ `docker-compose.yml` + `infra/garage/`; Cassandra no profile `full`; falta validar em máquina com Docker |
 | OS-04 | Pipeline CI no GitHub Actions | 🔵 🔴 | 3 | `mvn verify` + Testcontainers; CodeQL, Dependabot, Gitleaks com push protection, Trivy, SBOM CycloneDX; PR bloqueado se falhar |
-| OS-05 | Migrações versionadas (Flyway) a partir de `schema.sql` | 🔵 | 2 | `V1__baseline.sql` aplicado no boot; `ddl-auto=validate` passa |
+| OS-05 | Migrações versionadas (Flyway) a partir de `schema.sql` | 🔵 | 2 | ✅ `db/migration/V1__baseline.sql` + `SchemaConsistencyTest`; falta rodar `validate` contra o PostGIS real (OS-06) |
 | OS-06 | Testes de integração com Testcontainers 2.0 (PostGIS, Valkey, Cassandra) | 🔵 | 3 | `@ServiceConnection`; repositórios testados contra containers reais |
 | OS-07 **(novo)** | Spring Modulith 2.x: módulos `profile`, `post`, `audio`, `alert`, `trending`, `filter`, `lgpd`, `velion` | 🔵 | 5 | Teste de fronteiras (ArchUnit) verde; Event Publication Registry como outbox no MVP |
 | OS-08 **(novo)** | IaC em OpenTofu: VPC, ECS Fargate, RDS PostgreSQL, ElastiCache Valkey, S3 (sa-east-1) | 🔵 | 8 | `tofu plan` limpo em `dev`; state em S3 com locking; contas separadas por ambiente |
@@ -75,7 +75,7 @@ Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 | ID | Título | Etiqueta | Pts | Critérios de aceite |
 |---|---|---|---|---|
 | OS-20 | `TrendingScoreRepository` (Valkey ZSET) | 🔵 | 3 | Ranking global e por cor; TTL 48h |
-| OS-21 | Trending Score com decaimento temporal e anti-manipulação | 🔵 | 5 | Fórmula `(Σ pesos) / (idade_h + 2)^G`; views únicas via HyperLogLog; tempo mínimo de exibição; z-score congela pico para revisão |
+| OS-21 | Trending Score com decaimento temporal e anti-manipulação | 🔵 | 5 | ✅ fórmula `log10(views)·W + Σ pesos / (idade_h + 2)^1.6` em `TrendingScoreCalculator`; pendente: HyperLogLog de views únicas, tempo mínimo de exibição, z-score e job de recálculo |
 | OS-22 | `PostTimelineEntity` + fan-out **híbrido** no Cassandra | 🔵 | 8 | On write para < 10k seguidores; merge na leitura (`author_posts`) para contas grandes; inativos > 30 dias sem fan-out |
 | OS-23 | Publicação de post (texto/imagem/vídeo) | 🔵 | 5 | Estados Draft → Published; mídia validada no S3 |
 | OS-24 | Publicação no Audio Feed (podcast, áudio pessoal, música) | 🔵 | 5 | Conforme `DIAGRAMA_SEQUENCIA.md`; waveform pré-computado (`audiowaveform`) |
