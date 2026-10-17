@@ -12,7 +12,8 @@ const here = dirname(fileURLToPath(import.meta.url));
 const out = join(here, "anatomia");
 mkdirSync(out, { recursive: true });
 
-// [nº provisório, rótulo, seletor dentro do recorte, lado do rótulo]. "@borda" = filete esquerdo de 3 px do card.
+// [nº provisório, rótulo, seletor dentro do recorte, lado do rótulo]. "@borda" = filete esquerdo de 3 px do card;
+// "@faixa:top|bottom" = faixa de 11 px da moldura; "@anel" = trecho da borda direita da moldura.
 // Seletor com "*" no fim = união de todos os elementos encontrados. A numeração final segue a ordem de
 // leitura (de cima para baixo) e vai para anatomia/partes.json, que alimenta as tabelas da documentação.
 const SPECS = [
@@ -148,7 +149,17 @@ const SPECS = [
       [1, "Borda: variante escura (#1E7A3A)", "@borda", "l"],
       [2, "Bolinha com glifo branco", ".author .dot", "l"],
       [3, "Classificação: texto branco", ".rating", "r"],
-      [4, "Curtido: laranja #C2410C", '[data-act="like"]', "l"]] }
+      [4, "Curtido: laranja #C2410C", '[data-act="like"]', "l"]] },
+  { id: "15-moldura", title: "Moldura do post", note: "RF28 · Background Studio · post em alta",
+    shot: "28-feed-molduras", src: [".frame"], parts: [
+      [1, "Arte da moldura (faixa de 11 px)", "@faixa:top", "l"],
+      [2, "Aura Hype: anel (só em alta)", "@anel", "r"],
+      [3, "Filete da categoria, dentro do container", "@borda", "l"],
+      [4, "Bolinha da categoria: o sinal real", ".author .dot", "l"],
+      [5, "Mídia dentro do container", ".media", "r"],
+      [6, "Container opaco: texto nunca sobre a arte", ".c-title", "l"],
+      [7, "Texto “em alta”: sinal obrigatório do Hype", ".trend", "r"],
+      [8, "Material (vidro) por cima da arte", "@faixa:bottom", "l"]] }
 ];
 
 const localFontsCss = process.argv[2] ? resolve(process.argv[2]) : null;
@@ -159,6 +170,8 @@ if (localFontsCss) {
   const css = readFileSync(localFontsCss, "utf8").replace(/url\(([^)]+)\)/g, (_, u) => `url(${base}${u})`);
   await page.route("https://fonts.googleapis.com/**", route => route.fulfill({ contentType: "text/css", body: css }));
 }
+// Versão estática (Reduzir movimento): Hype parado e pôster da Aura Plus, para o desenho sair igual a cada execução
+await page.emulateMedia({ reducedMotion: "reduce" });
 await page.goto(pathToFileURL(join(here, "index.html")).href);
 await page.evaluate(() => document.fonts.ready);
 await page.addStyleTag({ content: `
@@ -198,6 +211,9 @@ for (const spec of SPECS) {
     const rel = r => ({ x: r.left - W.left, y: r.top - W.top, w: r.width, h: r.height });
     const box = sel => {
       if (sel === "@borda") { const r = rel(ph.querySelector(".card, .pcard").getBoundingClientRect()); return { ...r, w: 3, h: 24 }; }
+      if (sel.startsWith("@faixa")) { const r = rel(ph.querySelector(".frame").getBoundingClientRect());
+        return sel.endsWith("bottom") ? { ...r, y: r.y + r.h - 11, h: 11 } : { ...r, h: 11 }; }
+      if (sel === "@anel") { const r = rel(ph.querySelector(".frame").getBoundingClientRect()); return { x: r.x + r.w - 3, y: r.y + 24, w: 3, h: 44 }; }
       const all = sel.endsWith("*") ? [...ph.querySelectorAll(sel.slice(0, -1))] : [ph.querySelector(sel)];
       if (!all[0]) throw new Error(`${spec.id}: seletor sem resultado: ${sel}`);
       const rs = all.map(e => e.getBoundingClientRect());

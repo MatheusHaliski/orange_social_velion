@@ -1,0 +1,48 @@
+{
+  "brasa": {
+    "hq": {
+      "arquivo": "brasa-hq.mp4",
+      "kb": 55.1,
+      "orcamento_kb": 400
+    },
+    "flashes": {
+      "fps": 24,
+      "maior_variacao_media": 0.0004,
+      "maior_variacao_bloco": 0.001,
+      "aprovado": true
+    },
+    "poster": {
+      "arquivo": "brasa-poster.webp",
+      "kb": 3.4,
+      "orcamento_kb": 25
+    },
+    "leve": {
+      "arquivo": "brasa-leve.mp4",
+      "kb": 64.5,
+      "orcamento_kb": 150
+    }
+  },
+  "aurora": {
+    "hq": {
+      "arquivo": "aurora-hq.mp4",
+      "kb": 11.2,
+      "orcamento_kb": 400
+    },
+    "flashes": {
+      "fps": 24,
+      "maior_variacao_media": 0.0002,
+      "maior_variacao_bloco": 0.0009,
+      "aprovado": true
+    },
+    "poster": {
+      "arquivo": "aurora-poster.webp",
+      "kb": 1.9,
+      "orcamento_kb": 25
+    },
+    "leve": {
+      "arquivo": "aurora-leve.mp4",
+      "kb": 21.1,
+      "orcamento_kb": 150
+    }
+  }
+}

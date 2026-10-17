@@ -11,6 +11,10 @@ Estudo da proposta "Background Studio", adaptada do FashionAI, aplicada ao Orang
 
 Legenda: ✅ já existe no Orange · ⏳ a fazer.
 
+> **Protótipo:** o estúdio já roda no protótipo — telas 22–28 em `design/prototype/screens/`, Aura Plus "Brasa" e
+> "Aurora" em `design/brand/auras/` e o teste `design/prototype/studio-smoke.mjs`. O requisito está em
+> [RF28](rf/RF28-moldura-post.md).
+
 ---
 
 ## 1. Conclusões que viram regra

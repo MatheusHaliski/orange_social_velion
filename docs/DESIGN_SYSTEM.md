@@ -151,6 +151,7 @@ Anatomia numerada de cada card (partes, dado da API e regra): [TAXONOMIA_ATORES_
 | **AudioCard** | waveform pré-computado (JSON de ~1.000 picos), play/pause acessível, duração, categoria do autor |
 | **AlertCard** | faixa hazard, fonte verificada visível, validade (`expires` do CAP), nunca sensacionalista; variante "vaga" |
 | **FilterBar** | 6 chips combináveis (Categoria, Tipo, Local, País, Cidade, Nome), "limpar filtros", estado na URL |
+| **FrameCard / Background Studio** (RF28) | Moldura de 11 px em volta do card, que vira container opaco; categoria, "em alta" e selos sempre no container; Aura Plus em vídeo (AV1/H.264) + pôster, ≤ 5 s, pôster com Reduzir movimento; contraste tinta × container ≥ 4,5:1; anatomia em [TAXONOMIA §5.3](TAXONOMIA_ATORES_E_CARDS.md#moldura-do-post) |
 | **Settings LGPD** | Radix Switch / `accessibilityRole="switch"`; cada controle mostra o artigo da LGPD; "Excluir conta" em `AlertDialog` com reautenticação; "Exportar dados" com status do job |
 
 Matriz de testes visuais: 6 categorias × 2 temas × 6 chips de classificação.

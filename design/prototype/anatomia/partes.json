@@ -502,5 +502,43 @@
         "Curtido: laranja #C2410C"
       ]
     ]
+  },
+  "15-moldura": {
+    "title": "Moldura do post",
+    "note": "RF28 · Background Studio · post em alta",
+    "parts": [
+      [
+        1,
+        "Arte da moldura (faixa de 11 px)"
+      ],
+      [
+        2,
+        "Filete da categoria, dentro do container"
+      ],
+      [
+        3,
+        "Bolinha da categoria: o sinal real"
+      ],
+      [
+        4,
+        "Aura Hype: anel (só em alta)"
+      ],
+      [
+        5,
+        "Mídia dentro do container"
+      ],
+      [
+        6,
+        "Container opaco: texto nunca sobre a arte"
+      ],
+      [
+        7,
+        "Texto “em alta”: sinal obrigatório do Hype"
+      ],
+      [
+        8,
+        "Material (vidro) por cima da arte"
+      ]
+    ]
   }
 }

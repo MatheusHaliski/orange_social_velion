@@ -361,6 +361,7 @@ Finalidades de consentimento (`consent_event.purpose`, todas começam `false`): 
 | | `likeCount`, `commentCount`, `shareCount`, `viewCount` | sistema | público | Só leitura no JPA; mudam em UPDATE atômico |
 | | `createdAt`, `updatedAt`, `removedAt` | sistema | `createdAt` = `publishedAt` | — |
 | | ⏳ `sponsored`, `mediaAlt` | propostos | público | Selo de publicidade (CDC art. 36) e texto alternativo |
+| | ⏳ `background` (JSONB) | o (nulo = moldura padrão) | público | Moldura do post ([RF28](rf/RF28-moldura-post.md)): só ids do catálogo e chaves de asset, nunca URL nem CSS; `ALERT` ignora |
 | **AudioContent** ⏳ | `kind`, `transcript`, `tags`, picos da onda | — | público | `PODCAST` · `PERSONAL_AUDIO` · `MUSIC` |
 | **AlertContent** ⏳ | `category`, `severity`, `epicenter`, `radiusKm`, `expiresAt`, `verifiedSource`, `instruction` | — | público | `EMERGENCY` · `NATURAL_DISASTER` · `OFFICIAL_COMMUNICATION` · `JOB_OPENING`; severidade segue o CAP 1.2 (`Extreme` · `Severe` · `Moderate` · `Minor`) |
 | **Comentário** | `body` (1–2.000), `status`, `createdAt`, `removedAt` | O | público | Removido: texto apagado, id mantido |
@@ -401,6 +402,7 @@ Finalidades de consentimento (`consent_event.purpose`, todas começam `false`): 
 | `ShareChannel` | `COPY_LINK` · `NATIVE` · `WHATSAPP` · `TELEGRAM` · `X` · `EMAIL` | folha de compartilhar |
 | `UserPreference.*` | `Theme`, `AppBackground`, `CommentAudience`, `SensitiveContent` | §3.5 |
 | ⏳ `AudioKind`, `AlertCategory`, `Severity` | §3.4 | cards de áudio e alerta |
+| ⏳ Moldura (RF28) | `auraHypeStyle`: `OFF` · `SCANNER` · `BRILHO`; `metamorphose.mode`: `OFF` · `PRISMA` · `CONSTELACAO` · `FIO_VIVO` · `HOLOGRAFIA`; `aura.format`: `IMAGEM_UNICA` · `MOSAICO`; `layoutId`: `CLASSICO` · `POLAROID` · `POSTER`; `customArt.origin`: `UPLOAD` · `IA` | Background Studio |
 
 ---
 
@@ -446,6 +448,7 @@ flowchart LR
 | Comentário | RF26 | conta ativa | apagar (autor ou dono do post) | — | [11](../design/prototype/anatomia/11-comentario.png) |
 | Opção de tipo de usuário | RF1 | — | selecionar | — | [12](../design/prototype/anatomia/12-opcao-tipo.png) |
 | Sessão ativa | RF27 | — | encerrar | — | [13](../design/prototype/anatomia/13-sessao.png) |
+| **Moldura do post** (envolve os cards de conteúdo, exceto `ALERT`) | RF28 | o autor escolhe; o Hype vem do ranking | — | — | [15](../design/prototype/anatomia/15-moldura.png) |
 
 ---
 
@@ -454,6 +457,10 @@ flowchart LR
 ### 5.1 Estrutura comum (slots)
 
 Todos os cards de conteúdo seguem a mesma grade; cada tipo só preenche ou troca slots.
+
+**Slot 0 · Moldura** ([RF28](rf/RF28-moldura-post.md), opcional): uma faixa de arte de 11 px em volta do card. Quando há
+moldura, o card inteiro vira o **container** opaco. Filete, bolinha e rótulo da categoria, "em alta" e selos ficam
+sempre dentro dele, nunca na arte.
 
 ```mermaid
 flowchart TB
@@ -489,6 +496,7 @@ flowchart TB
 | Extra | — | publicidade | — | player | fonte, área, validade, o que fazer | interesses |
 | Ações | 4 | 4 | 4 | 4 | só compartilhar | seguir |
 | Tendência | ✅ | ✅ | ✅ | ✅ | aviso "sem curtidas" | — |
+| Moldura (slot 0) | o | o | — | o | **nunca** | ⏳ fase 5 |
 
 ### 5.2 Estados
 
@@ -505,6 +513,8 @@ flowchart TB
 | Conteúdo 18+ ou sensível ⏳ | mídia coberta + aviso + "Mostrar" | `sensitiveContent = LIMIT`; menor de 16 nunca vê (OS-49) |
 | Tema claro | variantes 700 da paleta | [desenho 14](../design/prototype/anatomia/14-post-tema-claro.png) |
 | Fundo do app | véu escuro entre o fundo e os cards | Contraste dos cards não muda (RF2) |
+| Moldura animada (Aura Plus) | toca até 5 s quando o card aparece, depois pôster; com Reduzir movimento, só pôster | WCAG 2.2.2 e 2.3.1 (RF28) |
+| Em alta com Hype | anel na borda + texto "em alta" | A cor e o brilho nunca são o único sinal |
 
 ### 5.3 Desenhos
 
@@ -714,6 +724,21 @@ atualize a tabela do card.
 | 2 | Bolinha com glifo branco | tema claro | `--glyph-on-dot: #FFFFFF` |
 | 3 | Classificação: texto branco | — | Igual nos dois temas |
 | 4 | Curtido: laranja #C2410C | `viewer.liked` | Laranja de texto do tema claro (5,18:1) |
+
+### Moldura do post
+
+![Anatomia: Moldura do post](../design/prototype/anatomia/15-moldura.png)
+
+| # | Parte | Dado (API / domínio) | Regra |
+|---|---|---|---|
+| 1 | Arte da moldura (faixa de 11 px) | `background` resolvido: aura, cor, cartela, Aura Plus (vídeo + pôster) ou arte própria | Decorativa (`aria-hidden`); nunca imita sozinha uma cor de categoria |
+| 2 | Filete da categoria, dentro do container | `author.category.color` | Sai da borda do card e fica dentro do container |
+| 3 | Bolinha da categoria: o sinal real | `author.category.code` | Cor + glifo + rótulo, como em todo card |
+| 4 | Aura Hype: anel (só em alta) | `auraHypeStyle` + ranking | O autor escolhe o estilo; o efeito só liga com o post em alta; anima ≤ 5 s |
+| 5 | Mídia dentro do container | `mediaUrl` | A arte nunca cobre a mídia |
+| 6 | Container opaco: texto nunca sobre a arte | `container.color`, `container.ink` | Contraste ≥ 4,5:1 conferido no cliente e no servidor |
+| 7 | Texto "em alta": sinal obrigatório do Hype | ranking | O brilho é enfeite; o texto é o sinal |
+| 8 | Material (vidro) por cima da arte | `materialId` | No feed, vidro "falso" sem `backdrop-filter` (desempenho) |
 
 ---
 

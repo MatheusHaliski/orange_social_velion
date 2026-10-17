@@ -148,7 +148,8 @@ Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 
 ### Background Studio — moldura dos cards e Aura Plus (pesquisa 17/10/2026)
 
-Detalhes em [`PESQUISA_BACKGROUND_STUDIO.md`](PESQUISA_BACKGROUND_STUDIO.md). Depende de OS-23 (publicar post).
+Detalhes em [`PESQUISA_BACKGROUND_STUDIO.md`](PESQUISA_BACKGROUND_STUDIO.md) e no [RF28](rf/RF28-moldura-post.md). Depende de OS-23
+(publicar post). ✅ Protótipo navegável (telas 22–28), Aura Plus "Brasa" e "Aurora" no formato final e teste de fumaça.
 
 | ID | Título | Etiqueta | Pts | Critérios de aceite |
 |---|---|---|---|---|

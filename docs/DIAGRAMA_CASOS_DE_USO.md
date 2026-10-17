@@ -42,9 +42,10 @@ flowchart LR
     P6(["Alertas e vagas<br/>Alert Feed"]):::planned
     P7(["Moderação e selo"]):::planned
     P8(["Integração Velion<br/>SSO · pontos · troféus"]):::planned
+    P9(["Moldura do post<br/>RF28"]):::planned
 
     VIS --- P1 & P4
-    USR --- P1 & P2 & P4 & P5
+    USR --- P1 & P2 & P4 & P5 & P9
     TIT --- P3
     FONTE --- P6
     P3 -.- RESP
@@ -231,6 +232,51 @@ flowchart LR
 Usuário ativo também faz tudo o que o Visitante faz (generalização). Visitante que toca em Curtir, Comentar
 ou Salvar recebe `401` e é levado ao login; conta pendente recebe `403` ("confirme seu e-mail").
 
+
+### 4.1 Moldura do post — Background Studio (RF28)
+
+```mermaid
+flowchart LR
+    AUT["Autor"]:::actor
+    LEI["Leitor"]:::actor
+
+    ABRIR(["Abrir a moldura ao criar o post ⏳"]):::planned
+    COR(["Escolher cor, gradiente<br/>ou cartela sazonal ⏳"]):::planned
+    AURA(["Escolher aura, material<br/>e Metamorfose ⏳"]):::planned
+    PLUS(["Escolher Aura Plus animada ⏳"]):::planned
+    PROPRIA(["Gerar com IA ou enviar arte ⏳"]):::planned
+    CONT(["Ajustar container e tinta ⏳"]):::planned
+    VER(["Ver o card com a moldura ⏳"]):::planned
+    PREV(["Ver prévia ao vivo ⏳"]):::planned
+    LIMPA(["Limpar escolhas incompatíveis ⏳"]):::planned
+    CONTR(["Validar contraste AA ⏳"]):::planned
+    POSTER(["Ver só o pôster ⏳"]):::planned
+    HYPE(["Mostrar Aura Hype ⏳"]):::planned
+    MODR(["Moderar e checar flashes ⏳"]):::planned
+
+    MOD["Moderação · EA IRIS"]:::actor
+    RANK["Ranking de tendência"]:::actor
+
+    AUT --- ABRIR & COR & AURA & PLUS & PROPRIA & CONT
+    LEI --- VER
+    ABRIR -. «include» .-> PREV
+    AURA -. «include» .-> LIMPA
+    PLUS -. «include» .-> LIMPA
+    PROPRIA -. «include» .-> LIMPA
+    CONT -. «include» .-> CONTR
+    PROPRIA -. «include» .-> MODR
+    POSTER -. «extend» Reduzir movimento ou economia de dados .-> VER
+    HYPE -. «extend» post em alta .-> VER
+    MODR --- MOD
+    HYPE --- RANK
+
+    classDef actor fill:#FFF1E8,stroke:#FF6A2B,stroke-width:2px,color:#17120D,font-weight:bold
+    classDef planned stroke-dasharray:5 4
+```
+
+Tudo ainda planejado no app; o fluxo inteiro já roda no protótipo (telas 22–28) e no teste
+`design/prototype/studio-smoke.mjs`.
+
 ---
 
 ## 5. Alertas, vagas e moderação
@@ -295,6 +341,7 @@ o fluxo de publicação ainda não.
 | Ver perfil e feed do autor | Visitante, Usuário | [RF25](rf/RF25-perfil-publico-autor.md) | `GET /api/v1/users/{id}/profile`, `/posts` | ✅ |
 | Curtir, comentar, apagar, compartilhar, salvar | Usuário ativo, Dono do post | [RF26](rf/RF26-interacoes-post.md) | `PUT/DELETE …/like` e `…/save`, `GET/POST …/comments`, `DELETE …/comments/{id}`, `POST …/shares` | ✅ |
 | Publicar post | Usuário ativo | — | `POST /api/v1/posts` | ⏳ OS-23 |
+| Moldura do post (Background Studio, Aura Plus) | Autor, Leitor, Moderação | [RF28](rf/RF28-moldura-post.md) | `GET /api/v1/backgrounds/catalog`, `background` no post | ⏳ OS-65 a OS-72 (protótipo ✅) |
 | Navegar nos feeds com filtros | Visitante, Usuário | — | `FeedController` | ⏳ |
 | Publicar alerta · vaga | Fonte oficial · Instituição | — | Alert Feed | ⏳ |
 | Moderação (selo, remoção, suspensão) | Moderação | — | papel e painel de moderação | ⏳ |

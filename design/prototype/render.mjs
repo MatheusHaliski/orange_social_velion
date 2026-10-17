@@ -16,6 +16,8 @@ mkdirSync(out, { recursive: true });
 const localFontsCss = process.argv[2] ? resolve(process.argv[2]) : null;
 const browser = await chromium.launch({ executablePath: process.env.CHROMIUM });
 const page = await browser.newPage({ viewport: { width: 1840, height: 2000 }, deviceScaleFactor: 2 });
+// Renders mostram a versão estática (pôster da Aura Plus, Hype parado): é o que vê quem usa "Reduzir movimento".
+await page.emulateMedia({ reducedMotion: "reduce" });
 
 if (localFontsCss) {
   const base = pathToFileURL(dirname(localFontsCss) + "/").href;
