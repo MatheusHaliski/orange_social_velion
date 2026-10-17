@@ -7,8 +7,8 @@
 # image           → imagem OCI via Jib + Trivy na imagem
 #
 # Configurações do repositório (não deste arquivo) — ver docs/TRELLO_BACKLOG.md (OS-04):
-#   Settings → Advanced Security: Code scanning (recebe os SARIF do Trivy e habilita o CodeQL),
-#   Secret scanning + Push protection, Dependabot alerts; Branches: proteção de `main`.
+#   Settings → Advanced Security: Code scanning ativo (CodeQL + SARIF do Trivy), Secret scanning +
+#   Push protection, Dependabot alerts; Branches: proteção de `main` exigindo estes checks.
 name: CI
 
 on:
@@ -92,6 +92,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      actions: read
     steps:
       - uses: actions/checkout@v4
       - name: Trivy filesystem scan
@@ -114,10 +115,8 @@ jobs:
           name: trivy-fs-sarif
           path: trivy-fs.sarif
           retention-days: 30
-      # Exige "Code scanning" habilitado em Settings → Advanced Security; até lá não derruba o job
       - name: Publicar SARIF no Code scanning
         if: always()
-        continue-on-error: true
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-fs.sarif
@@ -131,6 +130,7 @@ jobs:
     permissions:
       contents: read
       security-events: write
+      actions: read
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -159,7 +159,6 @@ jobs:
           retention-days: 30
       - name: Publicar SARIF no Code scanning
         if: always()
-        continue-on-error: true
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-image.sarif
