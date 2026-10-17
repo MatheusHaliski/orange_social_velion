@@ -23,6 +23,7 @@ paths:
   - src/main/resources/schema.sql
   - src/main/resources/db/migration/V1__baseline.sql
   - src/main/resources/db/migration/V3__auth_terms_mfa_deletion.sql
+  - design/prototype/index.html
 ---
 
 # RF1 · Cadastro de usuário
@@ -36,7 +37,7 @@ paths:
 | **Termos de Uso** | Texto da Velion (dona do Orange Social) em [`docs/legal/TERMOS_DE_USO.md`](../legal/TERMOS_DE_USO.md), com marcadores `{{…}}` para os dados da empresa; aceite obrigatório, caixa desmarcada |
 | **ECA Digital** | Mínimo 13 anos; menor de 16 informa o e-mail do responsável e nasce com proteções travadas; organizações exigem responsável 18+ |
 | **Campos por tipo** | [`PESQUISA_DADOS_USUARIO.md`](../PESQUISA_DADOS_USUARIO.md) §3 — validados por `UserTypeDetailsValidator` |
-| **Status** | 🟡 Parcial — API, regras, verificação de e-mail e testes prontos; envio real de e-mail (OS-12), vínculo completo com o responsável (OS-49) e telas no app ainda não |
+| **Status** | 🟡 Parcial — API, regras, verificação de e-mail testes e protótipo prontos; envio real de e-mail (OS-12), vínculo completo com o responsável (OS-49) e telas no app (OS-39) ainda não |
 
 ## Critérios de aceite
 
@@ -186,4 +187,5 @@ Fluxo de atividades geral do cadastro: [`DIAGRAMA_ATIVIDADES.md`](../DIAGRAMA_AT
 | Testes | `AccountRulesTest` (CNPJ alfanumérico, senha, campos por tipo), `AuthApiIT.registerWithChosenTypeAndTermsStartsASessionThatAnIncognitoWindowDoesNotSee`, `AuthApiIT.registrationRulesTermsTypeFieldsAgeAndUniqueness`, `AuthApiIT.minorsKeepProtectiveDefaults` | ✅ |
 | Termos | [`docs/legal/TERMOS_DE_USO.md`](../legal/TERMOS_DE_USO.md) — preencher os `{{…}}` e passar por revisão jurídica | 🟡 |
 | Pendências | e-mail transacional real (OS-12); eliminar cadastro não confirmado em 7 dias; vínculo do responsável (OS-49); consulta automática de CNPJ | ⏳ |
-| Tela | Protótipo: cadastro com escolha do tipo e aceite dos Termos sobre o mosaico | ⏳ próximo commit |
+| Tela | Protótipo sobre o mosaico laranja com o logo oficial: [14-cadastro](../../design/prototype/screens/14-cadastro.png) (dados + escolha do tipo, cor + glifo + rótulo) e [15-cadastro-termos](../../design/prototype/screens/15-cadastro-termos.png) (campos do tipo + caixa dos Termos **desmarcada**; "Criar conta" só habilita depois do aceite) | ✅ protótipo |
+| App | telas em Next.js/Expo | ⏳ OS-39 |

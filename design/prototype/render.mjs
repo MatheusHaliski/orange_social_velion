@@ -34,6 +34,6 @@ for (const el of await page.locator("[data-shot]").all()) {
 }
 await page.locator("#legend").screenshot({ path: join(out, "07-legenda-categorias.png") });
 await page.locator("#brand").screenshot({ path: join(out, "08-marca.png") });
-await page.screenshot({ path: join(out, "00-visao-geral.png"), fullPage: true });
+await page.screenshot({ path: join(out, "00-visao-geral.png"), fullPage: true, scale: "css" });  // 1x: a galeria inteira em 2x passa de 8 MB
 console.log("ok visão geral");
 await browser.close();

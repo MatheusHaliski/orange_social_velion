@@ -65,7 +65,7 @@ sequenceDiagram
 
     T->>API: GET /api/v1/me/preferences
     API-->>T: {theme: SYSTEM, appBackground: PLAIN, …, minorProtectionsLocked}
-    T->>T: Configurações → Exibição → escolhe a miniatura "Mosaico areia"
+    T->>T: Configurações → Exibição → toca na miniatura "Areia" (radio, ✓ + borda)
     T->>API: PATCH /api/v1/me/preferences {appBackground: MOSAIC_SAND} (X-XSRF-TOKEN)
     API->>S: update(userId, patch)
     alt menor de 16 tentando afrouxar proteção
@@ -111,4 +111,4 @@ flowchart TD
 | Testes | `AuthApiIT.preferencesIncludingAppBackgroundAndProfileEditing`, `AuthApiIT.minorsKeepProtectiveDefaults`, `DomainModelTest` | ✅ |
 | Artes | `design/brand/backgrounds/` (6 mosaicos), `orange-social-logo.svg` (rede) | ✅ |
 | Pendências | troca de e-mail com reconfirmação; foto por URL pré-assinada (OS-18); `activity_log` sem valores (OS-45); comunidades encadeadas (OS-15) | ⏳ |
-| Tela | Protótipo: Configurações com as 9 seções e o seletor de fundo | ⏳ próximo commit |
+| Tela | Protótipo: [05-config-lgpd](../../design/prototype/screens/05-config-lgpd.png) (Configurações), [18-exibicao-fundo](../../design/prototype/screens/18-exibicao-fundo.png) (tema + seletor com as 8 miniaturas, escolha aplicada na hora) e [21-feed-fundo-areia](../../design/prototype/screens/21-feed-fundo-areia.png) (feed com o fundo e o véu) | ✅ protótipo |

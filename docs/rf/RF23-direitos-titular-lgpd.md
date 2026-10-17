@@ -16,6 +16,7 @@ paths:
   - src/main/java/com/orangesocial/application/account/AccountDeletionJob.java
   - src/main/java/com/orangesocial/infrastructure/persistence/postgres/PostRepository.java
   - src/main/java/com/orangesocial/infrastructure/persistence/postgres/PostCommentRepository.java
+  - design/prototype/index.html
 ---
 
 # RF23 · Direitos do titular — portabilidade e eliminação
@@ -159,4 +160,4 @@ Ciclo de vida da conta: [`MAQUINA_ESTADOS.md`](../MAQUINA_ESTADOS.md) (estado te
 | Testes da carência | `AccountRulesTest.deletionGraceAllowsReactivationOnlyWithinTheWindow`, `AuthApiIT.deletionHidesAccountAllowsReactivationWithin30DaysAndEliminatesAfter` | ✅ |
 | Exclusão — passos fora do PostgreSQL | S3, Cassandra, Valkey (ranking), destruição da DEK, reconciliação | ⏳ OS-44, OS-46 |
 | Auditoria | registro de operações (Art. 37) | ⏳ OS-45, OS-4A |
-| Tela | Protótipo: [Configurações → Seus dados](../../design/prototype/screens/05-config-lgpd.png); modal de exclusão | ⏳ próximo commit |
+| Tela | Protótipo: [Configurações → Seus dados](../../design/prototype/screens/05-config-lgpd.png); modal de exclusão [19-excluir-conta](../../design/prototype/screens/19-excluir-conta.png) (`alertdialog` com consequências, data final, "Baixar uma cópia", caixa "Entendo" + senha + código; o botão só habilita após marcar); oferta de reativação no login [20-reativar-conta](../../design/prototype/screens/20-reativar-conta.png) | ✅ protótipo |

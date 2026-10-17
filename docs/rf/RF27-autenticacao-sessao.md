@@ -22,6 +22,7 @@ paths:
   - src/main/java/com/orangesocial/api/ViewerResolver.java
   - src/main/java/com/orangesocial/api/ApiExceptionHandler.java
   - src/main/resources/db/migration/V3__auth_terms_mfa_deletion.sql
+  - design/prototype/index.html
 ---
 
 # RF27 · Login, sessão, controle de acesso e 2FA
@@ -185,4 +186,4 @@ sequenceDiagram
 | API | `/api/v1/auth/{csrf,session,register,login,login/2fa,reactivate,logout}`; `/api/v1/me/{password,sessions,mfa,…}` | ✅ |
 | Testes | `TotpTest` (vetores da RFC 6238, cifra, timeout absoluto); `AuthApiIT` (aba anônima, cookie, CSRF, limite, logout entre abas, 2FA com anti-replay e códigos de recuperação, sessões) | ✅ |
 | Pendências | passkeys/WebAuthn; "lembrar este navegador por 30 dias"; e-mail transacional (OS-12); CAPTCHA após 20 falhas/24 h; SSO Velion via Keycloak (OS-13) | ⏳ OS-61, OS-62 |
-| Tela | Protótipo: login sobre o mosaico, Configurações → Senha e segurança (2FA e sessões) | ⏳ próximo commit |
+| Tela | Protótipo: [13-login](../../design/prototype/screens/13-login.png) sobre o mosaico com o logo oficial, [16-login-2fa](../../design/prototype/screens/16-login-2fa.png), [17-seguranca](../../design/prototype/screens/17-seguranca.png) (2FA ativada, sessões por aparelho, "Sair" em cada uma, "Sair de todos os outros", "Sair desta conta" avisando as outras abas via `BroadcastChannel`) | ✅ protótipo |
