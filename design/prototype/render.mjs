@@ -25,6 +25,7 @@ if (localFontsCss) {
 
 await page.goto(pathToFileURL(join(here, "index.html")).href);
 await page.evaluate(() => document.fonts.ready);
+await page.waitForFunction(() => [...document.images].every(i => i.complete && i.naturalWidth > 0));
 
 for (const el of await page.locator("[data-shot]").all()) {
   const id = await el.getAttribute("data-shot");
@@ -32,6 +33,7 @@ for (const el of await page.locator("[data-shot]").all()) {
   console.log("ok", id);
 }
 await page.locator("#legend").screenshot({ path: join(out, "07-legenda-categorias.png") });
+await page.locator("#brand").screenshot({ path: join(out, "08-marca.png") });
 await page.screenshot({ path: join(out, "00-visao-geral.png"), fullPage: true });
 console.log("ok visão geral");
 await browser.close();

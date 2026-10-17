@@ -1,5 +1,7 @@
 # Orange Social
 
+<p align="center"><img src="design/brand/orange-social-logo.svg" width="160" alt="Orange Social"></p>
+
 [![CI](https://github.com/matheushaliski/orange_social_velion/actions/workflows/ci.yml/badge.svg)](https://github.com/matheushaliski/orange_social_velion/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/matheushaliski/orange_social_velion/actions/workflows/codeql.yml/badge.svg)](https://github.com/matheushaliski/orange_social_velion/actions/workflows/codeql.yml)
 
@@ -20,6 +22,7 @@ LGPD por construção.
 ## Estrutura
 
 ```
+design/brand/              logo principal (SVG) e mark
 docs/                      diagramas Mermaid, pesquisa de tecnologias, design system, backlog Trello
 scripts/wcag_contrast.py   verificação de contraste da paleta
 src/main/resources/
@@ -38,7 +41,8 @@ src/main/java/com/orangesocial/
   [Atividades: cadastro](docs/DIAGRAMA_ATIVIDADES.md)
 - [Pesquisa de tecnologias (ADRs)](docs/PESQUISA_TECNOLOGIAS.md) · [Design system](docs/DESIGN_SYSTEM.md)
 - [Backlog para o Trello](docs/TRELLO_BACKLOG.md)
-- [Protótipo de interface](design/prototype/index.html) · [telas renderizadas](design/prototype/screens/)
+- [Protótipo de interface](design/prototype/index.html) · [telas renderizadas](design/prototype/screens/) ·
+  [marca e logo](design/brand/) ([regras](docs/DESIGN_SYSTEM.md#8-marca))
 
 ## Ambiente local
 
