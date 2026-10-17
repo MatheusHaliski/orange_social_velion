@@ -1,0 +1,47 @@
+spring:
+  application:
+    name: orange-social
+  threads:
+    virtual:
+      enabled: true
+
+  # PostgreSQL 17 + PostGIS · fonte da verdade
+  datasource:
+    url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/orange_social}
+    username: ${POSTGRES_USER:orange}
+    password: ${POSTGRES_PASSWORD:orange}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+      naming:
+        # preserva nomes explícitos (ex.: tabela VSusercontrolist com maiúsculas)
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    # V1__baseline.sql é idêntico a schema.sql (verificado por SchemaConsistencyTest)
+  sql:
+    init:
+      mode: never   # o schema é aplicado pelo Flyway, nunca pelo sql init
+
+  data:
+    # Valkey (compatível com Redis) · cache L1, sessões e Trending Score
+    redis:
+      host: ${VALKEY_HOST:localhost}
+      port: ${VALKEY_PORT:6379}
+    # Cassandra · timeline / logs / notificações
+    cassandra:
+      keyspace-name: orange_social
+      contact-points: ${CASSANDRA_CONTACT_POINTS:localhost:9042}
+      local-datacenter: ${CASSANDRA_DC:datacenter1}
+      schema-action: none
+
+orange-social:
+  storage:
+    # API S3: AWS S3 (sa-east-1) em produção, Garage em desenvolvimento
+    endpoint: ${S3_ENDPOINT:http://localhost:3900}
+    region: ${S3_REGION:sa-east-1}
+    bucket: ${S3_BUCKET:orange-social-media}
+  trending:
+    window-hours: 48
