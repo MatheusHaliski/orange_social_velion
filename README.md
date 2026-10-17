@@ -36,9 +36,11 @@ src/main/java/com/orangesocial/
 ## Documentação
 
 - **[Requisitos funcionais — diagramas por RF](docs/rf/README.md)** (mantidos junto com o código; verificados no CI)
-- [Diagrama de classes](docs/DIAGRAMA_CLASSES.md) · [Máquinas de estados](docs/MAQUINA_ESTADOS.md) ·
-  [Componentes](docs/DIAGRAMA_COMPONENTES.md) · [Sequência: Audio Feed](docs/DIAGRAMA_SEQUENCIA.md) ·
-  [Atividades: cadastro](docs/DIAGRAMA_ATIVIDADES.md)
+- [Casos de uso](docs/DIAGRAMA_CASOS_DE_USO.md) · [Diagrama de classes](docs/DIAGRAMA_CLASSES.md) ·
+  [Máquinas de estados](docs/MAQUINA_ESTADOS.md) · [Componentes](docs/DIAGRAMA_COMPONENTES.md) ·
+  [Sequências](docs/DIAGRAMA_SEQUENCIA.md) · [Atividades](docs/DIAGRAMA_ATIVIDADES.md)
+- [Taxonomia: atores, tipos de usuário, atributos e anatomia dos cards](docs/TAXONOMIA_ATORES_E_CARDS.md)
+  ([desenhos](design/prototype/anatomia/))
 - [Pesquisa de tecnologias (ADRs)](docs/PESQUISA_TECNOLOGIAS.md) · [Design system](docs/DESIGN_SYSTEM.md)
 - [Backlog para o Trello](docs/TRELLO_BACKLOG.md)
 - [Protótipo de interface](design/prototype/index.html) · [telas renderizadas](design/prototype/screens/) ·

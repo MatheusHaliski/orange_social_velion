@@ -53,5 +53,6 @@ Verificação local: `python3 scripts/check_rf_docs.py` (estrutura) e
 ## Diagramas transversais
 
 Valem para vários RFs e seguem a mesma regra de atualização:
-[classes](../DIAGRAMA_CLASSES.md) · [estados](../MAQUINA_ESTADOS.md) · [componentes](../DIAGRAMA_COMPONENTES.md) ·
-[sequência do Audio Feed](../DIAGRAMA_SEQUENCIA.md) · [atividades do cadastro](../DIAGRAMA_ATIVIDADES.md).
+[casos de uso](../DIAGRAMA_CASOS_DE_USO.md) · [classes](../DIAGRAMA_CLASSES.md) · [estados](../MAQUINA_ESTADOS.md) ·
+[componentes](../DIAGRAMA_COMPONENTES.md) · [sequências](../DIAGRAMA_SEQUENCIA.md) · [atividades](../DIAGRAMA_ATIVIDADES.md).
+Atores e atributos: [taxonomia](../TAXONOMIA_ATORES_E_CARDS.md).

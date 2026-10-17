@@ -140,6 +140,8 @@ adicionar `glyph`); `rating.*` ↔ `ageRating` do post; `content.border.*` ↔ `
 
 ## 6. Componentes-chave
 
+Anatomia numerada de cada card (partes, dado da API e regra): [TAXONOMIA_ATORES_E_CARDS.md §5](TAXONOMIA_ATORES_E_CARDS.md#5-anatomia-dos-cards).
+
 | Componente | Regras |
 |---|---|
 | **TopBar + Segmented Switcher** | 4 abas (Profile · Post · Audio · Alert), `role="tablist"`, navegação por setas, estado persistido; transição com layout animation |

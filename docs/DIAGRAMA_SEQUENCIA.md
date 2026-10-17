@@ -1,4 +1,23 @@
-# Diagrama de Sequência — Publicação no Audio Feed
+# Diagramas de Sequência — Orange Social
+
+## Sequências implementadas (por RF)
+
+| Fluxo | Onde |
+|---|---|
+| Cadastro com tipo de usuário e Termos | [RF1 · Sequência](rf/RF01-cadastro-usuario.md#sequência) |
+| Editar preferências (fundo do app) | [RF2](rf/RF02-editar-perfil.md#sequência--editar-preferências-fundo-do-app) |
+| Revogar localização | [RF3](rf/RF03-consentimento-privacidade.md#sequência--revogar-localização) |
+| Excluir conta, reativar e eliminar após 30 dias | [RF23](rf/RF23-direitos-titular-lgpd.md#excluir-conta--modal-carência-de-30-dias-e-reativação) |
+| Abrir post no modal | [RF24](rf/RF24-visualizar-post.md#sequência) |
+| Perfil e feed do autor | [RF25](rf/RF25-perfil-publico-autor.md#sequência) |
+| Curtir · comentar · compartilhar | [RF26](rf/RF26-interacoes-post.md#sequência--curtir-idempotente) |
+| Login com 2FA · ativar 2FA | [RF27](rf/RF27-autenticacao-sessao.md#sequência--login-com-2fa) |
+
+## Publicação no Audio Feed (desenho alvo · ⏳ OS-23)
+
+Ainda não implementado: `MediaController`, `PostPublishingService`, `TrendingService` e o fan-out são o desenho
+alvo. A autenticação já segue o que existe (RF27): sessão opaca no Valkey e `X-XSRF-TOKEN` em toda escrita —
+nunca JWT no app.
 
 Fluxo completo: upload do áudio para o S3, persistência canônica no PostgreSQL, atualização do
 *Trending Score* no Valkey (ZSET) e fan-out da timeline no Cassandra.
@@ -7,7 +26,7 @@ Fluxo completo: upload do áudio para o S3, persistência canônica no PostgreSQ
 sequenceDiagram
     autonumber
     actor U as Usuário (App)
-    participant SEC as JwtAuthenticationFilter
+    participant SEC as SecurityFilterChain (sessão + CSRF)
     participant MC as MediaController
     participant MS as MediaStorageService
     participant S3 as AWS S3
@@ -21,8 +40,8 @@ sequenceDiagram
     participant C as Cassandra (PostTimelineRepository)
 
     Note over U,S3: Etapa 1 — upload da mídia (fora da transação)
-    U->>SEC: POST /api/v1/media/upload-url {type: AUDIO, mime: audio/mpeg}
-    SEC->>SEC: valida JWT + status ACTIVE
+    U->>SEC: POST /api/v1/media/upload-url {type: AUDIO, mime: audio/mpeg}<br/>cookie de sessão + X-XSRF-TOKEN
+    SEC->>SEC: sessão válida no Valkey · CSRF confere · conta ACTIVE
     SEC->>MC: requisição autenticada
     MC->>MS: createPresignedUpload(userId, AUDIO)
     MS->>S3: gera URL pré-assinada PUT (15 min)

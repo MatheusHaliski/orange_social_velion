@@ -8,20 +8,20 @@ Implementado em `com.orangesocial.domain.model.AccountStatus#allowedTransitions(
 stateDiagram-v2
     direction LR
 
-    [*] --> Pending_Verification : cadastro concluído\n(RF1)
+    [*] --> Pending_Verification : cadastro concluído<br/>(RF1)
 
-    Pending_Verification --> Active : e-mail/SMS confirmado
-    Pending_Verification --> Anonymous_LGPD_Deleted : TTL de verificação expirado (7 dias)\nou titular desiste
+    Pending_Verification --> Active : código do e-mail confirmado
+    Pending_Verification --> Anonymous_LGPD_Deleted : 7 dias sem confirmar (⏳ job de limpeza)
 
-    Active --> Suspended : violação de termos\nou denúncia procedente
-    Active --> Pending_Deletion : "Excluir conta" no modal\nsenha + 2FA (Art. 18, VI)
+    Active --> Suspended : violação de termos<br/>ou denúncia procedente
+    Active --> Pending_Deletion : "Excluir conta" no modal<br/>senha + 2FA (Art. 18, VI)
     Pending_Verification --> Pending_Deletion : "Excluir conta"
 
-    Suspended --> Active : recurso aceito\nou fim da penalidade
+    Suspended --> Active : recurso aceito<br/>ou fim da penalidade
     Suspended --> Pending_Deletion : "Excluir conta"
 
-    Pending_Deletion --> Active : entra e reativa em até 30 dias\n(volta ao status anterior)
-    Pending_Deletion --> Anonymous_LGPD_Deleted : 30 dias sem reativar\n(job diário · saga RF23)
+    Pending_Deletion --> Active : entra e reativa em até 30 dias<br/>(volta ao status anterior)
+    Pending_Deletion --> Anonymous_LGPD_Deleted : 30 dias sem reativar<br/>(job diário · saga RF23)
 
     Anonymous_LGPD_Deleted --> [*]
 
@@ -43,9 +43,9 @@ stateDiagram-v2
 
 | Transição | Disparador | Efeitos colaterais |
 |---|---|---|
-| `[*] → Pending_Verification` | `POST /api/v1/users` | Grava `VSusercontrolist`, cria consentimentos com `granted=false` (Privacy by Default), envia código |
+| `[*] → Pending_Verification` | `POST /api/v1/auth/register` | Grava `VSusercontrolist`, cria consentimentos com `granted=false` (Privacy by Default), envia código |
 | `Pending_Verification → Active` | Código de e-mail validado (`POST /api/v1/me/verify-email`) | Grava `email_verified_at`; a sessão aberta no cadastro passa a poder interagir |
-| `Active → Suspended` | Moderação | Apaga as sessões do usuário no Valkey, oculta posts do ranking |
+| `Active → Suspended` | Moderação (⏳ papel e painel) | Apaga as sessões do usuário no Valkey, oculta posts do ranking |
 | `Suspended → Active` | Recurso aceito | Restaura posts no ranking |
 | `* → Pending_Deletion` | Titular confirma no modal com senha (+2FA) | Guarda o status anterior, agenda para +30 dias, apaga **todas** as sessões; perfil e posts somem |
 | `Pending_Deletion → (status anterior)` | Login no prazo + "Reativar" | Limpa as datas da exclusão |
@@ -62,13 +62,13 @@ stateDiagram-v2
     [*] --> Draft : usuário inicia o post
 
     Draft --> Draft : salvar rascunho
-    Draft --> Published : publicar\n(mídia já no S3)
+    Draft --> Published : publicar<br/>(mídia já no S3)
     Draft --> [*] : descartar
 
-    Published --> Trending : score ≥ limiar do feed\n(top N do ZSET)
+    Published --> Trending : score ≥ limiar do feed<br/>(top N do ZSET)
     Trending --> Published : score cai abaixo do limiar
 
-    Published --> Archived : autor arquiva\nou idade > janela do feed
+    Published --> Archived : autor arquiva<br/>ou idade > janela do feed
     Trending --> Archived : autor arquiva
 
     Published --> Removed : moderação / denúncia procedente
@@ -119,3 +119,57 @@ stateDiagram-v2
 ```
 
 Remover apaga o texto (`body = NULL`), decrementa `post.comment_count` e mantém o id para auditoria.
+
+---
+
+## 3. Selo da categoria (`CategoryVerification`)
+
+Implementado em `UserTypeDetailsValidator.initialVerification` (cadastro) e `ProfileService` (edição).
+A decisão `VERIFIED`/`REJECTED` é da moderação (⏳ painel).
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> Not_Required : cadastro VERDE, AMARELO, AZUL,<br/>LARANJA ou PRETO não banco
+    [*] --> Pending : cadastro VERMELHO<br/>ou PRETO banco
+    Pending --> Verified : moderação confere CNPJ,<br/>domínio e representante
+    Pending --> Rejected : dados não conferem
+    Rejected --> Pending : titular corrige os dados (⏳)
+    Verified --> Pending : titular muda nome, @<br/>ou dados do tipo
+    note right of Verified
+        Só VERMELHO verificado
+        publica alerta oficial.
+    end note
+```
+
+| Estado | Pode publicar como instituição / banco | Selo no perfil |
+|---|---|---|
+| `NOT_REQUIRED` | não se aplica | — |
+| `PENDING` | não (lê e interage normalmente) | "em verificação" |
+| `VERIFIED` | sim; VERMELHO também publica alerta | ✓ verificado |
+| `REJECTED` | não | — |
+
+## 4. Login em etapas (`PendingLogin`)
+
+A meia-sessão guarda só `{userId, etapa, expira, tentativas}`; ela não dá acesso a nada. Senha errada mantém o
+visitante onde está, com espera progressiva a partir da 5ª falha (`LoginThrottle`). Detalhe do lado do
+navegador em [RF27 · Estados da sessão](rf/RF27-autenticacao-sessao.md#estados-da-sessão-no-navegador).
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> Visitante
+    Visitante --> Etapa_MFA : senha certa + 2FA ativo
+    Visitante --> Etapa_Reativacao : senha certa + conta em exclusão
+    Visitante --> Autenticada : senha certa
+    Etapa_MFA --> Autenticada : código válido (anti-replay)
+    Etapa_MFA --> Etapa_Reativacao : código válido + conta em exclusão
+    Etapa_MFA --> Visitante : 5 erros ou 5 min
+    Etapa_Reativacao --> Autenticada : "Reativar minha conta"
+    Etapa_Reativacao --> Visitante : "Manter a exclusão e sair" ou 5 min
+    Autenticada --> Visitante : Sair · 60 min ocioso · 24 h ·<br/>encerrada em outro aparelho
+    note right of Autenticada
+        changeSessionId: o id da sessão
+        muda ao entrar (anti-fixação).
+    end note
+```

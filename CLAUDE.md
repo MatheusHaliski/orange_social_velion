@@ -13,7 +13,8 @@ Ao trabalhar em qualquer RF:
 - **Mudança de comportamento** em arquivo listado em `paths` de um RF → atualizar no **mesmo commit/PR**
   os diagramas (caso de uso, sequência, estados, atividades) e a tabela de rastreabilidade daquele RF.
 - **Arquivo novo que implementa um RF** → incluí-lo em `paths` do RF correspondente.
-- Diagramas transversais (`docs/DIAGRAMA_*.md`, `docs/MAQUINA_ESTADOS.md`) também devem refletir o código.
+- Diagramas transversais (`docs/DIAGRAMA_*.md`, inclusive casos de uso, e `docs/MAQUINA_ESTADOS.md`) também devem refletir o código.
+- Ator, atributo ou card novo → `docs/TAXONOMIA_ATORES_E_CARDS.md`; card alterado → `node design/prototype/anatomy.mjs`.
 - `[rf-docs-skip: RFn, …] motivo` (ou `[rf-docs-skip]` para todos), **no início de uma linha** da mensagem de
   commit, só para mudanças sem efeito no comportamento daqueles RFs.
 

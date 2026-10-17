@@ -1,5 +1,7 @@
 # Diagrama de Classes — Orange Social
 
+Atores, facetas de atributos e anatomia dos cards: [TAXONOMIA_ATORES_E_CARDS.md](TAXONOMIA_ATORES_E_CARDS.md).
+
 Modelo de domínio central. `VSusercontrolist` é a tabela PostgreSQL; a entidade Java correspondente é
 `com.orangesocial.domain.model.UserControlList`. Os campos marcados como `«sensível»` são dados
 pessoais sensíveis (LGPD Art. 5º, II) e só são tratados com consentimento específico (Art. 11).
@@ -341,6 +343,8 @@ classDiagram
 | Classe | Armazenamento | Observação |
 |---|---|---|
 | `VSusercontrolist`, `ConsentEvent`, `VelionPoints`, `VelionTrophy` | PostgreSQL 17 + PostGIS | Fonte da verdade, transações ACID |
+| `TermsAcceptance`, `UserPreference`, `UserMfa`, `RecoveryCode` | PostgreSQL (`terms_acceptance`, `user_preference`, `user_mfa`, `user_recovery_code`) | V3; segredo do 2FA cifrado (AES-256-GCM), códigos em Argon2id |
+| Sessão (`OrangePrincipal`, `PendingLogin`) | Valkey `orange:session:*` (Spring Session indexado) | Opaca; some ao sair, por tempo ou na exclusão |
 | `Post` (+ subclasses) — metadados e contadores | PostgreSQL 17 + PostGIS (`post`) | Registro canônico do post (V2) |
 | `PostComment`, `PostReaction`, `PostShare` | PostgreSQL (`post_comment`, `post_reaction`, `post_share`) | Interações RF26; contadores na linha do `post` |
 | `Post` — projeção de timeline | Cassandra `post_timeline` | Fan-out on write por seguidor/feed |

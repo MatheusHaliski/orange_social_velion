@@ -57,8 +57,8 @@ flowchart TD
     A7 --> A8[(INSERT VSusercontrolist PENDING_VERIFICATION<br/>+ terms_acceptance + 6 consent_event false<br/>+ user_preference · sessão aberta)]
     A8 --> A9[Enviar código de 6 dígitos por e-mail<br/>30 min · 5 tentativas · reenvio 1/min]
     A9 --> D7{Código confirmado<br/>em até 7 dias?}
-    D7 -- Sim --> A10[status = ACTIVE<br/>criar carteira Velion Points] --> FIM((Fim))
-    D7 -- Não --> A11[Eliminar cadastro incompleto<br/>status = ANONYMOUS_LGPD_DELETED] --> FIM
+    D7 -- Sim --> A10[status = ACTIVE<br/>criar carteira Velion Points ⏳] --> FIM((Fim))
+    D7 -- Não --> A11[Eliminar cadastro incompleto ⏳<br/>status = ANONYMOUS_LGPD_DELETED] --> FIM
 ```
 
 ## Regras aplicadas no fluxo
@@ -69,4 +69,16 @@ flowchart TD
 | `sexualpreference` só é gravado com consentimento específico e destacado | Art. 11, I |
 | Listas de país e cidade são filtradas pelo item anterior (`typeofcommunity → selectcountry → selectcity`) | Requisito de UX |
 | Contas `VERMELHO` e `PRETO` entram com verificação manual antes de ganhar selo | Alert Feed só aceita fontes verificadas |
-| Cadastro não confirmado em 7 dias é eliminado | Princípio da necessidade (Art. 6º, III) |
+| Cadastro não confirmado em 7 dias é eliminado (⏳ job de limpeza) | Princípio da necessidade (Art. 6º, III) |
+
+Passos marcados com ⏳ ainda não estão no código; foto por URL pré-assinada (OS-18), comunidades encadeadas
+(OS-15) e GPS dependem de telas e endpoints que virão.
+
+## Outros diagramas de atividades
+
+| Fluxo | Onde |
+|---|---|
+| Regras por tipo de usuário no cadastro | [RF1](rf/RF01-cadastro-usuario.md#atividades--regras-por-tipo-de-usuário) |
+| O que muda com cada campo do perfil | [RF2](rf/RF02-editar-perfil.md#atividades--o-que-muda-junto-com-cada-campo-do-perfil) |
+| Paginação por cursor do feed do autor | [RF25](rf/RF25-perfil-publico-autor.md#paginação-por-cursor) |
+| Regras de visibilidade do post | [RF24](rf/RF24-visualizar-post.md#regras-de-visibilidade) |
