@@ -41,7 +41,7 @@ services:
   # Object storage compatível com S3 (substitui o MinIO, arquivado em 2026).
   # Bucket criado pelo serviço garage-init; endpoint S3 em http://localhost:3900.
   garage:
-    image: dxflrs/garage:v2.1.0
+    image: dxflrs/garage:v2.4.1
     container_name: os-garage
     ports:
       - "3900:3900"   # API S3
@@ -57,7 +57,7 @@ services:
       retries: 20
 
   garage-init:
-    image: dxflrs/garage:v2.1.0
+    image: dxflrs/garage:v2.4.1
     container_name: os-garage-init
     depends_on:
       garage:
