@@ -1,0 +1,9 @@
+# Gitleaks: regras padrão + exceções pontuais, cada uma com o motivo.
+[extend]
+useDefault = true
+
+# Lista de senhas fracas que o cadastro recusa (PasswordPolicy.COMMON) — não são segredos.
+[[rules]]
+id = "generic-api-key"
+[[rules.allowlists]]
+paths = ['''src/main/java/com/orangesocial/application/account/PasswordPolicy\.java''']

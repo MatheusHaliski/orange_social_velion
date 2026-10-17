@@ -13,7 +13,12 @@ public interface UserControlListRepository extends JpaRepository<UserControlList
 
     Optional<UserControlList> findByEmail(String email);
 
+    /** Job diário (RF23): contas cujo prazo de 30 dias para reativar terminou. */
+    java.util.List<UserControlList> findByAccountStatusAndDeletionScheduledForBefore(AccountStatus status, java.time.Instant now);
+
     boolean existsByEmail(String email);
+
+    boolean existsByHandle(String handle);
 
     /** Profile Feed: filtros Categoria + País + Cidade. */
     Page<UserControlList> findByUserTypeAndCountryOfResidenceAndCityOfResidenceAndAccountStatus(

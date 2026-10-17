@@ -5,6 +5,18 @@ spring:
     virtual:
       enabled: true
 
+  # Sessão opaca no Valkey (RF27 · ADR-03). Ocioso 60 min (TTL deslizante); absoluto 24 h em
+  # orange-social.security.session-absolute-timeout. "indexed" permite listar e encerrar sessões por usuário.
+  session:
+    timeout: 60m
+    data:
+      redis:
+        repository-type: indexed
+        namespace: orange:session
+        # ElastiCache/Valkey gerenciado bloqueia CONFIG: em produção use "none" e ligue
+        # notify-keyspace-events Egx no grupo de parâmetros.
+        configure-action: ${SESSION_REDIS_CONFIGURE_ACTION:notify-keyspace-events}
+
   # PostgreSQL 17 + PostGIS · fonte da verdade
   datasource:
     url: ${POSTGRES_URL:jdbc:postgresql://localhost:5432/orange_social}
@@ -38,13 +50,38 @@ spring:
     local-datacenter: ${CASSANDRA_DC:datacenter1}
     schema-action: none
 
+server:
+  servlet:
+    session:
+      cookie:
+        # Sem max-age: cookie de sessão, morre ao fechar o navegador; aba anônima tem cookies próprios.
+        # __Host- exige Secure, Path=/ e nenhum Domain (o perfil dev usa nome simples sobre http).
+        name: ${SESSION_COOKIE_NAME:__Host-orange_session}
+        http-only: true
+        secure: ${SESSION_COOKIE_SECURE:true}
+        same-site: lax
+        path: /
+
 orange-social:
   # base dos links compartilhados (RF26): {public-base-url}/p/{postId}
   public-base-url: ${PUBLIC_BASE_URL:http://localhost:3000}
-  auth:
-    # SOMENTE dev/testes: identidade no cabeçalho X-Orange-Dev-User, sem autenticação.
-    # Produção usa Keycloak (OS-13); manter false.
-    dev-header-enabled: ${ORANGE_DEV_HEADER_AUTH:false}
+  security:
+    # Base64, 32+ bytes, vindo do Secrets Manager/Vault. Obrigatório fora dos perfis dev/it (AppSecrets).
+    app-secret: ${ORANGE_APP_SECRET:}
+    session-absolute-timeout: 24h
+  legal:
+    # Termos de Uso da Velion (docs/legal/TERMOS_DE_USO.md); mudar a versão pede novo aceite
+    terms-version: "2026-10-17"
+    terms-url: ${TERMS_URL:http://localhost:3000/termos}
+    privacy-version: "2026-10-17"
+  registration:
+    minimum-age: 13
+    protected-until-age: 16      # ECA Digital: padrões protetivos travados abaixo desta idade
+  account:
+    deletion-grace: 30d          # RF23: prazo para reativar antes da eliminação
+    deletion-cron: "0 15 3 * * *"
+  notifications:
+    log-codes: false             # true só no perfil dev
   storage:
     # API S3: AWS S3 (sa-east-1) em produção, Garage em desenvolvimento
     endpoint: ${S3_ENDPOINT:http://localhost:3900}

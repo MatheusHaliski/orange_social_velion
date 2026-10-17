@@ -10,7 +10,6 @@ import com.orangesocial.application.post.PostViews.SaveStateView;
 import com.orangesocial.application.post.PostViews.ShareResultView;
 import com.orangesocial.domain.model.PostComment;
 import com.orangesocial.domain.model.ShareChannel;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -48,55 +47,52 @@ public class PostController {
     }
 
     @GetMapping
-    public PostDetailView get(@PathVariable UUID postId, HttpServletRequest request) {
-        return queries.getPost(postId, viewer.viewerId(request));
+    public PostDetailView get(@PathVariable UUID postId) {
+        return queries.getPost(postId, viewer.viewerId());
     }
 
     @PutMapping("/like")
-    public LikeStateView like(@PathVariable UUID postId, HttpServletRequest request) {
-        return interactions.like(postId, viewer.requireViewer(request));
+    public LikeStateView like(@PathVariable UUID postId) {
+        return interactions.like(postId, viewer.requireViewer());
     }
 
     @DeleteMapping("/like")
-    public LikeStateView unlike(@PathVariable UUID postId, HttpServletRequest request) {
-        return interactions.unlike(postId, viewer.requireViewer(request));
+    public LikeStateView unlike(@PathVariable UUID postId) {
+        return interactions.unlike(postId, viewer.requireViewer());
     }
 
     @PutMapping("/save")
-    public SaveStateView save(@PathVariable UUID postId, HttpServletRequest request) {
-        return interactions.save(postId, viewer.requireViewer(request));
+    public SaveStateView save(@PathVariable UUID postId) {
+        return interactions.save(postId, viewer.requireViewer());
     }
 
     @DeleteMapping("/save")
-    public SaveStateView unsave(@PathVariable UUID postId, HttpServletRequest request) {
-        return interactions.unsave(postId, viewer.requireViewer(request));
+    public SaveStateView unsave(@PathVariable UUID postId) {
+        return interactions.unsave(postId, viewer.requireViewer());
     }
 
     @GetMapping("/comments")
     public CommentPageView comments(@PathVariable UUID postId,
                                     @RequestParam(defaultValue = "0") long after,
-                                    @RequestParam(defaultValue = "20") int limit,
-                                    HttpServletRequest request) {
-        return interactions.listComments(postId, after, limit, viewer.viewerId(request));
+                                    @RequestParam(defaultValue = "20") int limit) {
+        return interactions.listComments(postId, after, limit, viewer.viewerId());
     }
 
     @PostMapping("/comments")
     @ResponseStatus(HttpStatus.CREATED)
-    public CommentCreatedView comment(@PathVariable UUID postId, @Valid @RequestBody NewComment body,
-                                      HttpServletRequest request) {
-        return interactions.addComment(postId, viewer.requireViewer(request), body.body());
+    public CommentCreatedView comment(@PathVariable UUID postId, @Valid @RequestBody NewComment body) {
+        return interactions.addComment(postId, viewer.requireViewer(), body.body());
     }
 
     @DeleteMapping("/comments/{commentId}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteComment(@PathVariable UUID postId, @PathVariable long commentId, HttpServletRequest request) {
-        interactions.removeComment(postId, commentId, viewer.requireViewer(request));
+    public void deleteComment(@PathVariable UUID postId, @PathVariable long commentId) {
+        interactions.removeComment(postId, commentId, viewer.requireViewer());
     }
 
     @PostMapping("/shares")
-    public ShareResultView share(@PathVariable UUID postId, @Valid @RequestBody NewShare body,
-                                 HttpServletRequest request) {
-        return interactions.share(postId, viewer.requireViewer(request), body.channel());
+    public ShareResultView share(@PathVariable UUID postId, @Valid @RequestBody NewShare body) {
+        return interactions.share(postId, viewer.requireViewer(), body.channel());
     }
 
     public record NewComment(@NotBlank @Size(max = PostComment.MAX_LENGTH) String body) {

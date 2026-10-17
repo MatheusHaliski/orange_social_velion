@@ -15,10 +15,12 @@ telas e cards do Trello.
 | RF24 | Visualizar post em detalhe (modal, data de publicação) *(numeração provisória)* | 🟡 parcial | [RF24-visualizar-post.md](RF24-visualizar-post.md) |
 | RF25 | Perfil público do autor com o feed dele *(numeração provisória)* | 🟡 parcial | [RF25-perfil-publico-autor.md](RF25-perfil-publico-autor.md) |
 | RF26 | Interações com contagem: curtir, comentar, compartilhar, salvar *(numeração provisória)* | 🟡 parcial | [RF26-interacoes-post.md](RF26-interacoes-post.md) |
+| RF27 | Login, controle de sessão, controle de acesso e 2FA *(numeração provisória)* | 🟡 parcial | [RF27-autenticacao-sessao.md](RF27-autenticacao-sessao.md) |
+| RF28 | Moldura do post (Background Studio) com auras, materiais e Aura Plus *(numeração provisória)* | ⚪ planejado | [RF28-moldura-post.md](RF28-moldura-post.md) |
 
-> RF4–RF22 ainda não têm documento: a lista oficial não está no repositório. RF24–RF26 nasceram da
-> auditoria de 2026-10-17 e foram numerados depois de RF23 para não colidir; renumerar quando a lista
-> oficial chegar. Ao adicionar RFs, siga a regra abaixo.
+> RF4–RF22 ainda não têm documento: a lista oficial está no Trello e ainda não foi trazida para cá.
+> RF24–RF28 foram numerados depois de RF23 para não colidir; renumerar quando a lista oficial chegar.
+> Ao adicionar RFs, siga a regra abaixo.
 
 ## Regra: diagramas sempre atualizados
 
@@ -52,5 +54,6 @@ Verificação local: `python3 scripts/check_rf_docs.py` (estrutura) e
 ## Diagramas transversais
 
 Valem para vários RFs e seguem a mesma regra de atualização:
-[classes](../DIAGRAMA_CLASSES.md) · [estados](../MAQUINA_ESTADOS.md) · [componentes](../DIAGRAMA_COMPONENTES.md) ·
-[sequência do Audio Feed](../DIAGRAMA_SEQUENCIA.md) · [atividades do cadastro](../DIAGRAMA_ATIVIDADES.md).
+[casos de uso](../DIAGRAMA_CASOS_DE_USO.md) · [classes](../DIAGRAMA_CLASSES.md) · [estados](../MAQUINA_ESTADOS.md) ·
+[componentes](../DIAGRAMA_COMPONENTES.md) · [sequências](../DIAGRAMA_SEQUENCIA.md) · [atividades](../DIAGRAMA_ATIVIDADES.md).
+Atores e atributos: [taxonomia](../TAXONOMIA_ATORES_E_CARDS.md).

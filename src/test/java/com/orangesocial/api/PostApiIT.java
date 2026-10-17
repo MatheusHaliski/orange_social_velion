@@ -8,6 +8,8 @@ import com.orangesocial.domain.model.UserCategoryEnum;
 import com.orangesocial.domain.model.UserControlList;
 import com.orangesocial.infrastructure.persistence.postgres.PostRepository;
 import com.orangesocial.infrastructure.persistence.postgres.UserControlListRepository;
+import com.orangesocial.support.ApiClient;
+import com.orangesocial.support.CapturingNotifier;
 import com.orangesocial.support.PolyglotContainers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,20 +19,20 @@ import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
-import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.support.TransactionTemplate;
-import org.springframework.web.client.RestClient;
+import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.Instant;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.springframework.http.MediaType.APPLICATION_JSON;
 
 /**
  * Ponta a ponta contra PostGIS real: Flyway V1+V2, validação das entidades, contadores
@@ -38,7 +40,7 @@ import static org.springframework.http.MediaType.APPLICATION_JSON;
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
-@Import(PolyglotContainers.class)
+@Import({PolyglotContainers.class, CapturingNotifier.class})
 class PostApiIT {
 
     @LocalServerPort
@@ -59,7 +61,17 @@ class PostApiIT {
     @Autowired
     TransactionTemplate tx;
 
-    RestClient http;
+    @Autowired
+    PasswordEncoder passwords;
+
+    @Autowired
+    StringRedisTemplate redis;
+
+    static final String PASSWORD = "uma frase longa de teste";
+
+    /** Um "navegador" logado por usuário (sessão + CSRF reais); anônimo = navegador sem cookies. */
+    final Map<Long, ApiClient> browsers = new HashMap<>();
+    final Map<Long, String> emails = new HashMap<>();
     UserControlList author;
     UserControlList reader;
     UserControlList pending;
@@ -68,10 +80,9 @@ class PostApiIT {
     @BeforeEach
     void seed() {
         jdbc.execute("TRUNCATE TABLE \"VSusercontrolist\" RESTART IDENTITY CASCADE");
-        http = RestClient.builder()
-                .baseUrl("http://localhost:" + port)
-                .defaultStatusHandler(HttpStatusCode::isError, (req, res) -> { })   // asserts olham o status
-                .build();
+        redis.getRequiredConnectionFactory().getConnection().serverCommands().flushDb();   // sessões e contadores
+        browsers.clear();
+        emails.clear();
 
         author = activeUser("techblog.br", "tech@example.com", UserCategoryEnum.AMARELO);
         author.setPhotoObjectKey("users/1/avatar.webp");
@@ -79,7 +90,10 @@ class PostApiIT {
         author = tx.execute(s -> users.saveAndFlush(author));
         reader = tx.execute(s -> users.saveAndFlush(activeUser("Ana Ribeiro", "ana@example.com", UserCategoryEnum.VERDE)));
         pending = tx.execute(s -> users.saveAndFlush(
-                new UserControlList("Pendente", "pend@example.com", "hash", UserCategoryEnum.VERDE)));
+                new UserControlList("Pendente", "pend@example.com", passwords.encode(PASSWORD), UserCategoryEnum.VERDE)));
+        for (UserControlList u : List.of(author, reader, pending)) {
+            emails.put(u.getId(), u.getEmail());
+        }
 
         published = newPost(author, "O que ninguém te conta sobre começar a programar", p -> {
             p.setSubtitle("Seis meses depois");
@@ -219,6 +233,7 @@ class PostApiIT {
 
         UserControlList stranger = tx.execute(s -> users.saveAndFlush(
                 activeUser("Outro", "outro@example.com", UserCategoryEnum.AZUL)));
+        emails.put(stranger.getId(), stranger.getEmail());
         assertThat(send(HttpMethod.DELETE, box + "/" + commentId, stranger.getId(), null).getStatusCode().value())
                 .isEqualTo(403);
         assertThat(send(HttpMethod.DELETE, box + "/" + commentId, author.getId(), null).getStatusCode().value())
@@ -275,8 +290,8 @@ class PostApiIT {
 
     // ------------------------------------------------------------ apoio
 
-    private static UserControlList activeUser(String name, String email, UserCategoryEnum category) {
-        UserControlList user = new UserControlList(name, email, "argon2-hash", category);
+    private UserControlList activeUser(String name, String email, UserCategoryEnum category) {
+        UserControlList user = new UserControlList(name, email, passwords.encode(PASSWORD), category);
         user.activate();
         return user;
     }
@@ -292,14 +307,12 @@ class PostApiIT {
     }
 
     private ResponseEntity<Map> send(HttpMethod method, String path, Long viewerId, Object body) {
-        RestClient.RequestBodySpec spec = http.method(method).uri(path);
-        if (viewerId != null) {
-            spec.header(ViewerResolver.DEV_HEADER, viewerId.toString());
-        }
-        if (body != null) {
-            spec.contentType(APPLICATION_JSON).body(body);
-        }
-        return spec.retrieve().toEntity(Map.class);
+        ApiClient browser = viewerId == null ? new ApiClient(port) : browsers.computeIfAbsent(viewerId, id -> {
+            ApiClient b = new ApiClient(port);
+            assertThat(b.login(emails.get(id), PASSWORD).getStatusCode().value()).isEqualTo(200);
+            return b;
+        });
+        return browser.send(method, path, body);
     }
 
     @SuppressWarnings("unchecked")

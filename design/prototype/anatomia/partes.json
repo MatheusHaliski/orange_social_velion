@@ -1,0 +1,544 @@
+{
+  "01-post-texto": {
+    "title": "Post · texto",
+    "note": "Post Feed · FeedType.POST · MediaType.TEXT",
+    "parts": [
+      [
+        1,
+        "Borda da categoria do autor (3 px)"
+      ],
+      [
+        2,
+        "Nome do autor · link para o perfil"
+      ],
+      [
+        3,
+        "Bolinha: cor + glifo da categoria"
+      ],
+      [
+        4,
+        "Tipo de mídia"
+      ],
+      [
+        5,
+        "Classificação indicativa"
+      ],
+      [
+        6,
+        "Categoria · tempo relativo (<time>)"
+      ],
+      [
+        7,
+        "Título · abre o modal"
+      ],
+      [
+        8,
+        "Subtítulo (até 2 linhas)"
+      ],
+      [
+        9,
+        "Curtir + contagem"
+      ],
+      [
+        10,
+        "Comentar + contagem"
+      ],
+      [
+        11,
+        "Compartilhar + contagem"
+      ],
+      [
+        12,
+        "Salvar (privado, sem contagem)"
+      ],
+      [
+        13,
+        "Tendência"
+      ]
+    ]
+  },
+  "02-post-video": {
+    "title": "Post · vídeo",
+    "note": "MediaType.VIDEO · em alta",
+    "parts": [
+      [
+        1,
+        "Tipo: VÍDEO"
+      ],
+      [
+        2,
+        "Mídia 16:9 (chave no S3)"
+      ],
+      [
+        3,
+        "Play"
+      ],
+      [
+        4,
+        "Duração"
+      ],
+      [
+        5,
+        "Contagem compacta (2,1 mil)"
+      ],
+      [
+        6,
+        "Tendência: em alta"
+      ]
+    ]
+  },
+  "03-post-imagem-publicidade": {
+    "title": "Post · imagem de marca",
+    "note": "MediaType.IMAGE · AZUL · publicidade",
+    "parts": [
+      [
+        1,
+        "Bolinha AZUL (triângulo)"
+      ],
+      [
+        2,
+        "Tipo: IMAGEM"
+      ],
+      [
+        3,
+        "Imagem"
+      ],
+      [
+        4,
+        "Selo de publicidade (CDC art. 36)"
+      ],
+      [
+        5,
+        "Tendência: estável"
+      ]
+    ]
+  },
+  "04-vaga": {
+    "title": "Vaga",
+    "note": "Alert Feed · AlertCategory.JOB_OPENING",
+    "parts": [
+      [
+        1,
+        "Borda VERMELHO (instituição)"
+      ],
+      [
+        2,
+        "Autor: instituição"
+      ],
+      [
+        3,
+        "Tipo: VAGA"
+      ],
+      [
+        4,
+        "Cargo · modelo · cidade"
+      ],
+      [
+        5,
+        "Requisitos e prazo"
+      ],
+      [
+        6,
+        "Ações (sem classificação)"
+      ]
+    ]
+  },
+  "05-audio": {
+    "title": "Áudio",
+    "note": "Audio Feed · AudioKind.PERSONAL_AUDIO",
+    "parts": [
+      [
+        1,
+        "Autor (bolinha + nome + tempo)"
+      ],
+      [
+        2,
+        "Tipo de áudio"
+      ],
+      [
+        3,
+        "Classificação"
+      ],
+      [
+        4,
+        "Título"
+      ],
+      [
+        5,
+        "Forma de onda (picos do backend)"
+      ],
+      [
+        6,
+        "Trecho já ouvido"
+      ],
+      [
+        7,
+        "Play / pausa"
+      ],
+      [
+        8,
+        "Posição / duração"
+      ],
+      [
+        9,
+        "Ações"
+      ]
+    ]
+  },
+  "06-mini-player": {
+    "title": "Tocando agora",
+    "note": "Audio Feed · mini player fixo",
+    "parts": [
+      [
+        1,
+        "Rótulo e episódio"
+      ],
+      [
+        2,
+        "Play / pausa"
+      ],
+      [
+        3,
+        "Título"
+      ],
+      [
+        4,
+        "Progresso"
+      ]
+    ]
+  },
+  "07-alerta": {
+    "title": "Alerta oficial",
+    "note": "Alert Feed · CAP 1.2 · fonte verificada",
+    "parts": [
+      [
+        1,
+        "Borda VERMELHO + fundo de alerta"
+      ],
+      [
+        2,
+        "Severidade · evento"
+      ],
+      [
+        3,
+        "Emitido há"
+      ],
+      [
+        4,
+        "Título"
+      ],
+      [
+        5,
+        "Epicentro"
+      ],
+      [
+        6,
+        "Área no mapa"
+      ],
+      [
+        7,
+        "Fonte"
+      ],
+      [
+        8,
+        "Selo: fonte verificada"
+      ],
+      [
+        9,
+        "Área e raio"
+      ],
+      [
+        10,
+        "Válido até (expires)"
+      ],
+      [
+        11,
+        "O que fazer (instruction)"
+      ],
+      [
+        12,
+        "Só compartilhar"
+      ],
+      [
+        13,
+        "Sem curtidas em alerta oficial"
+      ]
+    ]
+  },
+  "08-perfil": {
+    "title": "Perfil",
+    "note": "Profile Feed · FeedType.PROFILE",
+    "parts": [
+      [
+        1,
+        "Nome"
+      ],
+      [
+        2,
+        "Seguir / Seguindo"
+      ],
+      [
+        3,
+        "Avatar (foto ou iniciais)"
+      ],
+      [
+        4,
+        "Categoria: cor + rótulo"
+      ],
+      [
+        5,
+        "Bolinha da categoria"
+      ],
+      [
+        6,
+        "Cidade, UF · país"
+      ],
+      [
+        7,
+        "Interesses (taxonomia fixa)"
+      ]
+    ]
+  },
+  "09-perfil-cabecalho": {
+    "title": "Cabeçalho do perfil do autor",
+    "note": "RF25 · só dados públicos",
+    "parts": [
+      [
+        1,
+        "Nome"
+      ],
+      [
+        2,
+        "Avatar + bolinha"
+      ],
+      [
+        3,
+        "Categoria: glifo + rótulo"
+      ],
+      [
+        4,
+        "Membro desde"
+      ],
+      [
+        5,
+        "Nº de posts"
+      ],
+      [
+        6,
+        "Curtidas recebidas"
+      ]
+    ]
+  },
+  "10-modal-post": {
+    "title": "Modal do post",
+    "note": "RF24 · role=dialog · aria-modal",
+    "parts": [
+      [
+        1,
+        "Alça (arrastar para fechar)"
+      ],
+      [
+        2,
+        "Tipo de mídia"
+      ],
+      [
+        3,
+        "Fechar (Esc)"
+      ],
+      [
+        4,
+        "Autor · link para o perfil"
+      ],
+      [
+        5,
+        "Mídia"
+      ],
+      [
+        6,
+        "Título (h2)"
+      ],
+      [
+        7,
+        "Subtítulo"
+      ],
+      [
+        8,
+        "Texto completo"
+      ],
+      [
+        9,
+        "Data absoluta"
+      ],
+      [
+        10,
+        "Tempo relativo"
+      ],
+      [
+        11,
+        "Local"
+      ],
+      [
+        12,
+        "Classificação"
+      ],
+      [
+        13,
+        "Contagens por extenso"
+      ],
+      [
+        14,
+        "Ações com rótulo"
+      ],
+      [
+        15,
+        "Prévia dos comentários"
+      ]
+    ]
+  },
+  "11-comentario": {
+    "title": "Comentário",
+    "note": "RF26 · CommentStatus",
+    "parts": [
+      [
+        1,
+        "Nome · link para o perfil"
+      ],
+      [
+        2,
+        "Tempo relativo"
+      ],
+      [
+        3,
+        "Bolinha do autor"
+      ],
+      [
+        4,
+        "Texto (1–2.000)"
+      ],
+      [
+        5,
+        "Seu comentário: nome sem link"
+      ],
+      [
+        6,
+        "Apagar (autor ou dono do post)"
+      ]
+    ]
+  },
+  "12-opcao-tipo": {
+    "title": "Opção de tipo de usuário",
+    "note": "RF1 · cadastro · role=radio",
+    "parts": [
+      [
+        1,
+        "Bolinha: cor + glifo"
+      ],
+      [
+        2,
+        "Rótulo da categoria"
+      ],
+      [
+        3,
+        "Não selecionada"
+      ],
+      [
+        4,
+        "Selecionada: borda + fundo laranja"
+      ],
+      [
+        5,
+        "Para quem é"
+      ],
+      [
+        6,
+        "PRETO: anel claro no escuro"
+      ]
+    ]
+  },
+  "13-sessao": {
+    "title": "Sessão ativa",
+    "note": "RF27 · Senha e segurança",
+    "parts": [
+      [
+        1,
+        "Navegador e sistema"
+      ],
+      [
+        2,
+        "Aparelho (celular / computador)"
+      ],
+      [
+        3,
+        "Esta sessão"
+      ],
+      [
+        4,
+        "Encerrar aquela sessão"
+      ],
+      [
+        5,
+        "Último acesso · cidade aproximada"
+      ]
+    ]
+  },
+  "14-post-tema-claro": {
+    "title": "Post · tema claro",
+    "note": "Variantes 700 da paleta",
+    "parts": [
+      [
+        1,
+        "Borda: variante escura (#1E7A3A)"
+      ],
+      [
+        2,
+        "Bolinha com glifo branco"
+      ],
+      [
+        3,
+        "Classificação: texto branco"
+      ],
+      [
+        4,
+        "Curtido: laranja #C2410C"
+      ]
+    ]
+  },
+  "15-moldura": {
+    "title": "Moldura do post",
+    "note": "RF28 · Background Studio · post em alta",
+    "parts": [
+      [
+        1,
+        "Arte da moldura (faixa de 11 px)"
+      ],
+      [
+        2,
+        "Filete da categoria, dentro do container"
+      ],
+      [
+        3,
+        "Bolinha da categoria: o sinal real"
+      ],
+      [
+        4,
+        "Aura Hype: anel (só em alta)"
+      ],
+      [
+        5,
+        "Mídia dentro do container"
+      ],
+      [
+        6,
+        "Container opaco: texto nunca sobre a arte"
+      ],
+      [
+        7,
+        "Texto “em alta”: sinal obrigatório do Hype"
+      ],
+      [
+        8,
+        "Material (vidro) por cima da arte"
+      ]
+    ]
+  }
+}

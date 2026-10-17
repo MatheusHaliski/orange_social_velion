@@ -201,6 +201,103 @@
   .share-note { display: flex; gap: 7px; font-size: 11.5px; color: var(--text-3); line-height: 1.4; margin-top: 14px; }
   .toast { position: absolute; left: 16px; right: 16px; bottom: 96px; z-index: 9; background: var(--text); color: var(--bg); border-radius: 12px; padding: 11px 14px; font-size: 13px; font-weight: 500; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
 
+  /* Entrada: login e cadastro sobre o mosaico (RF1 · RF27) */
+  .auth { position: absolute; inset: 0; display: flex; flex-direction: column; background: #17120D var(--auth-bg) center / cover; }
+  .auth::before { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, rgba(23,18,13,.15) 0%, rgba(23,18,13,.35) 30%, rgba(23,18,13,.92) 58%, #17120D 75%); }
+  .auth > * { position: relative; }
+  .auth .statusbar { color: #fff; }
+  .lockup { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 34px; }
+  .lockup img { height: 58px; filter: drop-shadow(0 4px 10px rgba(0,0,0,.35)); }
+  .lockup b { font-family: 'Bricolage Grotesque', sans-serif; font-size: 30px; font-weight: 800; color: #fff; letter-spacing: -.02em; text-shadow: 0 2px 10px rgba(0,0,0,.4); }
+  .lockup.sm { margin-top: 14px; }
+  .lockup.sm img { height: 38px; }
+  .lockup.sm b { font-size: 21px; }
+  .auth-card { margin: auto 14px 18px; background: rgba(33,26,18,.94); border: 1px solid var(--line); border-radius: 22px; padding: 18px 16px 16px; box-shadow: 0 20px 50px rgba(0,0,0,.45); }
+  .auth-card.tall { margin-top: 14px; flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+  .auth-card h2 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 22px; font-weight: 700; }
+  .auth-card .lead { font-size: 13px; color: var(--text-2); margin-top: 4px; line-height: 1.45; }
+  .auth-card .lead-cat { display: flex; gap: 8px; align-items: center; }
+  .auth-card .lead-cat .dot { flex: none; }
+  .field { display: block; margin-top: 12px; }
+  .field > span { display: block; font-size: 12px; font-weight: 600; color: var(--text-2); margin-bottom: 5px; }
+  .field .input { display: flex; align-items: center; gap: 8px; height: 44px; padding: 0 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); color: var(--text); font-size: 14px; }
+  .field .input.ph { color: var(--text-3); }
+  .field .input svg { color: var(--text-3); margin-left: auto; }
+  .field small { display: block; font-size: 11px; color: var(--text-3); margin-top: 4px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; height: 46px; margin-top: 14px; border-radius: 13px; border: 0; background: var(--brand); color: var(--on-brand); font: inherit; font-size: 15px; font-weight: 700; cursor: pointer; }
+  .btn.ghost { background: transparent; color: var(--text); border: 1px solid var(--line); }
+  .btn.danger { background: var(--c-vermelho); color: #fff; }
+  .btn:disabled { background: var(--surface-2); color: var(--text-3); cursor: not-allowed; }
+  .auth-links { display: flex; justify-content: space-between; margin-top: 12px; font-size: 12.5px; }
+  .auth-links a, .text-link { color: var(--brand-text); text-decoration: none; font-weight: 600; }
+  .auth-note { display: flex; gap: 7px; align-items: flex-start; font-size: 11.5px; color: var(--text-3); line-height: 1.4; margin-top: 12px; }
+  .divider { display: flex; align-items: center; gap: 10px; color: var(--text-3); font-size: 11.5px; margin-top: 14px; }
+  .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+  .steps { display: flex; gap: 6px; margin-top: 10px; }
+  .steps i { flex: 1; height: 4px; border-radius: 4px; background: var(--line); }
+  .steps i.on { background: var(--brand); }
+  .types { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+  .type-opt { display: flex; gap: 9px; align-items: flex-start; padding: 10px; border-radius: 13px; border: 1px solid var(--line); background: var(--bg); text-align: left; color: var(--text); font: inherit; cursor: pointer; }
+  .type-opt b { font-size: 12.5px; font-weight: 700; display: block; }
+  .type-opt small { font-size: 10.5px; color: var(--text-3); line-height: 1.3; display: block; margin-top: 2px; }
+  .type-opt[aria-checked="true"] { border-color: var(--brand); background: color-mix(in srgb, var(--brand) 12%, var(--bg)); box-shadow: 0 0 0 1px var(--brand); }
+  .chips-sel { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chips-sel .chip[aria-checked="true"] { border-color: var(--brand); color: var(--brand-text); background: color-mix(in srgb, var(--brand) 12%, transparent); }
+  .check { display: flex; gap: 10px; align-items: flex-start; margin-top: 14px; font-size: 13px; line-height: 1.45; cursor: pointer; }
+  .check input { appearance: none; width: 22px; height: 22px; flex: none; border-radius: 7px; border: 2px solid var(--text-2); background: transparent; margin: 0; display: grid; place-items: center; cursor: pointer; }
+  .check input:checked { background: var(--brand); border-color: var(--brand); }
+  .check input:checked::after { content: ""; width: 10px; height: 6px; border: solid var(--on-brand); border-width: 0 0 2.5px 2.5px; transform: rotate(-45deg) translate(1px, -1px); }
+  .check input:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  .code-boxes { display: flex; gap: 8px; justify-content: center; margin-top: 16px; }
+  .code-boxes span { width: 44px; height: 54px; border-radius: 12px; border: 1px solid var(--line); background: var(--bg); display: grid; place-items: center; font-family: 'Space Mono', monospace; font-size: 22px; font-weight: 700; }
+  .code-boxes span.on { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand); }
+
+  /* Configurações → Segurança e Exibição (RF2 · RF27) */
+  .badge-ok { font-size: 10.5px; font-weight: 700; color: var(--c-verde); border: 1px solid color-mix(in srgb, var(--c-verde) 45%, var(--line)); border-radius: 999px; padding: 2px 8px; display: inline-flex; align-items: center; gap: 4px; }
+  .sess { display: flex; align-items: center; gap: 11px; padding: 11px 13px; border-bottom: 1px solid var(--line-soft); }
+  .sess:last-child { border-bottom: 0; }
+  .sess .txt { flex: 1; min-width: 0; }
+  .sess .txt b { font-size: 13.5px; font-weight: 600; display: block; }
+  .sess .txt span { font-size: 11.5px; color: var(--text-3); }
+  .sess .here { font-size: 10.5px; font-weight: 700; color: var(--brand-text); }
+  .mini-btn { height: 30px; padding: 0 12px; border-radius: 9px; border: 1px solid var(--line); background: transparent; color: var(--text); font: inherit; font-size: 12px; font-weight: 600; cursor: pointer; }
+  .seg3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; padding: 3px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line-soft); }
+  .seg3 button { height: 34px; border-radius: 9px; border: 0; background: transparent; color: var(--text-2); font: inherit; font-size: 12.5px; font-weight: 600; }
+  .seg3 button[aria-pressed="true"] { background: var(--brand); color: var(--on-brand); }
+  .bg-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .bg-opt { padding: 0; border: 0; background: none; color: var(--text-2); font: inherit; font-size: 10.5px; text-align: center; cursor: pointer; }
+  .bg-opt .thumb { display: block; height: 62px; border-radius: 11px; border: 1px solid var(--line); background: #17120D center / cover; position: relative; overflow: hidden; }
+  .bg-opt .thumb.plain { background: var(--bg); }
+  .bg-opt .thumb.network { background: #17120D url(../brand/orange-social-logo.svg) center / 130% no-repeat; }
+  .bg-opt[aria-checked="true"] .thumb { border-color: var(--brand); box-shadow: 0 0 0 2px var(--brand); }
+  .bg-opt[aria-checked="true"] .thumb::after { content: "✓"; position: absolute; right: 4px; top: 4px; width: 18px; height: 18px; border-radius: 50%; background: var(--brand); color: var(--on-brand); font-size: 11px; font-weight: 800; display: grid; place-items: center; }
+  .bg-opt span { display: block; margin-top: 4px; }
+  .range { height: 6px; border-radius: 6px; background: var(--line); position: relative; margin: 10px 0 4px; }
+  .range i { position: absolute; left: 0; top: 0; bottom: 0; width: 46%; border-radius: 6px; background: var(--brand); }
+  .range i::after { content: ""; position: absolute; right: -9px; top: -6px; width: 18px; height: 18px; border-radius: 50%; background: var(--text); }
+
+  /* Fundo do app escolhido em Configurações: véu escuro garante o contraste dos cards (WCAG 1.4.3) */
+  .phone.app-bg { background: linear-gradient(rgba(23,18,13,.84), rgba(23,18,13,.9)), #17120D var(--app-bg) center / cover; }
+  .phone.app-bg.network { background: linear-gradient(rgba(23,18,13,.86), rgba(23,18,13,.9)), #17120D var(--app-bg) center 40% / 150% no-repeat; }
+  .phone.app-bg .fade { background: linear-gradient(transparent, rgba(23,18,13,.9)); }
+  .phone.app-bg .tabbar { background: rgba(23,18,13,.92); }
+
+  /* Modal de exclusão: alertdialog centralizado (RF23) */
+  .overlay.center { justify-content: center; padding: 0 14px; }
+  .alert-modal { position: relative; background: var(--bg); border: 1px solid var(--line); border-radius: 22px; padding: 18px 16px 14px; max-height: 94%; overflow: hidden; box-shadow: 0 24px 60px rgba(0,0,0,.55); }
+  .alert-modal h2 { display: flex; align-items: center; gap: 9px; font-family: 'Bricolage Grotesque', sans-serif; font-size: 19px; font-weight: 700; }
+  .alert-modal h2 svg { color: var(--c-vermelho); width: 22px; height: 22px; }
+  .alert-modal p, .alert-modal li { font-size: 12.5px; line-height: 1.45; color: var(--text-2); }
+  .alert-modal p { margin-top: 8px; }
+  .alert-modal p b, .alert-modal li b { color: var(--text); }
+  .alert-modal ul { margin: 4px 0 0 16px; }
+  .alert-modal .when { margin-top: 10px; padding: 9px 11px; border-radius: 11px; background: color-mix(in srgb, var(--c-vermelho) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--c-vermelho) 35%, var(--line)); font-size: 12.5px; color: var(--text); }
+  .alert-modal .actions-row { display: grid; grid-template-columns: 1fr 1.4fr; gap: 8px; margin-top: 12px; }
+  .alert-modal .actions-row .btn { margin-top: 0; height: 44px; font-size: 14px; }
+  .alert-modal .field { margin-top: 10px; }
+  .alert-modal .check { margin-top: 10px; font-size: 12.5px; }
+
   /* Perfil público do autor (RF25) */
   .p-top { display: flex; align-items: center; gap: 10px; padding: 6px 16px 4px; }
   .p-top h2 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 17px; font-weight: 700; }
@@ -315,6 +412,102 @@
   .tab.new { width: 46px; height: 46px; border-radius: 15px; background: var(--brand); color: var(--on-brand); justify-content: center; }
   .tab.new svg { width: 22px; height: 22px; stroke-width: 2.4; }
   .fade { position: absolute; left: 0; right: 0; bottom: 82px; height: 60px; background: linear-gradient(transparent, var(--bg)); pointer-events: none; }
+
+  /* ---------- Moldura do post (Background Studio · RF28) ----------
+     Arte só na faixa em volta; o card (container) fica opaco por cima, com o filete e a bolinha da categoria.
+     Nada de texto do usuário sobre a arte. Animação toca no máximo 5 s e respeita "Reduzir movimento". */
+  @property --angle { syntax: "<angle>"; inherits: false; initial-value: 0deg; }
+  .frame { position: relative; isolation: isolate; border-radius: 22px; padding: 11px; overflow: hidden; flex: none; }
+  .frame > .card { position: relative; z-index: 3; }
+  .frame-art, .frame-mat, .frame-meta, .hype-ring { position: absolute; inset: 0; border-radius: inherit; pointer-events: none; }
+  .frame-art { z-index: 0; background: var(--surface-2); overflow: hidden; }
+  .frame-art.mosaic { background-size: 50% 50% !important; }
+  .frame-art video, .frame-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .frame-mat, .frame-meta { z-index: 1; }
+  .frame.layout-polaroid { padding: 11px 11px 30px; border-radius: 8px; }
+  .frame.layout-poster { padding: 16px; }
+  .frame.skin-mono .c-title { font-family: 'Space Mono', monospace; font-size: 15px; letter-spacing: -.01em; }
+  .frame.skin-leve .c-title { font-family: 'Inter', sans-serif; font-weight: 500; }
+  .frame .frame-note { margin-top: 8px; font-family: 'Space Mono', monospace; font-size: 9.5px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-3); display: flex; gap: 5px; align-items: center; }
+
+  .mat-papel { opacity: .5; mix-blend-mode: overlay; background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.04 .9' numOctaves='3' seed='7'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23p)'/%3E%3C/svg%3E"); }
+  .mat-cetim { mix-blend-mode: soft-light; background: linear-gradient(105deg, #fff0 22%, #fff7 40%, #fff0 55%, #fff0 70%, #fff5 82%, #fff0 94%); }
+  .mat-metal { mix-blend-mode: overlay; background: repeating-linear-gradient(90deg, #ffffff22 0 1px, #00000026 1px 3px), conic-gradient(from 20deg, #fff0, #fff6 12%, #fff0 25%, #fff5 40%, #fff0 55%, #fff6 72%, #fff0 88%); }
+  .mat-vidro { background: linear-gradient(135deg, #ffffff38, #ffffff0a 38%, #ffffff24 58%, #ffffff08); box-shadow: inset 0 0 0 1px #ffffff4d, inset 0 1px 0 #ffffff70; }
+
+  .meta-prisma { opacity: .45; mix-blend-mode: screen; background: conic-gradient(from 200deg at 8% 82%, #FF4D4D, #F7C948, #3DDC6B, #4A93FF, #B46BFF, #FF4D4D 40%, #0000 41%); }
+  .meta-holo { opacity: .55; mix-blend-mode: color-dodge; background: repeating-linear-gradient(115deg, #FF4D4D55 0 6%, #F7C94855 6% 12%, #3DDC6B55 12% 18%, #4A93FF55 18% 24%, #B46BFF55 24% 30%); }
+  .fio { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; overflow: visible; pointer-events: none; }
+  .fio rect { width: calc(100% - 3px); height: calc(100% - 3px); fill: none; stroke: #FFD27A; stroke-width: 2.2; stroke-linecap: round; stroke-dasharray: 16 84; animation: fio 4.8s linear 1; }
+  @keyframes fio { to { stroke-dashoffset: -100; } }
+
+  /* Aura Hype: só quando o post está em alta; o texto "em alta" do card é o sinal obrigatório */
+  .hype-ring { z-index: 2; padding: 2.5px; -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; }
+  .hype-scanner .hype-ring { background: conic-gradient(from var(--angle), #0000 0 290deg, #FF6A2B 340deg, #FFF8 356deg, #0000 360deg); animation: scan 2.4s linear 2; --angle: 90deg; }   /* parado: arco no canto superior direito */
+  .hype-brilho .hype-ring { background: linear-gradient(135deg, #FF6A2B, #FFD27A, #FF6A2B); animation: pulso 1.2s ease-in-out 4 alternate; }
+  @keyframes scan { from { --angle: 0deg; } to { --angle: 360deg; } }
+  @keyframes pulso { to { opacity: .45; } }
+
+  .frame.anim-respirar .frame-art { animation: respirar 2.4s ease-in-out 2 alternate; }
+  .frame.anim-deriva .frame-art { background-size: 160% 160% !important; animation: deriva 4.8s ease-in-out 1; }
+  @keyframes respirar { to { transform: scale(1.06); } }
+  @keyframes deriva { from { background-position: 0% 0%; } to { background-position: 100% 100%; } }
+  @media (prefers-reduced-motion: reduce) {
+    .frame-art, .fio rect, .hype-ring { animation: none !important; }
+  }
+
+  /* Estúdio */
+  .studio-head { display: flex; align-items: center; gap: 10px; padding: 4px 16px 8px; }
+  .studio-head h2 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 18px; font-weight: 700; flex: 1; }
+  .studio-head .pub { height: 34px; padding: 0 14px; border-radius: 10px; border: 0; background: var(--brand); color: var(--on-brand); font: inherit; font-weight: 700; font-size: 13px; }
+  .studio-prev { padding: 0 16px; }
+  .studio-prev .prev-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-3); }
+  .seg2 { display: inline-grid; grid-auto-flow: column; gap: 2px; padding: 2px; border-radius: 9px; background: var(--surface); border: 1px solid var(--line-soft); }
+  .seg2 button { height: 24px; padding: 0 9px; border-radius: 7px; border: 0; background: transparent; color: var(--text-2); font: inherit; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0; text-transform: none; }
+  .seg2 button[aria-pressed="true"] { background: var(--brand); color: var(--on-brand); }
+  .studio-tabs { margin: 12px 16px 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; padding: 3px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line-soft); }
+  .studio-tabs button { height: 36px; border: 0; border-radius: 9px; background: transparent; color: var(--text-2); font: inherit; font-size: 11.5px; font-weight: 600; line-height: 1.1; }
+  .studio-tabs button[aria-selected="true"] { background: var(--brand); color: var(--on-brand); }
+  .studio-panel { flex: 1; min-height: 0; overflow: auto; padding: 12px 16px 16px; scrollbar-width: none; display: flex; flex-direction: column; gap: 14px; }
+  .studio-panel h3 { font-family: 'Space Mono', monospace; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-3); margin-bottom: 7px; display: flex; justify-content: space-between; gap: 8px; }
+  .studio-panel h3 small { font-family: 'Inter', sans-serif; letter-spacing: 0; text-transform: none; font-size: 10.5px; }
+  .strip { display: flex; flex-wrap: wrap; gap: 8px; }
+  .th { width: 62px; padding: 0; border: 0; background: none; color: var(--text-2); font: inherit; font-size: 10px; line-height: 1.2; text-align: center; cursor: pointer; }
+  .th .sw { display: block; width: 62px; height: 46px; border-radius: 11px; border: 1px solid var(--line); background: var(--surface-2) center / cover; position: relative; overflow: hidden; }
+  .th .sw.round { width: 34px; height: 34px; border-radius: 50%; margin: 0 auto; }
+  .th.sm { width: 46px; }
+  .th .nm { display: block; margin-top: 4px; }
+  .th[aria-pressed="true"] .sw { border-color: var(--brand); box-shadow: 0 0 0 2px var(--brand); }
+  .th[aria-pressed="true"] .nm { color: var(--text); font-weight: 600; }
+  .th .badge-plus { position: absolute; left: 4px; bottom: 4px; font-family: 'Space Mono', monospace; font-size: 8px; font-weight: 700; letter-spacing: .08em; padding: 1px 4px; border-radius: 4px; background: #17120Dcc; color: #FFD27A; }
+  .th .none { position: absolute; inset: 0; display: grid; place-items: center; color: var(--text-3); }
+  .th:disabled { opacity: .4; cursor: not-allowed; }
+  .rec { display: flex; gap: 10px; align-items: center; padding: 10px 11px; border-radius: 13px; background: color-mix(in srgb, var(--brand) 10%, var(--surface)); border: 1px solid color-mix(in srgb, var(--brand) 35%, var(--line)); font-size: 11.5px; color: var(--text-2); }
+  .rec b { color: var(--text); display: block; font-size: 12.5px; }
+  .rec button, .mini-cta { flex: none; height: 30px; padding: 0 10px; border-radius: 9px; border: 1px solid var(--brand); background: transparent; color: var(--brand-text); font: inherit; font-size: 11.5px; font-weight: 700; }
+  .season-now { display: flex; align-items: center; gap: 10px; padding: 9px 11px; border-radius: 12px; background: var(--surface); border: 1px solid var(--line-soft); font-size: 11.5px; color: var(--text-2); }
+  .season-now b { color: var(--text); }
+  .pal { display: flex; flex: none; border-radius: 6px; overflow: hidden; }
+  .pal i { width: 12px; height: 22px; display: block; }
+  .disabled-note { padding: 12px; border-radius: 12px; background: var(--surface); border: 1px dashed var(--line); font-size: 12px; color: var(--text-2); line-height: 1.45; }
+  .contrast-ok, .contrast-bad { display: flex; gap: 9px; align-items: flex-start; padding: 10px 11px; border-radius: 12px; font-size: 12px; line-height: 1.4; }
+  .contrast-ok { background: color-mix(in srgb, var(--c-verde) 10%, var(--surface)); border: 1px solid color-mix(in srgb, var(--c-verde) 35%, var(--line)); color: var(--text); }
+  .contrast-bad { background: color-mix(in srgb, var(--c-vermelho) 12%, var(--surface)); border: 1px solid color-mix(in srgb, var(--c-vermelho) 40%, var(--line)); color: var(--text); }
+  .contrast-bad .mini-cta { margin-top: 6px; }
+  .custom-color { display: inline-flex; align-items: center; gap: 6px; font-size: 10.5px; color: var(--text-2); }
+  .custom-color input { width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 50%; padding: 0; background: none; }
+  .json-box summary { font-size: 11.5px; color: var(--text-3); cursor: pointer; }
+  .json-box pre { margin-top: 6px; font-family: 'Space Mono', monospace; font-size: 9.5px; line-height: 1.45; color: var(--text-2); background: var(--surface); border: 1px solid var(--line-soft); border-radius: 10px; padding: 9px; white-space: pre-wrap; word-break: break-all; }
+  .art-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .art-btns button { height: 38px; border-radius: 11px; border: 1px solid var(--line); background: var(--surface); color: var(--text); font: inherit; font-size: 12px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+  .season-modal { max-height: 92%; display: flex; flex-direction: column; }
+  .season-list { overflow: auto; margin-top: 10px; display: flex; flex-direction: column; gap: 6px; scrollbar-width: none; }
+  .season-opt { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 11px; border: 1px solid var(--line-soft); background: var(--surface); font-size: 12px; }
+  .season-opt input { accent-color: var(--brand); }
+  .season-opt span { flex: 1; min-width: 0; }
+  .season-opt small { display: block; color: var(--text-3); font-size: 10.5px; }
+  .season-opt:has(input:checked) { border-color: var(--brand); }
+  .season-modal .fieldset-off { opacity: .45; }
 </style>
 </head>
 <body>
@@ -366,6 +559,9 @@
     download: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" x2="12" y1="15" y2="3"/>',
     trash: '<path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/>',
     back: '<path d="m15 18-6-6 6-6"/>',
+    logout: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" x2="9" y1="12" y2="12"/>',
+    phone: '<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>',
+    monitor: '<rect width="20" height="14" x="2" y="3" rx="2"/><line x1="8" x2="16" y1="21" y2="21"/><line x1="12" x2="12" y1="17" y2="21"/>',
     lock: '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
     clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
     sliders: '<line x1="4" x2="4" y1="21" y2="14"/><line x1="4" x2="4" y1="10" y2="3"/><line x1="12" x2="12" y1="21" y2="12"/><line x1="12" x2="12" y1="8" y2="3"/><line x1="20" x2="20" y1="21" y2="16"/><line x1="20" x2="20" y1="12" y2="3"/><line x1="2" x2="6" y1="14" y2="14"/><line x1="10" x2="14" y1="8" y2="8"/><line x1="18" x2="22" y1="16" y2="16"/>',
@@ -618,20 +814,20 @@
     <div class="settings">
       <div class="pbd">${icon("check", "sm")}<span>Privacidade por padrão: todo tratamento opcional começa desligado. Revogar é o mesmo toque que autorizar.</span></div>
       <section class="group"><h3>Conta</h3><div class="rows">
-        ${row({ t: "Dados do perfil", d: "Nome, e-mail, cidade, interesses", law: "LGPD · Art. 18, III — correção" })}
+        ${row({ t: "Dados do perfil", d: "Nome, @usuário, bio, cidade, campos do seu tipo", law: "LGPD · Art. 18, III — correção" })}
+        <div data-goto="security">${row({ t: "Senha e segurança", d: "Verificação em duas etapas ativada · 3 aparelhos" })}</div>
       </div></section>
       <section class="group"><h3>Privacidade</h3><div class="rows">
         ${row({ t: "Salvar minha localização", d: "Usada no filtro “Local” e em alertas", law: "Art. 7º, I — consentimento", sw: false })}
         ${row({ t: "Reconhecimento facial", d: "Processado só no aparelho", law: "Art. 11 — dado sensível", sens: true, sw: false })}
         ${row({ t: "Feed personalizado", d: "Ordena posts pelos seus interesses", law: "Art. 7º, I", sw: false })}
       </div></section>
-      <section class="group"><h3>Aparência</h3><div class="rows">
-        ${row({ t: "Modo escuro", sw: true })}
-        ${row({ t: "Idioma", v: "Português (BR)" })}
+      <section class="group"><h3>Exibição</h3><div class="rows">
+        <div data-goto="appearance">${row({ t: "Tema, fundo do app e acessibilidade", v: "Escuro · Areia" })}</div>
       </div></section>
       <section class="group"><h3>Seus dados</h3><div class="rows">
         ${row({ t: "Exportar meus dados", d: "Arquivo JSON enviado por link seguro", law: "Art. 18, V — portabilidade", ic: "download" })}
-        ${row({ t: "Excluir conta", d: "Pede sua senha de novo antes de apagar", law: "Art. 18, VI — eliminação", ic: "trash", danger: true })}
+        <div data-open-delete>${row({ t: "Excluir conta", d: "30 dias para reativar · pede sua senha", law: "Art. 18, VI — eliminação", ic: "trash", danger: true })}</div>
       </div></section>
     </div>${tabbar("me")}`;
 
@@ -715,6 +911,140 @@
     <p class="p-section">Posts de ${a.name}</p>
     <div class="feed">${posts.map(card).join("")}</div><div class="fade"></div>${tabbar("explore")}`; };
 
+  // ---------- RF1 · RF27 · entrada sobre o mosaico (backgrounds/mosaico-laranja.webp) ----------
+  const AUTH_BG = "url(../brand/backgrounds/mosaico-laranja.webp)";
+  const lockup = (sm = false) => `<div class="lockup ${sm ? "sm" : ""}"><img src="../brand/orange-social-mark.svg" alt=""><b>Orange Social</b></div>`;
+  const field = (label, value, opts = {}) => `<label class="field"><span>${label}</span>
+      <span class="input ${opts.ph ? "ph" : ""}">${value}${opts.ic ? icon(opts.ic, "sm") : ""}</span>${opts.hint ? `<small>${opts.hint}</small>` : ""}</label>`;
+
+  SCREENS.login = () => `<div class="auth" style="--auth-bg:${AUTH_BG}">${statusbar()}${lockup()}
+      <form class="auth-card" data-login aria-labelledby="login-h">
+        <h2 id="login-h">Entrar</h2>
+        <p class="lead">Que bom te ver de novo.</p>
+        ${field("E-mail", "ana@exemplo.com.br")}
+        ${field("Senha", "••••••••••••••", { ic: "lock" })}
+        <button class="btn" type="submit">Entrar</button>
+        <div class="auth-links"><a href="#esqueci">Esqueci minha senha</a><a href="#cadastro" data-goto="signup">Criar conta</a></div>
+        <p class="auth-note">${icon("lock", "xs")}<span>Sua sessão termina ao fechar o navegador. Em uma aba anônima você entra de novo — nada fica salvo nela.</span></p>
+      </form></div>`;
+
+  SCREENS.login2fa = () => `<div class="auth" style="--auth-bg:${AUTH_BG}">${statusbar()}${lockup(true)}
+      <form class="auth-card" aria-labelledby="mfa-h">
+        <h2 id="mfa-h">Verificação em duas etapas</h2>
+        <p class="lead">Digite o código de 6 dígitos do seu app autenticador.</p>
+        <div class="code-boxes" role="group" aria-label="Código de 6 dígitos"><span>4</span><span>8</span><span>2</span><span class="on">1</span><span></span><span></span></div>
+        <button class="btn" type="submit" disabled>Confirmar</button>
+        <div class="auth-links"><a href="#recuperacao">Usar um código de recuperação</a><a href="#voltar" data-goto="login">Voltar</a></div>
+        <p class="auth-note">${icon("clock", "xs")}<span>O código muda a cada 30 segundos. Depois de 5 tentativas erradas, entre com a senha de novo.</span></p>
+      </form></div>`;
+
+  const TYPE_DESC = { VERDE: "Você, com seu nome", AMARELO: "Imprensa, blog, fórum, networking", AZUL: "Marketing e propaganda",
+                      LARANJA: "Igrejas, clubes, grupos", VERMELHO: "Governo, empresas, marcas", PRETO: "Amigos, eventos, bancos" };
+  const typeGrid = sel => `<div class="types" role="radiogroup" aria-label="Tipo de usuário">${Object.keys(CAT).map(k =>
+      `<button type="button" class="type-opt" role="radio" aria-checked="${k === sel}" data-type="${k}">${dot(k)}<span><b>${CAT[k].label}</b><small>${TYPE_DESC[k]}</small></span></button>`).join("")}</div>`;
+
+  SCREENS.signup = () => `<div class="auth" style="--auth-bg:${AUTH_BG}">${statusbar()}${lockup(true)}
+      <form class="auth-card tall" aria-labelledby="su-h">
+        <h2 id="su-h">Criar conta</h2>
+        <div class="steps" aria-label="Etapa 1 de 2"><i class="on"></i><i></i></div>
+        <div class="row2">${field("Nome de exibição", "techblog.br")}${field("@usuário", "@techblog.br")}</div>
+        ${field("E-mail", "contato@techblog.com.br")}
+        <div class="row2">${field("Senha", "••••••••••••••", { hint: "12+ caracteres" })}${field("Nascimento", "20/05/1990", { hint: "ano fica privado" })}</div>
+        <label class="field"><span>Tipo de usuário — define sua cor no Orange</span></label>
+        ${typeGrid("AMARELO")}
+        <button class="btn" type="button" data-goto="signupType">Continuar</button>
+      </form></div>`;
+
+  SCREENS.signupType = () => `<div class="auth" style="--auth-bg:${AUTH_BG}">${statusbar()}${lockup(true)}
+      <form class="auth-card tall" data-signup aria-labelledby="su2-h">
+        <h2 id="su2-h">Sobre o seu veículo</h2>
+        <div class="steps" aria-label="Etapa 2 de 2"><i class="on"></i><i class="on"></i></div>
+        <p class="lead lead-cat">${dot("AMARELO")}<span>Imprensa · Networking — campos públicos, exceto o registro MTb.</span></p>
+        <label class="field"><span>Subtipo</span></label>
+        <div class="chips-sel" role="radiogroup" aria-label="Subtipo">${["Veículo", "Blog", "Fórum", "Networking"].map((t, i) =>
+          `<span class="chip" role="radio" aria-checked="${i === 1}">${t}</span>`).join("")}</div>
+        ${field("Nome do veículo ou publicação", "techblog.br")}
+        <div class="row2">${field("Site", "https://techblog.com.br")}${field("Sua função", "Editora")}</div>
+        ${field("Registro MTb (opcional)", "Opcional · privado", { ph: true })}
+        <label class="check"><input type="checkbox" data-terms aria-describedby="terms-h"><span id="terms-h">Li e aceito os <a class="text-link" href="../../docs/legal/TERMOS_DE_USO.md" target="_blank" rel="noopener">Termos de Uso da Velion</a> (versão 2026-10-17), empresa dona do Orange Social.</span></label>
+        <p class="auth-note">${icon("check", "xs")}<span>Usos opcionais dos seus dados começam desligados. Você decide em Configurações → Privacidade.</span></p>
+        <button class="btn" type="submit" data-create disabled>Criar conta</button>
+      </form></div>`;
+
+  SCREENS.reactivate = () => `<div class="auth" style="--auth-bg:${AUTH_BG}">${statusbar()}${lockup()}
+      <form class="auth-card" aria-labelledby="re-h">
+        <h2 id="re-h">Sua conta está em exclusão</h2>
+        <p class="lead">Ela será excluída em <b>16 de novembro de 2026</b>. Até lá você pode desistir: tudo volta como estava.</p>
+        <button class="btn" type="button" data-goto="post">Reativar minha conta</button>
+        <button class="btn ghost" type="button" data-goto="login">Manter a exclusão e sair</button>
+        <p class="auth-note">${icon("clock", "xs")}<span>Depois dessa data, perfil, posts, comentários e curtidas são apagados de vez.</span></p>
+      </form></div>`;
+
+  // ---------- RF27 · Senha e segurança ----------
+  const sess = (dev, when, here) => `<div class="sess">${icon(dev.includes("Android") || dev.includes("iOS") ? "phone" : "monitor")}
+      <div class="txt"><b>${dev}</b><span>${here ? `<span class="here">Esta sessão</span> · ` : ""}${when}</span></div>
+      ${here ? "" : `<button class="mini-btn" data-end>Sair</button>`}</div>`;
+  SCREENS.security = () => `${statusbar()}
+    <div class="s-head"><span class="icon-btn" data-goto="settings">${icon("back")}</span><h2>Senha e segurança</h2></div>
+    <div class="settings">
+      <section class="group"><h3>Login</h3><div class="rows">
+        ${row({ t: "Senha", d: "Alterada há 3 meses · trocar encerra os outros aparelhos" })}
+        <div class="row"><div class="txt"><b>Verificação em duas etapas</b><span>App autenticador · 9 de 10 códigos de recuperação</span></div><span class="badge-ok">${icon("check", "xs")}Ativada</span></div>
+        ${row({ t: "Alertas de login", d: "E-mail a cada nova entrada", sw: true })}
+      </div></section>
+      <section class="group"><h3>Onde você está conectado</h3><div class="rows">
+        ${sess("Chrome no Android", "agora", true)}
+        ${sess("Safari no iOS", "há 2 h · Curitiba, PR", false)}
+        ${sess("Firefox no Windows", "ontem · São Paulo, SP", false)}
+      </div></section>
+      <button class="btn ghost" data-end-all>Sair de todos os outros aparelhos</button>
+      <button class="btn danger" data-logout>${icon("logout", "sm")}Sair desta conta</button>
+    </div>${tabbar("me")}`;
+
+  // ---------- RF2 · Exibição e fundo do app ----------
+  const BACKGROUNDS = [["PLAIN", "Liso", ""], ["NETWORK", "Rede Orange", "network"], ["MOSAIC", "Mosaico laranja", "mosaico-laranja"],
+      ["MOSAIC_CLASSIC", "Clássico", "mosaico-classico"], ["MOSAIC_DEEP", "Profundo", "mosaico-profundo"],
+      ["MOSAIC_GLOW", "Brilho", "mosaico-brilho"], ["MOSAIC_SKY", "Céu", "mosaico-ceu"], ["MOSAIC_SAND", "Areia", "mosaico-areia"]];
+  const bgUrl = key => { const b = BACKGROUNDS.find(x => x[0] === key);
+    return !b || !b[2] ? null : b[2] === "network" ? "url(../brand/orange-social-logo.svg)" : `url(../brand/backgrounds/${b[2]}.webp)`; };
+  SCREENS.appearance = (selected = "MOSAIC_SAND") => `${statusbar()}
+    <div class="s-head"><span class="icon-btn" data-goto="settings">${icon("back")}</span><h2>Exibição</h2></div>
+    <div class="settings">
+      <section class="group"><h3>Tema</h3>
+        <div class="seg3" role="group" aria-label="Tema"><button aria-pressed="false">Sistema</button><button aria-pressed="true">Escuro</button><button aria-pressed="false">Claro</button></div>
+      </section>
+      <section class="group"><h3>Fundo do app</h3>
+        <div class="bg-grid" role="radiogroup" aria-label="Fundo do app">${BACKGROUNDS.map(([k, label, file]) =>
+          `<button class="bg-opt" role="radio" aria-checked="${k === selected}" data-bg="${k}"><span class="thumb ${file === "" ? "plain" : file === "network" ? "network" : ""}" ${file && file !== "network" ? `style="background-image:url(../brand/backgrounds/${file}-thumb.webp)"` : ""}></span><span>${label}</span></button>`).join("")}</div>
+        <p class="note" style="margin-top:8px">${icon("check", "xs")} Um véu escuro fica por cima do fundo para os posts continuarem legíveis.</p>
+      </section>
+      <section class="group"><h3>Acessibilidade</h3><div class="rows">
+        <div class="row"><div class="txt"><b>Tamanho do texto</b><span>115%</span><div class="range"><i></i></div></div></div>
+        ${row({ t: "Reduzir movimento", d: "Menos animações e brilhos", sw: false })}
+        ${row({ t: "Idioma", v: "Português (BR)" })}
+      </div></section>
+    </div>${tabbar("me")}`;
+
+  // ---------- RF23 · modal de exclusão ----------
+  const deleteModal = () => `<div class="overlay center" role="alertdialog" aria-modal="true" aria-labelledby="del-h" aria-describedby="del-d">
+      <div class="scrim" data-close></div>
+      <form class="alert-modal" data-delete>
+        <h2 id="del-h">${icon("alert")}Excluir sua conta do Orange?</h2>
+        <div class="when" id="del-d">Sua conta será excluída em <b>30 dias</b> (em <b>16/11/2026</b>). Até lá ela fica oculta e você sai de todos os aparelhos.</div>
+        <p><b>Mudou de ideia?</b> Entre com seu e-mail e senha antes dessa data e toque em <b>Reativar conta</b>. Tudo volta como estava.</p>
+        <p><b>Depois do prazo, vamos apagar:</b> perfil, publicações, fotos, comentários, curtidas, seguidores e configurações. Não dá para recuperar.</p>
+        <p><b>O que continua existindo:</b></p>
+        <ul><li>mensagens que você enviou ficam com quem recebeu, como "Conta excluída";</li><li>registros de acesso (data, hora e IP) por 6 meses, em sigilo — Marco Civil da Internet.</li></ul>
+        <p><a class="text-link" href="#exportar">${icon("download", "xs")} Baixar uma cópia dos meus dados antes</a></p>
+        <label class="check"><input type="checkbox" data-understand><span>Entendo que, passados 30 dias, a exclusão é definitiva.</span></label>
+        <div class="row2">${field("Senha", "••••••••••••••")}${field("Código do app", "482 913")}</div>
+        <div class="actions-row"><button class="btn ghost" type="button" data-close autofocus>Cancelar</button><button class="btn danger" type="submit" data-confirm-delete disabled>Excluir minha conta</button></div>
+      </form></div>`;
+  SCREENS.deleteAccount = () => SCREENS.settings() + deleteModal();
+
+  // ---------- fundo do app aplicado ao feed ----------
+  SCREENS.feedBackground = () => SCREENS.post();
+
   SCREENS.postModal = () => SCREENS.post() + postModal(POSTS.p1);
   SCREENS.comments = () => SCREENS.post() + commentsSheet(POSTS.p1, "Também larguei uns três cursos no meio 😅");
   SCREENS.share = () => SCREENS.post() + shareSheet(POSTS.p1);
@@ -743,6 +1073,318 @@
     </div>`;
 
   // ---------- montagem da galeria ----------
+
+  // ---------- RF28 · Moldura do post (Background Studio) ----------
+  // Catálogo procedural próprio (no app: GET /api/v1/backgrounds/catalog). O post salva só a configuração (JSON).
+  const FRAME_COLORS = [["#2B2217", "Café"], ["#3B1F33", "Ameixa"], ["#1E2A38", "Noite"], ["#24382E", "Musgo"],
+    ["#5B3A29", "Telha"], ["#FF6A2B", "Orange"], ["#E9C46A", "Mel"], ["#F5EDE3", "Areia clara"]];
+  const GRADIENTS = {
+    "por-do-sol": ["Pôr do sol", "linear-gradient(135deg,#FF6A2B,#C1121F 55%,#3A0E0A)"],
+    oceano: ["Oceano", "linear-gradient(135deg,#00B4D8,#0D47A1)"],
+    uva: ["Uva", "linear-gradient(135deg,#7B2FF7,#2E1A47)"],
+    mate: ["Mate", "linear-gradient(135deg,#95D5B2,#2D6A4F)"],
+    caramelo: ["Caramelo", "linear-gradient(135deg,#E9C46A,#8D5524)"],
+    grafite: ["Grafite", "linear-gradient(135deg,#4A4A4A,#141414)"]
+  };
+  // Hemisfério Sul · janelas [início, fim) em America/Sao_Paulo · prioridade 1 vence 4 (docs/PESQUISA_BACKGROUND_STUDIO.md §6.2)
+  const pascoa = y => { const a = y % 19, b = Math.floor(y / 100), c = y % 100, d = Math.floor(b / 4), e = b % 4, f = Math.floor((b + 8) / 25),
+    g = Math.floor((b - f + 1) / 3), h = (19 * a + b - d - g + 15) % 30, i = Math.floor(c / 4), k = c % 4, l = (32 + 2 * e + 2 * i - h - k) % 7,
+    m = Math.floor((a + 11 * h + 22 * l) / 451), n = h + l - 7 * m + 114; return new Date(Date.UTC(y, Math.floor(n / 31) - 1, n % 31 + 1)); };
+  const SEASONS = [
+    { id: "verao", name: "Verão", win: "21/12–20/03", prio: 4, c: ["#FFB703", "#FB8500", "#00B4D8", "#90E0EF", "#F4E1C1"], md: ["12-21", "03-20"] },
+    { id: "outono", name: "Outono", win: "20/03–21/06", prio: 4, c: ["#C8553D", "#E09F3E", "#9E2A2B", "#7A6C5D", "#F2D0A4"], md: ["03-20", "06-21"] },
+    { id: "inverno", name: "Inverno", win: "21/06–22/09", prio: 4, c: ["#2E4A62", "#7FA7C9", "#C9D6E3", "#8C6E5D", "#E8DCC8"], md: ["06-21", "09-22"] },
+    { id: "primavera", name: "Primavera (ipês)", win: "22/09–21/12", prio: 4, c: ["#F6C90E", "#A05EB5", "#F28AB2", "#5CB85C", "#9AD0EC"], md: ["09-22", "12-21"] },
+    { id: "carnaval", name: "Carnaval", win: "Páscoa −51 → −46", prio: 2, c: ["#FF2E88", "#FFD23F", "#00C2A8", "#7B2FF7", "#FF6A2B"], easter: [-51, -45] },
+    { id: "junina", name: "Festa Junina", win: "01/06–30/06", prio: 3, c: ["#E63946", "#F4A261", "#2A9D8F", "#F1C453", "#8D5524"], md: ["06-01", "07-01"] },
+    { id: "namorados", name: "Dia dos Namorados", win: "05/06–12/06", prio: 1, c: ["#E5383B", "#FF758F", "#FFB3C1", "#9D0208", "#FFF0F3"], md: ["06-05", "06-13"] },
+    { id: "patria", name: "Semana da Pátria", win: "01/09–07/09", prio: 1, c: ["#009C3B", "#FFDF00", "#002776", "#3DA35D", "#F5EDE3"], md: ["09-01", "09-08"] },
+    { id: "outubro-rosa", name: "Outubro Rosa", win: "01/10–31/10", prio: 2, c: ["#F48FB1", "#EC407A", "#AD1457", "#FCE4EC", "#6D2C4A"], md: ["10-01", "11-01"] },
+    { id: "novembro-azul", name: "Novembro Azul", win: "01/11–30/11", prio: 2, c: ["#1E88E5", "#64B5F6", "#0D47A1", "#BBDEFB", "#263238"], md: ["11-01", "12-01"] },
+    { id: "natal", name: "Natal e Réveillon", win: "01/12–06/01", prio: 3, c: ["#C1121F", "#2D6A4F", "#E9C46A", "#F5EDE3", "#00B4D8"], md: ["12-01", "01-07"] }
+  ];
+  const inWindow = (s, d) => {
+    if (s.easter) { const p = pascoa(d.getUTCFullYear()), t = (d - p) / 864e5; return t >= s.easter[0] && t < s.easter[1]; }
+    const md = d.toISOString().slice(5, 10), [a, b] = s.md;
+    return a <= b ? md >= a && md < b : md >= a || md < b;
+  };
+  const SP_TODAY = new Date(new Intl.DateTimeFormat("en-CA", { timeZone: TZ }).format(NOW) + "T00:00:00Z");
+  const autoSeason = (d = SP_TODAY) => SEASONS.filter(s => inWindow(s, d)).sort((x, y) => x.prio - y.prio)[0];
+  const seasonArt = s => `linear-gradient(135deg,${s.c.map((c, i) => `${c} ${i * 25}%`).join(",")})`;
+
+  const lcg = seed => { let s = seed >>> 0; return () => (s = (s * 1664525 + 1013904223) >>> 0) / 2 ** 32; };
+  const svgUri = svg => `url('data:image/svg+xml,${encodeURIComponent(svg)}')`;   // aspas simples: vai dentro de style="…"
+  const constelacao = (seed, w = 240, h = 160, n = 16) => { const r = lcg(seed), p = Array.from({ length: n }, () => [r() * w, r() * h]); let g = "";
+    p.forEach(([x, y], i) => p.slice(i + 1).forEach(([u, v]) => { if (Math.hypot(x - u, y - v) < w * .22) g += `<line x1="${x.toFixed(1)}" y1="${y.toFixed(1)}" x2="${u.toFixed(1)}" y2="${v.toFixed(1)}"/>`; }));
+    p.forEach(([x, y], i) => { g += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${i % 5 ? 1 : 1.8}"/>`; });
+    return svgUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" preserveAspectRatio="xMidYMid slice" stroke="#9AB8FF66" stroke-width=".6" fill="#F5EDE3">${g}</svg>`); };
+  const confete = (seed, w = 120, h = 120) => { const r = lcg(seed), cs = ["#FF2E88", "#F7C948", "#3DDC6B", "#4A93FF", "#FF6A2B"]; let g = "";
+    for (let i = 0; i < 46; i++) g += `<rect x="${(r() * w).toFixed(1)}" y="${(r() * h).toFixed(1)}" width="${(2 + r() * 4).toFixed(1)}" height="${(1.5 + r() * 2).toFixed(1)}" rx=".6" fill="${cs[i % 5]}" transform="rotate(${Math.round(r() * 180)} ${(r() * w).toFixed(1)} ${(r() * h).toFixed(1)})"/>`;
+    return svgUri(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}">${g}</svg>`); };
+  const hashSeed = str => [...str].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) >>> 0, 7);
+
+  // 8 auras estáticas procedurais (as outras 4 da pesquisa entram depois) + 2 da Aura Plus (vídeo + pôster, nunca GIF)
+  const AURAS = {
+    eclipse: { name: "Eclipse", arch: "Mago", css: `${constelacao(11)} center/cover, radial-gradient(60% 50% at 20% 25%,#7B2FF7aa,#0000 70%), radial-gradient(55% 60% at 85% 78%,#4A93FF88,#0000 70%), #1A1033` },
+    entardecer: { name: "Entardecer", arch: "Amante", css: "radial-gradient(70% 60% at 15% 85%,#FF6A2Bcc,#0000 70%), radial-gradient(60% 50% at 85% 20%,#FF758Fbb,#0000 70%), radial-gradient(50% 50% at 50% 50%,#9D0208aa,#0000 75%), #2A0F12" },
+    mare: { name: "Maré", arch: "Inocente", css: "radial-gradient(120% 60% at 50% 120%,#0077B6,#0000 60%), repeating-linear-gradient(170deg,#90E0EF2e 0 9px,#0000 9px 22px), linear-gradient(180deg,#00B4D866,#0B2233)" },
+    varanda: { name: "Varanda", arch: "Cara comum", css: "conic-gradient(from 45deg,#E76F51 0 25%,#F4A261 0 50%,#2A9D8F 0 75%,#F1FAEE 0) 0 0/18px 18px" },
+    "ouro-velho": { name: "Ouro Velho", arch: "Governante", css: "repeating-linear-gradient(90deg,#ffffff12 0 1px,#0000001a 1px 3px), conic-gradient(from 20deg,#B08D57,#E9C46A 12%,#7A5C2E 25%,#F3DFA2 40%,#6B4F2A 55%,#E9C46A 72%,#8C6A3A 88%,#B08D57)" },
+    confete: { name: "Confete", arch: "Bobo da corte", css: `${confete(5)} 0 0/120px 120px, #1C1410` },
+    colo: { name: "Colo", arch: "Cuidador", css: "radial-gradient(45% 45% at 25% 30%,#F2D0A4aa,#0000 70%), radial-gradient(40% 45% at 75% 70%,#A7C957aa,#0000 70%), radial-gradient(50% 40% at 70% 20%,#E09F3E99,#0000 70%), #3A2E22" },
+    asfalto: { name: "Asfalto", arch: "Rebelde", css: "radial-gradient(#FF2E8877 1.2px,#0000 1.7px) 0 0/7px 7px, radial-gradient(#3DDC6B55 1px,#0000 1.6px) 3.5px 3.5px/7px 7px, #14110E" }
+  };
+  const AURA_PLUS = {
+    brasa: { name: "Brasa", arch: "Herói", base: "../brand/auras/brasa" },
+    aurora: { name: "Aurora", arch: "Mago", base: "../brand/auras/aurora" }
+  };
+  const MATERIALS = [[null, "Nenhum"], ["papel", "Papel"], ["cetim", "Cetim"], ["metal", "Metal"], ["vidro", "Vidro"]];
+  const HYPES = [["OFF", "Desligada"], ["SCANNER", "Scanner"], ["BRILHO", "Brilho"]];
+  const METAS = [["OFF", "Desligada"], ["PRISMA", "Prisma"], ["CONSTELACAO", "Constelação"], ["FIO_VIVO", "Fio Vivo"], ["HOLOGRAFIA", "Holografia"]];
+  const ANIMS = [["NONE", "Sem animação"], ["RESPIRAR", "Respirar"], ["DERIVA", "Deriva"]];
+  const LAYOUTS = [["CLASSICO", "Clássico"], ["POLAROID", "Polaroid"], ["POSTER", "Pôster"]];
+  const SKINS = { PADRAO: ["Padrão", "#211A12"], MONO: ["Mono", "#191714"], LEVE: ["Leve", "#2A2119"] };
+  const CONTAINER_COLORS = [[null, "Nativa do skin"], ["#2B2217", "Café"], ["#1E2A38", "Noite"], ["#F5EDE3", "Areia clara"], ["#FF6A2B", "Orange"]];
+  const INKS = [["AUTO", "Automática"], ["#F5EDE3", "Clara"], ["#17120D", "Escura"], ["#FF9D5E", "Laranja"]];
+  const POSTER_ART = "url(../brand/backgrounds/mosaico-laranja.webp) center/cover";
+
+  // Contraste WCAG 2.x — mesmo cálculo de scripts/wcag_contrast.py (o servidor revalida)
+  const linC = c => (c /= 255) <= .04045 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4;
+  const rgbOf = h => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+  const lum = h => { const [r, g, b] = rgbOf(h).map(linC); return .2126 * r + .7152 * g + .0722 * b; };
+  const contrast = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((p, q) => q - p); return (x + .05) / (y + .05); };
+  const mixHex = (a, b, t) => "#" + rgbOf(a).map((v, i) => Math.round(v * t + rgbOf(b)[i] * (1 - t)).toString(16).padStart(2, "0")).join("").toUpperCase();
+  const fmtRatio = r => `${r.toFixed(1).replace(".", ",")}:1`;
+  const bestInk = bg => contrast("#F5EDE3", bg) >= contrast("#17120D", bg) ? "#F5EDE3" : "#17120D";
+
+  const STUDIO_DEFAULT = () => ({ v: 1, color: null, gradientId: null, seasonal: { presetId: null, auto: false }, animationId: "NONE",
+    aura: null, auraPlusId: null, auraHypeStyle: "SCANNER", metamorphose: { mode: "OFF", presetId: null }, materialId: null,
+    customArt: null, layoutId: "CLASSICO", skinId: "PADRAO", container: { color: null, ink: "AUTO" } });
+
+  // Container: cor + tinta; tons secundários sobem até passar de 4,5:1
+  const containerOf = st => {
+    const bg = st.container.color || SKINS[st.skinId][1];
+    const ink = st.container.ink === "AUTO" ? bestInk(bg) : st.container.ink;
+    const sec = start => { let t = start; while (t < 1 && contrast(mixHex(ink, bg, t), bg) < 4.5) t += .04; return mixHex(ink, bg, Math.min(t, 1)); };
+    return { bg, ink, ratio: contrast(ink, bg), t2: sec(.78), t3: sec(.62), line: mixHex(ink, bg, .14), suggestion: bestInk(bg) };
+  };
+  const artOf = st => {
+    if (st.layoutId === "POSTER") return { css: POSTER_ART };
+    if (st.customArt) { const s = hashSeed(st.customArt.assetId);
+      return { css: `radial-gradient(60% 60% at ${20 + s % 60}% 30%,#FF6A2Bbb,#0000 70%), radial-gradient(60% 60% at 80% ${30 + s % 50}%,#4A93FF99,#0000 70%), #221A2E` }; }
+    if (st.auraPlusId) { const a = AURA_PLUS[st.auraPlusId];
+      return { css: `url(${a.base}-poster.webp) center/cover`, video: `<video muted loop playsinline preload="none" poster="${a.base}-poster.webp" aria-hidden="true" data-aura-plus="${st.auraPlusId}">`
+        + `<source src="${a.base}-hq.mp4" type='video/mp4; codecs="av01.0.04M.08"'><source src="${a.base}-leve.mp4" type='video/mp4; codecs="avc1.4D401E"'></video>` }; }
+    if (st.aura) return { css: AURAS[st.aura.presetId].css, mosaic: st.aura.format === "MOSAICO", soft: st.aura.variantId === "SUAVE" };
+    const season = st.seasonal.auto ? autoSeason() : SEASONS.find(s => s.id === st.seasonal.presetId);
+    if (season) return { css: seasonArt(season) };
+    if (st.gradientId) return { css: GRADIENTS[st.gradientId][1] };
+    if (st.color) return { css: st.color };
+    return { css: "var(--surface-2)" };
+  };
+  const framed = (p, st, { hot = false } = {}) => {
+    const art = artOf(st), cont = containerOf(st), hype = hot && st.auraHypeStyle !== "OFF" && st.layoutId !== "POSTER";
+    const meta = st.layoutId === "POSTER" ? "OFF" : st.metamorphose.mode;
+    const cls = ["frame", `layout-${st.layoutId.toLowerCase()}`, `skin-${st.skinId.toLowerCase()}`,
+      st.animationId !== "NONE" && !art.video ? `anim-${st.animationId.toLowerCase()}` : "", hype ? `hype-${st.auraHypeStyle.toLowerCase()}` : ""].join(" ");
+    const vars = `--surface:${cont.bg};--text:${cont.ink};--text-2:${cont.t2};--text-3:${cont.t3};--line-soft:${cont.line};--line:${cont.line};`;
+    const pp = hot ? { ...p, trend: "hot" } : p;
+    let inner = card(pp).replace('style="--cc:', `style="${vars}--cc:`);
+    if (st.customArt?.origin === "IA") inner = inner.replace("</article>", `<p class="frame-note">${icon("image", "xs")}Moldura gerada por IA</p></article>`);
+    return `<div class="${cls}" data-frame>
+      <div class="frame-art${art.mosaic ? " mosaic" : ""}" style="background:${art.css};${art.soft ? "filter:saturate(.6) brightness(.85);" : ""}">${art.video || ""}</div>
+      ${st.materialId && st.layoutId !== "POSTER" ? `<div class="frame-mat mat-${st.materialId}"></div>` : ""}
+      ${meta === "PRISMA" ? `<div class="frame-meta meta-prisma"></div>` : meta === "HOLOGRAFIA" ? `<div class="frame-meta meta-holo"></div>`
+        : meta === "CONSTELACAO" ? `<div class="frame-meta" style="background:${constelacao(hashSeed(p.id))} center/cover;opacity:.9"></div>`
+        : meta === "FIO_VIVO" ? `<svg class="fio" aria-hidden="true"><rect x="1.5" y="1.5" rx="20" pathLength="100"/></svg>` : ""}
+      ${hype ? `<i class="hype-ring" aria-hidden="true"></i>` : ""}
+      ${inner}</div>`;
+  };
+
+  // Regras de exclusão (as mesmas que o servidor aplica): uma fonte de arte por vez — arte própria ⇄ preset ⇄ cor/gradiente/cartela
+  const clearBase = st => Object.assign(st, { color: null, gradientId: null, seasonal: { presetId: null, auto: false } });
+  const SELECT = {
+    color: (st, v) => { Object.assign(st, { color: v, gradientId: null, seasonal: { presetId: null, auto: false }, aura: null, auraPlusId: null, customArt: null }); },
+    gradient: (st, v) => { Object.assign(st, { gradientId: v, color: null, seasonal: { presetId: null, auto: false }, aura: null, auraPlusId: null, customArt: null }); },
+    anim: (st, v) => { st.animationId = v; },
+    aura: (st, v) => { clearBase(st); st.aura = { presetId: v, variantId: st.aura?.variantId || "ORIGINAL", format: st.aura?.format || "IMAGEM_UNICA" }; st.auraPlusId = null; st.customArt = null; },
+    auraPlus: (st, v) => { clearBase(st); st.auraPlusId = v; st.aura = null; st.customArt = null; },
+    material: (st, v) => { st.materialId = v === "null" ? null : v; },
+    hype: (st, v) => { st.auraHypeStyle = v; },
+    meta: (st, v) => { st.metamorphose = { mode: v, presetId: null }; },
+    layout: (st, v) => { if (st.layoutId === "POSTER" && v !== "POSTER") st.posterArtId = undefined;
+      if (v === "POSTER") Object.assign(st, { aura: null, auraPlusId: null, materialId: null, metamorphose: { mode: "OFF", presetId: null } });
+      st.layoutId = v; },
+    skin: (st, v) => { st.skinId = v; },
+    container: (st, v) => { st.container.color = v === "null" ? null : v; },
+    ink: (st, v) => { st.container.ink = v; }
+  };
+  const serialize = st => JSON.stringify({ ...st, ui: undefined, posterArtId: undefined }, null, 2);
+
+  const th = (key, value, label, swatch, pressed, extra = "") =>
+    `<button class="th ${extra}" type="button" data-st="${key}" data-v="${value}" aria-pressed="${pressed}" aria-label="${label}"><span class="sw${extra.includes("sm") ? " round" : ""}" style="background:${swatch}">${value === "null" || value === "OFF" || value === "NONE" ? `<span class="none">${icon("close", "sm")}</span>` : ""}</span><span class="nm">${label}</span></button>`;
+  const panels = {
+    cor: st => { const now = autoSeason(), cur = st.seasonal.auto ? now : SEASONS.find(s => s.id === st.seasonal.presetId);
+      return `<section><h3>Cor lisa</h3><div class="strip">${FRAME_COLORS.map(([c, n]) => th("color", c, n, c, st.color === c, "sm")).join("")}</div></section>
+      <section><h3>Gradientes</h3><div class="strip">${Object.entries(GRADIENTS).map(([k, [n, css]]) => th("gradient", k, n, css, st.gradientId === k)).join("")}</div></section>
+      <section><h3>Cartela sazonal <small>Hemisfério Sul</small></h3><div class="season-now"><span class="pal">${(cur || now).c.map(c => `<i style="background:${c}"></i>`).join("")}</span>
+        <span style="flex:1">${cur ? `<b>${cur.name}</b>${st.seasonal.auto ? " · automática pela data" : ""}` : `Hoje: <b>${now.name}</b> (${now.win})`}</span>
+        <button class="mini-cta" type="button" data-open-season>Escolher…</button></div></section>
+      <section><h3>Animação leve <small>toca até 5 s · para com Reduzir movimento</small></h3><div class="strip">${ANIMS.map(([k, n]) => th("anim", k, n, k === "NONE" ? "var(--surface)" : GRADIENTS["por-do-sol"][1], st.animationId === k)).join("")}</div></section>`; },
+    aura: st => st.layoutId === "POSTER"
+      ? `<p class="disabled-note">${icon("lock", "xs")} O layout <b>Pôster</b> já traz arte própria, então Aura e Material ficam desligados. Volte para Clássico ou Polaroid em <b>Layout e Estilo</b> para escolher uma aura.</p>`
+      : `<div class="rec"><span style="flex:1"><b>Recomendada: Eclipse + Vidro</b>Combina com Pessoa física e post de texto</span><button type="button" data-rec>Aplicar recomendada</button></div>
+      <section><h3>Aura</h3><div class="strip">${Object.entries(AURAS).map(([k, a]) => th("aura", k, a.name, a.css, st.aura?.presetId === k)).join("")}</div></section>
+      ${st.aura ? `<section><h3>Variação e formato</h3><div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div class="seg2" role="group" aria-label="Variação"><button type="button" data-auraopt="variantId" data-v="ORIGINAL" aria-pressed="${st.aura.variantId === "ORIGINAL"}">Original</button><button type="button" data-auraopt="variantId" data-v="SUAVE" aria-pressed="${st.aura.variantId === "SUAVE"}">Suave</button></div>
+        <div class="seg2" role="group" aria-label="Formato"><button type="button" data-auraopt="format" data-v="IMAGEM_UNICA" aria-pressed="${st.aura.format === "IMAGEM_UNICA"}">Imagem única</button><button type="button" data-auraopt="format" data-v="MOSAICO" aria-pressed="${st.aura.format === "MOSAICO"}">Mosaico</button></div></div></section>` : ""}
+      <section><h3>Aura Plus <small>animada · vídeo de 4 s, nunca GIF</small></h3><div class="strip">${Object.entries(AURA_PLUS).map(([k, a]) =>
+        `<button class="th" type="button" data-st="auraPlus" data-v="${k}" aria-pressed="${st.auraPlusId === k}" aria-label="Aura Plus ${a.name}, animada"><span class="sw" style="background:url(${a.base}-poster.webp) center/cover"><span class="badge-plus">PLUS</span></span><span class="nm">${a.name}</span></button>`).join("")}</div></section>
+      <section><h3>Material</h3><div class="strip">${MATERIALS.map(([k, n]) => `<button class="th" type="button" data-st="material" data-v="${k}" aria-pressed="${st.materialId === k}" aria-label="Material ${n}"><span class="sw" style="background:#5B3A29">${k ? `<span class="frame-mat mat-${k}" style="position:absolute;inset:0"></span>` : `<span class="none">${icon("close", "sm")}</span>`}</span><span class="nm">${n}</span></button>`).join("")}</div></section>
+      <section><h3>Aura Hype <small>só aparece quando o post entra em alta</small></h3><div class="strip">${HYPES.map(([k, n]) => th("hype", k, n, k === "OFF" ? "var(--surface)" : "conic-gradient(from 300deg,#0000 0 60%,#FF6A2B 85%,#FFF8 95%,#0000) , #2B2217", st.auraHypeStyle === k)).join("")}</div></section>
+      <section><h3>Metamorfose</h3><div class="strip">${METAS.map(([k, n]) => th("meta", k, n, { OFF: "var(--surface)", PRISMA: "conic-gradient(from 200deg at 10% 90%,#FF4D4D,#F7C948,#3DDC6B,#4A93FF,#B46BFF,#FF4D4D)", CONSTELACAO: `${constelacao(3, 120, 90, 9)} center/cover, #1A1033`, FIO_VIVO: "linear-gradient(#2B2217,#2B2217) padding-box, linear-gradient(90deg,#FFD27A,#0000) border-box", HOLOGRAFIA: "repeating-linear-gradient(115deg,#FF4D4D88 0 12%,#F7C94888 12% 24%,#3DDC6B88 24% 36%,#4A93FF88 36% 48%)" }[k], st.metamorphose.mode === k)).join("")}</div></section>
+      <section><h3>Arte própria <small>16+ · passa por moderação</small></h3><div class="art-btns"><button type="button" data-art="IA">${icon("image", "sm")}Gerar com IA</button><button type="button" data-art="UPLOAD">${icon("download", "sm")}Enviar imagem</button></div></section>`,
+    layout: st => `<section><h3>Layout do card</h3><div class="strip">${LAYOUTS.map(([k, n]) => th("layout", k, n, k === "POSTER" ? POSTER_ART : k === "POLAROID" ? "linear-gradient(#F5EDE3 0 0) 50% 35%/70% 55% no-repeat, #E8DCC8" : "linear-gradient(#211A12 0 0) center/76% 70% no-repeat, #5B3A29", st.layoutId === k)).join("")}</div></section>
+      <p class="note">${icon("check", "xs")} Pôster traz arte própria e desliga a aba Aura e Material. Bento, revista e tela cheia entram na fase 5.</p>
+      <section><h3>Skin</h3><div class="strip">${Object.entries(SKINS).map(([k, [n, bg]]) => th("skin", k, n, bg, st.skinId === k)).join("")}</div></section>`,
+    container: st => { const c = containerOf(st);
+      return `<section><h3>Cor do container</h3><div class="strip">${CONTAINER_COLORS.map(([k, n]) => th("container", String(k), n, k || SKINS[st.skinId][1], st.container.color === k, "sm")).join("")}
+        <label class="custom-color"><input type="color" data-custom-container value="${st.container.color && !CONTAINER_COLORS.some(x => x[0] === st.container.color) ? st.container.color : "#3A2A1A"}" aria-label="Cor personalizada do container">Personalizada</label></div></section>
+      <section><h3>Cor dos textos</h3><div class="strip">${INKS.map(([k, n]) => th("ink", k, n, k === "AUTO" ? `linear-gradient(135deg,#F5EDE3 50%,#17120D 50%)` : k, st.container.ink === k, "sm")).join("")}</div></section>
+      ${c.ratio >= 4.5 ? `<div class="contrast-ok" role="status">${icon("check", "sm")}<span>Texto <b>${fmtRatio(c.ratio)}</b> sobre o container — passa no WCAG AA. Tons secundários ajustados para ≥ 4,5:1.</span></div>`
+        : `<div class="contrast-bad" role="alert">${icon("alert", "sm")}<span>Texto com <b>${fmtRatio(c.ratio)}</b>: abaixo de 4,5:1, fica ilegível e o post não é salvo assim.<br>Sugestão: tinta <b>${c.suggestion === "#17120D" ? "escura" : "clara"}</b> (${fmtRatio(contrast(c.suggestion, c.bg))}).<br><button class="mini-cta" type="button" data-use-ink="${c.suggestion}">Usar sugestão</button></span></div>`}`; }
+  };
+  const TABS = [["cor", "Cor"], ["aura", "Aura e<br>Material"], ["layout", "Layout e<br>Estilo"], ["container", "Container"]];
+  POSTS.pv = { id: "pv", author: VIEWER, at: "2026-10-17T12:41:00Z", type: "TEXTO", typeIcon: "file", rating: "LIVRE",
+    title: "Fim de tarde no Parque Barigui", sub: "Levei a câmera nova e o pôr do sol colaborou.", likes: 0, comments: 0, shares: 0, liked: false, saved: false };
+  const studioScreen = st => { const ui = st.ui;
+    return `${statusbar()}
+    <div class="studio" data-studio='${JSON.stringify(st).replace(/'/g, "&#39;")}' style="display:contents">
+    <div class="studio-head"><button class="icon-btn" type="button" data-goto="post" aria-label="Voltar">${icon("back")}</button><h2>Moldura do post</h2><button class="pub" type="button" data-publish>Publicar</button></div>
+    <div class="studio-prev"><div class="prev-bar"><span>Prévia ao vivo</span>
+      <div class="seg2" role="group" aria-label="Prévia"><button type="button" data-prev="normal" aria-pressed="${!ui.hot}">Normal</button><button type="button" data-prev="hot" aria-pressed="${ui.hot}">Em alta</button></div></div>
+      ${framed(POSTS.pv, st, { hot: ui.hot })}</div>
+    <div class="studio-tabs" role="tablist" aria-label="Background Studio">${TABS.map(([k, n]) => `<button type="button" role="tab" aria-selected="${ui.tab === k}" data-tab="${k}">${n}</button>`).join("")}</div>
+    <div class="studio-panel" role="tabpanel">${panels[ui.tab](st)}
+      <details class="json-box"${ui.json ? " open" : ""}><summary>Configuração salva com o post (JSON)</summary><pre>${serialize(st).replace(/</g, "&lt;")}</pre></details></div>
+    </div>`; };
+  const studioState = (over = {}, ui = {}) => Object.assign(STUDIO_DEFAULT(), over, { ui: { tab: "cor", hot: false, json: false, ...ui } });
+  SCREENS.studioCor = () => studioScreen(studioState({ gradientId: "por-do-sol", animationId: "RESPIRAR" }, { tab: "cor" }));
+  SCREENS.studioAura = () => studioScreen(studioState({ aura: { presetId: "eclipse", variantId: "ORIGINAL", format: "IMAGEM_UNICA" }, materialId: "vidro",
+    metamorphose: { mode: "CONSTELACAO", presetId: null } }, { tab: "aura", hot: true }));
+  SCREENS.studioAuraPlus = () => studioScreen(studioState({ auraPlusId: "brasa" }, { tab: "aura" }));
+  SCREENS.studioSazonal = () => studioScreen(studioState({ seasonal: { presetId: null, auto: true } }, { tab: "cor" })) + seasonModal({ presetId: null, auto: true });
+  SCREENS.studioContainer = () => studioScreen(studioState({ aura: { presetId: "entardecer", variantId: "ORIGINAL", format: "IMAGEM_UNICA" },
+    container: { color: "#F5EDE3", ink: "#FF9D5E" } }, { tab: "container" }));
+  SCREENS.studioLayout = () => studioScreen(studioState({ layoutId: "POSTER", skinId: "MONO" }, { tab: "layout", json: true }));
+
+  const seasonModal = draft => { const now = autoSeason();
+    return `<div class="overlay center" role="dialog" aria-modal="true" aria-labelledby="season-h">
+      <div class="scrim" data-close></div>
+      <form class="alert-modal season-modal" data-season-form data-draft='${JSON.stringify(draft)}'>
+        <h2 id="season-h" style="font-size:18px">Cartela sazonal</h2>
+        <p>Nada muda no post até você tocar em <b>Aplicar</b>.</p>
+        <label class="check"><input type="checkbox" data-season-auto ${draft.auto ? "checked" : ""}><span>Automática pela data — hoje é <b>${now.name}</b>. Troca sozinha (fuso de São Paulo).</span></label>
+        <div class="season-list ${draft.auto ? "fieldset-off" : ""}" role="radiogroup" aria-label="Cartelas">${SEASONS.map(s => `<label class="season-opt"><input type="radio" name="season" value="${s.id}" ${draft.presetId === s.id ? "checked" : ""} ${draft.auto ? "disabled" : ""}>
+          <span>${s.name}<small>${s.win}</small></span><span class="pal">${s.c.map(c => `<i style="background:${c}"></i>`).join("")}</span></label>`).join("")}</div>
+        <div class="actions-row"><button class="btn ghost" type="button" data-close>Cancelar</button><button class="btn" type="submit">Aplicar</button></div>
+      </form></div>`; };
+
+  // Feed com molduras: a do post em alta mostra o Hype; o de Aura Plus toca 5 s ao aparecer; o terceiro fica sem moldura (padrão)
+  const FEED_FRAMES = {
+    p1: Object.assign(STUDIO_DEFAULT(), { aura: { presetId: "eclipse", variantId: "ORIGINAL", format: "IMAGEM_UNICA" }, materialId: "vidro" }),
+    p2: Object.assign(STUDIO_DEFAULT(), { auraPlusId: "brasa" })
+  };
+  SCREENS.feedFrames = () => `${statusbar()}${topbar()}${switcher("post")}
+    ${filters([catChip(), chip("Tipo"), chip("Curitiba · 10 km", "pin", true), chip("Brasil")])}
+    <div class="feed">
+      ${framed(POSTS.p1, FEED_FRAMES.p1, { hot: POSTS.p1.trend === "hot" })}
+      ${framed(POSTS.p2, FEED_FRAMES.p2)}
+      ${card(POSTS.p3)}
+    </div><div class="fade"></div>${tabbar("home")}`;
+
+  // Aura Plus: toca só com ≥ 60 % visível, no máximo 5 s, até 3 ao mesmo tempo (2 no celular); "Reduzir movimento" = só pôster
+  const reduceMotionQ = matchMedia("(prefers-reduced-motion: reduce)");
+  const auraBudget = () => matchMedia("(pointer: coarse)").matches ? 2 : 3;
+  const auraPlaying = new Set();
+  const stopAura = v => { v.pause(); auraPlaying.delete(v); v.load(); };          // load() volta ao pôster
+  const auraIO = "IntersectionObserver" in window ? new IntersectionObserver(entries => entries.forEach(e => {
+    const v = e.target;
+    if (e.intersectionRatio < .3) { if (auraPlaying.has(v)) stopAura(v); v._done = false; return; }
+    if (e.intersectionRatio >= .6 && !v._done && !reduceMotionQ.matches && auraPlaying.size < auraBudget()) {
+      auraPlaying.add(v);
+      v.play().then(() => { v._t0 = performance.now(); }).catch(() => { auraPlaying.delete(v); v._done = true; });   // Pouca Energia: fica no pôster
+    }
+  }), { threshold: [0, .3, .6, 1] }) : null;
+  const wireAura = scope => scope.querySelectorAll("video[data-aura-plus]").forEach(v => {
+    if (v._wired) return; v._wired = true;
+    v.addEventListener("timeupdate", () => { if (v._t0 && performance.now() - v._t0 >= 5000) { v._t0 = 0; v._done = true; stopAura(v); } });
+    auraIO?.observe(v);
+  });
+  requestAnimationFrame(() => wireAura(document));
+
+  const studioOf = phone => phone.querySelector("[data-studio]");
+  const readStudio = phone => JSON.parse(studioOf(phone).dataset.studio);
+  const writeStudio = (phone, st) => { const panel = phone.querySelector(".studio-panel"), top = panel?.scrollTop || 0;
+    showScreen(phone, studioScreen(st)); const np = phone.querySelector(".studio-panel"); if (np) np.scrollTop = top; wireAura(phone); };
+  document.addEventListener("click", e => {
+    const phone = e.target.closest(".phone");
+    if (!phone || !studioOf(phone)) return;
+    const st = readStudio(phone);
+    const pick = e.target.closest("[data-st]");
+    if (pick) {
+      const hadPreset = st.aura || st.auraPlusId || st.customArt;
+      SELECT[pick.dataset.st](st, pick.dataset.v);
+      writeStudio(phone, st);
+      if (["color", "gradient"].includes(pick.dataset.st) && hadPreset) toast(phone, "A aura saiu: a cor virou a arte da moldura");
+      return;
+    }
+    const tab = e.target.closest("[data-tab]");
+    if (tab) { st.ui.tab = tab.dataset.tab; writeStudio(phone, st); return; }
+    const prev = e.target.closest("[data-prev]");
+    if (prev) { st.ui.hot = prev.dataset.prev === "hot"; writeStudio(phone, st); return; }
+    const opt = e.target.closest("[data-auraopt]");
+    if (opt && st.aura) { st.aura[opt.dataset.auraopt] = opt.dataset.v; writeStudio(phone, st); return; }
+    if (e.target.closest("[data-rec]")) {
+      clearBase(st); Object.assign(st, { aura: { presetId: "eclipse", variantId: "ORIGINAL", format: "IMAGEM_UNICA" }, materialId: "vidro", auraPlusId: null, customArt: null });
+      writeStudio(phone, st); toast(phone, "Direção recomendada aplicada: Eclipse + Vidro"); return;
+    }
+    const art = e.target.closest("[data-art]");
+    if (art) { clearBase(st); st.customArt = { assetId: `asset-${Date.now().toString(36)}`, origin: art.dataset.art }; st.aura = null; st.auraPlusId = null;
+      writeStudio(phone, st); toast(phone, art.dataset.art === "IA" ? "Arte gerada · em análise de moderação" : "Arte enviada · em análise de moderação"); return; }
+    const ink = e.target.closest("[data-use-ink]");
+    if (ink) { st.container.ink = ink.dataset.useInk; writeStudio(phone, st); return; }
+    if (e.target.closest("[data-open-season]")) { openOverlay(phone, seasonModal({ ...st.seasonal }), e.target.closest("[data-open-season]")); return; }
+    if (e.target.closest("[data-publish]")) {
+      const c = containerOf(st);
+      toast(phone, c.ratio < 4.5 ? "Ajuste o contraste do texto antes de publicar" : "Post publicado · salvamos só a configuração da moldura");
+    }
+  });
+  document.addEventListener("change", e => {
+    const phone = e.target.closest(".phone");
+    if (!phone || !studioOf(phone)) return;
+    if (e.target.matches("[data-custom-container]")) { const st = readStudio(phone); st.container.color = e.target.value.toUpperCase(); writeStudio(phone, st); return; }
+    const form = e.target.closest("[data-season-form]");
+    if (form) {                                         // rascunho: só o modal muda
+      const d = JSON.parse(form.dataset.draft);
+      if (e.target.matches("[data-season-auto]")) d.auto = e.target.checked;
+      if (e.target.name === "season") d.presetId = e.target.value;
+      form.dataset.draft = JSON.stringify(d);
+      form.querySelector(".season-list").classList.toggle("fieldset-off", d.auto);
+      form.querySelectorAll('input[name="season"]').forEach(r => { r.disabled = d.auto; });
+    }
+  });
+  document.addEventListener("submit", e => {
+    const form = e.target.closest("[data-season-form]");
+    if (!form) return;
+    e.preventDefault();
+    const phone = form.closest(".phone"), st = readStudio(phone), d = JSON.parse(form.dataset.draft);
+    st.seasonal = { presetId: d.auto ? null : d.presetId, auto: d.auto };
+    if (d.auto || d.presetId) Object.assign(st, { color: null, gradientId: null, aura: null, auraPlusId: null, customArt: null });
+    closeTop(phone);
+    writeStudio(phone, st);
+  });
+
   const SHOTS = [
     ["01-post-feed", "Post Feed · tema escuro", "post", ""],
     ["02-audio-feed", "Audio Feed", "audio", ""],
@@ -753,11 +1395,27 @@
     ["09-post-modal", "Modal do post (RF24)", "postModal", ""],
     ["10-perfil-autor", "Perfil do autor (RF25)", "author", ""],
     ["11-comentarios", "Caixa de comentários (RF26)", "comments", ""],
-    ["12-compartilhar", "Compartilhar (RF26)", "share", ""]
+    ["12-compartilhar", "Compartilhar (RF26)", "share", ""],
+    ["13-login", "Entrar (RF27)", "login", ""],
+    ["14-cadastro", "Criar conta · tipo de usuário (RF1)", "signup", ""],
+    ["15-cadastro-termos", "Campos do tipo + Termos da Velion (RF1)", "signupType", ""],
+    ["16-login-2fa", "Verificação em duas etapas (RF27)", "login2fa", ""],
+    ["17-seguranca", "Senha e segurança · sessões (RF27)", "security", ""],
+    ["18-exibicao-fundo", "Exibição · fundo do app (RF2)", "appearance", ""],
+    ["19-excluir-conta", "Excluir conta (RF23)", "deleteAccount", ""],
+    ["20-reativar-conta", "Reativar dentro de 30 dias (RF23)", "reactivate", ""],
+    ["21-feed-fundo-areia", "Feed com o fundo Areia (RF2)", "feedBackground", "app-bg"],
+    ["22-studio-cor", "Background Studio · Cor (RF28)", "studioCor", ""],
+    ["23-studio-aura", "Background Studio · Aura e Material (RF28)", "studioAura", ""],
+    ["24-studio-aura-plus", "Aura Plus animada · pôster (RF28)", "studioAuraPlus", ""],
+    ["25-studio-sazonal", "Cartela sazonal com rascunho (RF28)", "studioSazonal", ""],
+    ["26-studio-container", "Container e contraste (RF28)", "studioContainer", ""],
+    ["27-studio-layout", "Layout com arte própria (RF28)", "studioLayout", ""],
+    ["28-feed-molduras", "Feed com molduras (RF28)", "feedFrames", ""]
   ];
   const g = document.getElementById("gallery");
   g.innerHTML = SHOTS.map(([id, label, scr, theme]) =>
-    `<div><p class="shot-label">${label}</p><div class="phone ${theme}" data-shot="${id}" data-screen="${scr}">${SCREENS[scr]()}</div></div>`).join("")
+    `<div><p class="shot-label">${label}</p><div class="phone ${theme}" data-shot="${id}" data-screen="${scr}"${theme === "app-bg" ? ` style="--app-bg:${bgUrl("MOSAIC_SAND")}"` : ""}>${SCREENS[scr]()}</div></div>`).join("")
     + `<div><p class="shot-label">Legenda</p>${legend()}</div>`
     + `<div><p class="shot-label">Marca</p>${brandPanel()}</div>`;
 
@@ -835,6 +1493,48 @@
       e.preventDefault();
       openOverlay(phone, postModal(p), cardEl.querySelector(".c-link") || cardEl);
     }
+  });
+
+  // ---------- conta: navegação, termos, fundo, sair (com aviso às outras abas) ----------
+  const authChannel = "BroadcastChannel" in window ? new BroadcastChannel("orange-auth") : null;
+  const toLogin = phone => { phone.dataset.screen = "login"; phone.classList.remove("app-bg", "network"); showScreen(phone, SCREENS.login()); };
+  authChannel?.addEventListener("message", ev => {          // logout em outra aba: todas voltam ao login
+    if (ev.data?.type === "logout") document.querySelectorAll(".phone").forEach(toLogin);
+  });
+  const applyBackground = (phone, key) => {
+    const url = bgUrl(key);
+    phone.classList.toggle("app-bg", !!url);
+    phone.classList.toggle("network", key === "NETWORK");
+    if (url) phone.style.setProperty("--app-bg", url); else phone.style.removeProperty("--app-bg");
+  };
+  document.addEventListener("click", e => {
+    const phone = e.target.closest(".phone");
+    if (!phone) return;
+    const go = e.target.closest("[data-goto]");
+    if (go) { e.preventDefault(); showScreen(phone, SCREENS[go.dataset.goto]()); return; }
+    const type = e.target.closest("[data-type]");
+    if (type) { type.parentElement.querySelectorAll("[data-type]").forEach(b => b.setAttribute("aria-checked", b === type)); return; }
+    const bg = e.target.closest("[data-bg]");
+    if (bg) {
+      bg.parentElement.querySelectorAll("[data-bg]").forEach(b => b.setAttribute("aria-checked", b === bg));
+      applyBackground(phone, bg.dataset.bg);
+      toast(phone, `Fundo do app: ${bg.textContent.trim()}`);
+      return;
+    }
+    if (e.target.closest("[data-open-delete]")) { openOverlay(phone, deleteModal(), e.target.closest("[data-open-delete]")); return; }
+    if (e.target.closest("[data-end]")) { e.target.closest(".sess").remove(); toast(phone, "Sessão encerrada naquele aparelho"); return; }
+    if (e.target.closest("[data-end-all]")) { phone.querySelectorAll("[data-end]").forEach(b => b.closest(".sess").remove()); toast(phone, "Você saiu de todos os outros aparelhos"); return; }
+    if (e.target.closest("[data-logout]")) { authChannel?.postMessage({ type: "logout" }); toLogin(phone); return; }
+  });
+  document.addEventListener("submit", e => {
+    const phone = e.target.closest(".phone");
+    if (e.target.matches("[data-login]")) { e.preventDefault(); showScreen(phone, SCREENS.login2fa()); }
+    if (e.target.matches("[data-signup]")) { e.preventDefault(); toast(phone, "Conta criada · enviamos um código para o seu e-mail"); }
+    if (e.target.matches("[data-delete]")) { e.preventDefault(); closeTop(phone); showScreen(phone, SCREENS.reactivate()); }
+  });
+  document.addEventListener("change", e => {
+    if (e.target.matches("[data-terms]")) e.target.closest("form").querySelector("[data-create]").disabled = !e.target.checked;
+    if (e.target.matches("[data-understand]")) e.target.closest("form").querySelector("[data-confirm-delete]").disabled = !e.target.checked;
   });
 
   document.addEventListener("input", e => {

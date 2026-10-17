@@ -3,7 +3,6 @@ package com.orangesocial.api;
 import com.orangesocial.application.post.PostQueryService;
 import com.orangesocial.application.post.PostViews.FeedPageView;
 import com.orangesocial.application.post.PostViews.PublicProfileView;
-import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,8 +32,7 @@ public class UserProfileController {
     @GetMapping("/posts")
     public FeedPageView posts(@PathVariable Long userId,
                               @RequestParam Optional<String> cursor,
-                              @RequestParam(defaultValue = "20") int limit,
-                              HttpServletRequest request) {
-        return queries.authorFeed(userId, cursor, limit, viewer.viewerId(request));
+                              @RequestParam(defaultValue = "20") int limit) {
+        return queries.authorFeed(userId, cursor, limit, viewer.viewerId());
     }
 }

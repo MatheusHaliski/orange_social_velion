@@ -225,4 +225,5 @@ erDiagram
 | Aplicação / API | `PostInteractionService`; `PUT/DELETE …/like`, `PUT/DELETE …/save`, `GET/POST …/comments`, `DELETE …/comments/{id}`, `POST …/shares` | ✅ |
 | Testes | `PostDomainTest.commentIsTrimmedValidatedAndRemovableByWriterOrPostOwner`; `PostApiIT` (curtir idempotente, 401/403/409, caixa de comentários, compartilhar por canal, eliminação LGPD) | ✅ |
 | Tela | Protótipo: botões com contagem em [01-post-feed](../../design/prototype/screens/01-post-feed.png), [11-comentarios](../../design/prototype/screens/11-comentarios.png), [12-compartilhar](../../design/prototype/screens/12-compartilhar.png) | ✅ protótipo |
+| Identidade | `ViewerResolver` lê a sessão autenticada ([RF27](RF27-autenticacao-sessao.md)); o cabeçalho de dev `X-Orange-Dev-User` foi removido e os testes entram com login real (sessão + CSRF) | ✅ |
 | Pendências | tempo real dos contadores (SSE, OS-2B); notificação ao autor (OS-27); moderação de comentários (OS-4D); rate limit (OS-47); repost como ação separada | ⏳ OS-59 |
