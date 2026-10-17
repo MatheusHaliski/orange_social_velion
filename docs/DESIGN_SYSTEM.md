@@ -143,7 +143,9 @@ adicionar `glyph`); `rating.*` ↔ `ageRating` do post; `content.border.*` ↔ `
 | Componente | Regras |
 |---|---|
 | **TopBar + Segmented Switcher** | 4 abas (Profile · Post · Audio · Alert), `role="tablist"`, navegação por setas, estado persistido; transição com layout animation |
-| **FeedCard** | bolinha (cor + glifo + `aria-label`), borda por tipo, chip de classificação, título obrigatório, subtítulo opcional, ações, indicador de trending (🔥 📈 ➖ 📉) discreto |
+| **FeedCard** | bolinha (cor + glifo + `aria-label`), borda por tipo, chip de classificação, título obrigatório, subtítulo opcional, ações, indicador de trending (🔥 📈 ➖ 📉) discreto; foto + nome do autor = um link para o perfil (RF25); data relativa em `<time datetime>` com a absoluta no `title`; toque no card abre o PostModal |
+| **PostModal** (RF24) | sheet de 92 % da altura, `role="dialog"` + `aria-modal`, foco no "Fechar", `Esc` fecha e devolve o foco ao card; autor em destaque, mídia, texto completo, "Publicado em {data absoluta}" + relativo, contagens por extenso e as 4 ações com rótulo |
+| **CommentsSheet / ShareSheet** (RF26) | caixa de mensagens com lista, apagar o próprio comentário e campo com contador 0/2.000; folha com prévia do link, Copiar link, WhatsApp, Telegram, X, e-mail e "Mais opções" (Web Share API) |
 | **AudioCard** | waveform pré-computado (JSON de ~1.000 picos), play/pause acessível, duração, categoria do autor |
 | **AlertCard** | faixa hazard, fonte verificada visível, validade (`expires` do CAP), nunca sensacionalista; variante "vaga" |
 | **FilterBar** | 6 chips combináveis (Categoria, Tipo, Local, País, Cidade, Nome), "limpar filtros", estado na URL |
@@ -177,8 +179,12 @@ desenhados à mão "parecidos com Lucide": eles divergem no traço e nos cantos 
 | Salvar | `bookmark` (preenchido quando ativo) | não (privado) | |
 | Trending | `flame` · `trending-up` · `minus` · `trending-down` | texto ao lado | indicador, não botão |
 
-> Estado atual do protótipo: ícones já são Lucide oficial, mas as ações do card ainda usam `repeat` sem
-> contagem no lugar de compartilhar e são `<span>`, não botões — pendente do RF de interações.
+Alerta oficial (Alert Feed) tem **só compartilhar**: sem curtidas nem comentários, para não premiar
+sensacionalismo. Card de áudio e vaga têm as quatro ações.
+
+Implementado no protótipo ([RF26](rf/RF26-interacoes-post.md)): ações são `<button>` com contagem,
+`aria-label` com o número por extenso e `aria-pressed` em curtir/salvar; comentar abre a caixa de
+mensagens e compartilhar abre a folha de compartilhamento.
 
 ## 8. Marca
 

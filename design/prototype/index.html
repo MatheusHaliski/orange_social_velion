@@ -129,8 +129,92 @@
   .media .play { position: absolute; inset: 0; margin: auto; width: 46px; height: 46px; border-radius: 50%; background: rgba(23,18,13,.72); display: grid; place-items: center; color: #fff; }
   .media .dur { position: absolute; right: 8px; bottom: 8px; font-family: 'Space Mono', monospace; font-size: 10px; color: #fff; background: rgba(23,18,13,.72); padding: 2px 6px; border-radius: 5px; }
   .sponsored { font-family: 'Space Mono', monospace; font-size: 9.5px; letter-spacing: .1em; color: var(--text-3); text-transform: uppercase; margin-top: 8px; }
-  .actions { display: flex; align-items: center; gap: 16px; margin-top: 11px; padding-top: 9px; border-top: 1px dashed var(--line); color: var(--text-3); font-size: 12px; }
+  .actions { display: flex; align-items: center; gap: 14px; margin-top: 11px; padding-top: 9px; border-top: 1px dashed var(--line); color: var(--text-3); font-size: 12px; }
   .actions span { display: inline-flex; align-items: center; gap: 5px; }
+
+  /* Ações = botões reais (RF26): um ícone, um significado, contagem visível, aria-pressed nos que alternam */
+  .act { display: inline-flex; align-items: center; gap: 5px; background: none; border: 0; padding: 5px 3px; margin: -5px -3px; color: inherit; font: inherit; border-radius: 8px; cursor: pointer; }
+  .act[aria-pressed="true"] { color: var(--brand-text); }
+  .act[aria-pressed="true"] svg { fill: currentColor; }
+  .act:disabled { opacity: .45; cursor: not-allowed; }
+  .act:focus-visible, a:focus-visible, .card:focus-visible, .close:focus-visible, .share-opt:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+  a.author, a.c-link, a.pm-author { color: inherit; text-decoration: none; }
+  a.author:hover .who b, a.pm-author:hover b { text-decoration: underline; }
+  .card { cursor: pointer; }
+  time { font: inherit; }
+
+  /* Modal / sheets (RF24, RF26): role=dialog, foco preso, Esc fecha */
+  .overlay { position: absolute; inset: 0; z-index: 5; display: flex; flex-direction: column; justify-content: flex-end; }
+  .scrim { position: absolute; inset: 0; background: rgba(8,6,4,.64); }
+  .sheet { position: relative; background: var(--bg); border-top: 1px solid var(--line); border-radius: 24px 24px 0 0; max-height: 92%; display: flex; flex-direction: column; box-shadow: 0 -18px 50px rgba(0,0,0,.45); }
+  .sheet.tall { height: 92%; }
+  .grabber { width: 38px; height: 4px; border-radius: 4px; background: var(--line); margin: 8px auto 2px; flex: none; }
+  .sheet-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 6px 16px 10px; flex: none; }
+  .sheet-head h2 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 18px; font-weight: 700; }
+  .sheet-head h2 small { font-family: 'Inter', sans-serif; font-size: 13px; font-weight: 500; color: var(--text-3); margin-left: 4px; }
+  .close { width: 34px; height: 34px; border-radius: 11px; display: grid; place-items: center; background: var(--surface); border: 1px solid var(--line-soft); color: var(--text); cursor: pointer; flex: none; }
+  .sheet-body { overflow: auto; padding: 0 16px 18px; flex: 1; min-height: 0; scrollbar-width: none; }
+  .sheet:not(.tall) .sheet-body { padding-bottom: 30px; }
+  .pm-author { display: flex; align-items: center; gap: 13px; padding: 10px 12px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line-soft); }
+  .pm-author .avatar { width: 42px; height: 42px; border-radius: 13px; font-size: 14px; padding: 7px 0 0 8px; }
+  .pm-author .avatar .dot { right: -7px; bottom: -7px; }
+  .pm-author .txt { flex: 1; min-width: 0; line-height: 1.25; }
+  .pm-author b { font-size: 14.5px; font-weight: 600; display: block; }
+  .pm-author small { font-size: 12px; color: var(--text-3); }
+  .pm-author > svg { color: var(--text-3); }
+  .pm-title { font-family: 'Bricolage Grotesque', sans-serif; font-size: 21px; font-weight: 700; line-height: 1.2; letter-spacing: -.01em; margin-top: 14px; }
+  .pm-sub { font-size: 14px; color: var(--text-2); margin-top: 6px; line-height: 1.45; }
+  .pm-body { font-size: 14px; line-height: 1.6; margin-top: 10px; }
+  .pm-body p + p { margin-top: 8px; }
+  .pm-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 7px 12px; font-size: 12px; color: var(--text-2); margin-top: 14px; }
+  .pm-meta > span { display: inline-flex; align-items: center; gap: 5px; }
+  .pm-counts { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 12.5px; color: var(--text-3); padding: 12px 0 10px; margin-top: 12px; border-top: 1px solid var(--line-soft); }
+  .pm-counts b { color: var(--text); font-weight: 600; }
+  .pm-actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: 7px; }
+  .pm-actions .act { flex-direction: column; justify-content: center; gap: 4px; margin: 0; height: 58px; background: var(--surface); border: 1px solid var(--line-soft); border-radius: 12px; font-size: 11.5px; color: var(--text-2); }
+  .pm-actions .act svg { width: 18px; height: 18px; }
+  .pm-actions .act[aria-pressed="true"] { color: var(--brand-text); border-color: color-mix(in srgb, var(--brand) 45%, var(--line)); }
+  .pm-comments { margin-top: 16px; }
+  .pm-comments h3, .p-section { font-family: 'Space Mono', monospace; font-size: 10.5px; letter-spacing: .14em; text-transform: uppercase; color: var(--text-3); margin-bottom: 2px; }
+  .link-btn { background: none; border: 0; color: var(--brand-text); font: inherit; font-size: 13px; font-weight: 600; padding: 10px 0 0; cursor: pointer; }
+  .comment { display: flex; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--line-soft); }
+  .comment:last-child { border-bottom: 0; }
+  .comment .c-main { flex: 1; min-width: 0; }
+  .comment .c-head { display: flex; align-items: center; gap: 7px; font-size: 12px; color: var(--text-3); }
+  .comment .c-head a, .comment .c-head b { color: var(--text); font-weight: 600; font-size: 13px; text-decoration: none; }
+  .comment p { font-size: 13.5px; line-height: 1.45; margin-top: 3px; }
+  .comment .del { margin-left: auto; background: none; border: 0; color: var(--text-3); font: inherit; font-size: 11.5px; cursor: pointer; padding: 2px 4px; }
+  .composer { flex: none; padding: 10px 16px 24px; border-top: 1px solid var(--line-soft); background: var(--bg); }
+  .composer .box { display: flex; gap: 8px; align-items: flex-end; }
+  .composer textarea { flex: 1; resize: none; height: 44px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--text); font: inherit; font-size: 13.5px; padding: 11px 12px; }
+  .composer textarea::placeholder { color: var(--text-3); }
+  .composer .send { width: 44px; height: 44px; border-radius: 12px; background: var(--brand); color: var(--on-brand); border: 0; display: grid; place-items: center; cursor: pointer; }
+  .composer .send:disabled { background: var(--surface-2); color: var(--text-3); cursor: not-allowed; }
+  .composer .hint { display: flex; justify-content: space-between; font-size: 11px; color: var(--text-3); margin-top: 6px; }
+  .share-preview { display: flex; gap: 11px; align-items: center; padding: 10px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line-soft); }
+  .share-preview .thumb { width: 52px; height: 52px; border-radius: 10px; flex: none; }
+  .share-preview b { font-size: 13px; font-weight: 600; line-height: 1.3; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+  .share-preview code { font-family: 'Space Mono', monospace; font-size: 10.5px; color: var(--text-3); display: block; margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .share-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; margin-top: 14px; }
+  .share-opt { display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 13px 6px 11px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line-soft); color: var(--text); font: inherit; font-size: 12px; font-weight: 500; cursor: pointer; }
+  .share-opt .ic { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: color-mix(in srgb, var(--brand) 16%, var(--surface-2)); color: var(--brand-text); font-weight: 800; font-size: 17px; }
+  .share-note { display: flex; gap: 7px; font-size: 11.5px; color: var(--text-3); line-height: 1.4; margin-top: 14px; }
+  .toast { position: absolute; left: 16px; right: 16px; bottom: 96px; z-index: 9; background: var(--text); color: var(--bg); border-radius: 12px; padding: 11px 14px; font-size: 13px; font-weight: 500; box-shadow: 0 10px 30px rgba(0,0,0,.35); }
+
+  /* Perfil público do autor (RF25) */
+  .p-top { display: flex; align-items: center; gap: 10px; padding: 6px 16px 4px; }
+  .p-top h2 { font-family: 'Bricolage Grotesque', sans-serif; font-size: 17px; font-weight: 700; }
+  .profile-head { padding: 10px 16px 14px; display: flex; gap: 16px; align-items: center; }
+  .profile-head .avatar { width: 76px; height: 76px; border-radius: 22px; font-size: 26px; padding: 13px 0 0 14px; }
+  .profile-head .avatar .dot { right: -8px; bottom: -8px; }
+  .profile-head b { font-family: 'Bricolage Grotesque', sans-serif; font-size: 22px; font-weight: 700; display: block; letter-spacing: -.01em; }
+  .profile-head .p-cat { font-size: 12.5px; margin-top: 4px; }
+  .profile-head .since { font-size: 12px; color: var(--text-3); margin-top: 6px; }
+  .p-stats { display: flex; gap: 8px; margin: 0 16px 12px; }
+  .p-stats div { flex: 1; background: var(--surface); border: 1px solid var(--line-soft); border-radius: 12px; padding: 9px 10px; }
+  .p-stats b { font-family: 'Bricolage Grotesque', sans-serif; font-size: 17px; display: block; }
+  .p-stats span { font-size: 11px; color: var(--text-3); }
+  .p-section { padding: 0 18px; margin-bottom: 8px; }
   .trend { margin-left: auto; display: inline-flex; align-items: center; gap: 5px; font-family: 'Space Mono', monospace; font-size: 10.5px; font-weight: 700; color: var(--brand-text); }
   .trend.flat { color: var(--text-3); }
 
@@ -240,7 +324,7 @@
     <img class="head-logo" src="../brand/orange-social-logo.svg" alt="Orange Social">
     <div>
     <h1><span>Orange Social</span> · primeiras telas</h1>
-    <p>Protótipo estático do app mobile: Segmented Switcher dos 4 feeds, filtro de 6 eixos, cards com bolinha + glifo VSL, borda e classificação etária, e a página de configurações LGPD. Cores, contraste e tipografia seguem o <code>docs/DESIGN_SYSTEM.md</code>.</p>
+    <p>Protótipo navegável do app mobile (toque nos cards, autores, curtir, comentar e compartilhar): Segmented Switcher dos 4 feeds, filtro de 6 eixos, cards com bolinha + glifo VSL, borda e classificação etária, e a página de configurações LGPD. Cores, contraste e tipografia seguem o <code>docs/DESIGN_SYSTEM.md</code>.</p>
     </div>
   </div>
 </header>
@@ -252,7 +336,7 @@
   "use strict";
 
   // ---------- ícones: Lucide 0.460.0 oficial (ISC), traço 2 — DESIGN_SYSTEM.md §5 ----------
-  // chave local → nome Lucide: home=house, file=file-text, alert=triangle-alert, msg=message-circle, up=trending-up, flat=minus, pin=map-pin, chevron=chevron-right, down=chevron-down, check=shield-check, trash=trash-2, back=chevron-left, sliders=sliders-vertical
+  // chave local → nome Lucide: share=share-2, close=x, more=ellipsis, home=house, file=file-text, alert=triangle-alert, msg=message-circle, up=trending-up, flat=minus, pin=map-pin, chevron=chevron-right, down=chevron-down, check=shield-check, trash=trash-2, back=chevron-left, sliders=sliders-vertical
   const P = {
     search: '<circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/>',
     bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/>',
@@ -268,7 +352,6 @@
     video: '<path d="m16 13 5.223 3.482a.5.5 0 0 0 .777-.416V7.87a.5.5 0 0 0-.752-.432L16 10.5"/><rect x="2" y="6" width="14" height="12" rx="2"/>',
     heart: '<path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>',
     msg: '<path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/>',
-    repeat: '<path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/>',
     bookmark: '<path d="m19 21-7-4-7 4V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v16z"/>',
     flame: '<path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>',
     up: '<polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/>',
@@ -285,7 +368,14 @@
     back: '<path d="m15 18-6-6 6-6"/>',
     lock: '<rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
     clock: '<circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>',
-    sliders: '<line x1="4" x2="4" y1="21" y2="14"/><line x1="4" x2="4" y1="10" y2="3"/><line x1="12" x2="12" y1="21" y2="12"/><line x1="12" x2="12" y1="8" y2="3"/><line x1="20" x2="20" y1="21" y2="16"/><line x1="20" x2="20" y1="12" y2="3"/><line x1="2" x2="6" y1="14" y2="14"/><line x1="10" x2="14" y1="8" y2="8"/><line x1="18" x2="22" y1="16" y2="16"/>'
+    sliders: '<line x1="4" x2="4" y1="21" y2="14"/><line x1="4" x2="4" y1="10" y2="3"/><line x1="12" x2="12" y1="21" y2="12"/><line x1="12" x2="12" y1="8" y2="3"/><line x1="20" x2="20" y1="21" y2="16"/><line x1="20" x2="20" y1="12" y2="3"/><line x1="2" x2="6" y1="14" y2="14"/><line x1="10" x2="14" y1="8" y2="8"/><line x1="18" x2="22" y1="16" y2="16"/>',
+    share: '<circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/>',
+    close: '<path d="M18 6 6 18"/><path d="m6 6 12 12"/>',
+    send: '<path d="M14.536 21.686a.5.5 0 0 0 .937-.024l6.5-19a.496.496 0 0 0-.635-.635l-19 6.5a.5.5 0 0 0-.024.937l7.93 3.18a2 2 0 0 1 1.112 1.11z"/><path d="m21.854 2.147-10.94 10.939"/>',
+    link: '<path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>',
+    mail: '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+    more: '<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
+    calendar: '<path d="M8 2v4"/><path d="M16 2v4"/><rect width="18" height="18" x="3" y="4" rx="2"/><path d="M3 10h18"/>'
   };
   const icon = (n, cls = "") => `<svg class="i ${cls}" viewBox="0 0 24 24" aria-hidden="true">${P[n]}</svg>`;
 
@@ -335,19 +425,104 @@
   const tabbar = active => `<div class="tabbar">${
       [["home", "Início", "home"], ["explore", "Explorar", "compass"], ["new", "", "plus"], ["notif", "Avisos", "bell"], ["me", "Perfil", "user"]]
         .map(([id, l, ic]) => id === "new" ? `<span class="tab new">${icon(ic)}</span>` : `<span class="tab ${id === active ? "on" : ""}">${icon(ic)}${l}</span>`).join("")}</div>`;
-  const actions = (likes, comments, trend) => `<div class="actions">
-      <span>${icon("heart", "sm")}${likes}</span><span>${icon("msg", "sm")}${comments}</span><span>${icon("repeat", "sm")}</span><span>${icon("bookmark", "sm")}</span>${TREND[trend]}</div>`;
+  // ---------- dados de exemplo (no app: GET /api/v1/posts/{id}, /users/{id}/profile, /users/{id}/posts) ----------
+  const NOW = new Date("2026-10-17T12:41:00Z");       // 9:41 em Brasília, a hora da status bar
+  const TZ = "America/Sao_Paulo";                      // no app: fuso do aparelho
+  const nf = new Intl.NumberFormat("pt-BR");
+  const cf = new Intl.NumberFormat("pt-BR", { notation: "compact", maximumFractionDigits: 1 });
+  const fmtCount = n => n >= 1000 ? cf.format(n) : nf.format(n);          // 2.100 → "2,1 mil"
+  const absDate = iso => new Intl.DateTimeFormat("pt-BR", { dateStyle: "long", timeStyle: "short", timeZone: TZ }).format(new Date(iso));
+  const ago = iso => {
+    const min = Math.floor((NOW - new Date(iso)) / 60000);
+    if (min < 1) return { short: "agora", long: "agora mesmo" };
+    if (min < 60) return { short: `${min} min`, long: `há ${min} min` };
+    const h = Math.floor(min / 60);
+    if (h < 24) return { short: `${h} h`, long: `há ${h} h` };
+    const d = Math.floor(h / 24);
+    if (d === 1) return { short: "ontem", long: "ontem" };
+    return { short: `${d} d`, long: `há ${d} dias` };
+  };
+  // RF24: relativo no card, absoluto no tooltip (title) e no modal; datetime ISO para leitores de tela
+  const when = iso => `<time datetime="${iso}" title="Publicado em ${absDate(iso)}">${ago(iso).short}</time>`;
 
-  const card = c => `<article class="card" style="--cc:var(${CAT[c.cat].v})">
+  const AUTHORS = {
+    1: { name: "techblog.br", cat: "AMARELO", role: "Imprensa", ini: "TB", bg: "linear-gradient(135deg,#7A5A10,#F7C948)", since: "2024-03-02T12:00:00Z", posts: 86, likes: 41200 },
+    2: { name: "Ana Ribeiro", cat: "VERDE", role: "Pessoa física", ini: "AR", bg: "linear-gradient(135deg,#2E7D4F,#3DDC6B)", since: "2025-01-15T12:00:00Z", posts: 23, likes: 1840 },
+    3: { name: "Lumen Store", cat: "AZUL", role: "Marketing", ini: "LS", bg: "linear-gradient(135deg,#0E2547,#4A93FF)", since: "2023-11-20T12:00:00Z", posts: 310, likes: 9100 },
+    4: { name: "TechCast BR", cat: "AMARELO", role: "Imprensa", ini: "TC", bg: "linear-gradient(135deg,#7A5A10,#F7C948)", since: "2024-06-01T12:00:00Z", posts: 64, likes: 12800 },
+    5: { name: "João Martins", cat: "VERDE", role: "Pessoa física", ini: "JM", bg: "linear-gradient(135deg,#2E7D4F,#3DDC6B)", since: "2025-05-09T12:00:00Z", posts: 9, likes: 210 },
+    6: { name: "Coral Vozes do Sul", cat: "LARANJA", role: "Comunidade", ini: "CV", bg: "linear-gradient(135deg,#8A4A0A,#FF9F1C)", since: "2024-09-12T12:00:00Z", posts: 41, likes: 3300 },
+    7: { name: "Nimbus Tecnologia", cat: "VERMELHO", role: "Instituição", ini: "NT", bg: "linear-gradient(135deg,#7A1414,#FF4D4D)", since: "2023-04-03T12:00:00Z", posts: 128, likes: 5600 },
+    9: { name: "Você", cat: "VERDE", role: "Pessoa física", ini: "EU", bg: "linear-gradient(135deg,#2E7D4F,#3DDC6B)" }
+  };
+  const VIEWER = 9;
+
+  const POSTS = {
+    p1: { id: "p1", author: 1, at: "2026-10-17T12:38:00Z", type: "VÍDEO", typeIcon: "video", rating: "LIVRE", loc: "Curitiba, PR",
+          media: "linear-gradient(135deg,#3B2A10,#7A4F12 45%,#F7C948)", video: "12:48",
+          title: "O que ninguém te conta sobre começar a programar",
+          sub: "Seis meses depois da primeira linha de código, o que eu faria diferente.",
+          body: ["Ninguém avisa que a parte difícil não é a sintaxe: é aprender a ficar confortável sem saber a resposta.", "No vídeo eu mostro a rotina que funcionou, os três cursos que larguei no meio e por que um projeto pequeno ensina mais que dez tutoriais."],
+          likes: 2100, comments: 184, shares: 57, liked: false, saved: false, trend: "hot" },
+    p2: { id: "p2", author: 2, at: "2026-10-17T12:29:00Z", type: "TEXTO", typeIcon: "file", rating: "LIVRE", loc: "Curitiba, PR",
+          title: "Troquei o carro pela bike por 30 dias. O resultado me surpreendeu",
+          sub: "Não foi o tempo de deslocamento que mudou — foi como eu passei a enxergar o bairro…",
+          body: ["Nos primeiros dias foi só cansaço. Na segunda semana comecei a reparar nas padarias, nos vizinhos e nas ciclofaixas que eu nem sabia que existiam."],
+          likes: 318, comments: 42, shares: 11, liked: true, saved: false, trend: "up" },
+    p3: { id: "p3", author: 3, at: "2026-10-17T11:41:00Z", type: "IMAGEM", typeIcon: "image", rating: "LIVRE", sponsored: true,
+          media: "linear-gradient(160deg,#0E2547,#1D5FCC 55%,#8FB8FF)",
+          title: "Coleção de inverno chega às lojas parceiras nesta sexta", likes: 96, comments: 8, shares: 3, liked: false, saved: false, trend: "flat" },
+    p4: { id: "p4", author: 1, at: "2026-10-16T21:10:00Z", type: "TEXTO", typeIcon: "file", rating: "LIVRE",
+          title: "Cinco extensões que deixaram meu editor mais rápido", sub: "Nenhuma delas é de IA.", likes: 640, comments: 37, shares: 22, liked: false, saved: true, trend: "flat" },
+    p5: { id: "p5", author: 1, at: "2026-10-14T15:00:00Z", type: "IMAGEM", typeIcon: "image", rating: "LIVRE",
+          media: "linear-gradient(135deg,#2A1E08,#8B6B00 60%,#F7C948)",
+          title: "Bastidores do nosso estúdio novo em Curitiba", likes: 1300, comments: 96, shares: 14, liked: false, saved: false, trend: "flat" },
+    a1: { id: "a1", author: 4, at: "2026-10-16T13:00:00Z", rating: "LIVRE", kind: "PODCAST", title: "Ep. 13 — IA no dia a dia: o que já mudou e o que é só barulho",
+          seed: 1.3, played: 0, pos: "00:00", dur: "48:10", likes: 870, comments: 64, shares: 41, liked: false, saved: false, trend: "hot" },
+    a2: { id: "a2", author: 5, at: "2026-10-17T10:41:00Z", rating: "LIVRE", kind: "PESSOAL", title: "Recado rápido pra galera do grupo de corrida",
+          seed: 3.1, played: .35, pos: "00:29", dur: "01:24", likes: 12, comments: 5, shares: 0, liked: false, saved: false, trend: "flat" },
+    a3: { id: "a3", author: 6, at: "2026-10-17T07:41:00Z", rating: "LIVRE", kind: "MÚSICA", title: "Ensaio aberto: Asa Branca em quatro vozes",
+          seed: 5.7, played: 0, pos: "00:00", dur: "03:52", likes: 233, comments: 19, shares: 26, liked: false, saved: false, trend: "up" },
+    j1: { id: "j1", author: 7, at: "2026-10-17T11:41:00Z", type: "VAGA", typeIcon: "briefcase", title: "Pessoa desenvolvedora back-end Java · híbrido em Curitiba",
+          sub: "Spring Boot, PostgreSQL e mensageria. Candidaturas abertas até 30/10.", likes: 57, comments: 12, shares: 33, liked: false, saved: false, trend: "flat" },
+    al1: { id: "al1", alert: true, title: "Chuva forte com risco de alagamento na região metropolitana", shares: 1200, at: "2026-10-17T12:30:00Z" }
+  };
+  const COMMENTS = {
+    p1: [
+      { id: 1, author: 2, at: "2026-10-17T12:39:00Z", text: "A parte do “ficar confortável sem saber a resposta” resumiu meu primeiro ano inteiro." },
+      { id: 2, author: 5, at: "2026-10-17T12:40:00Z", text: "Qual foi o projeto pequeno que mais te ensinou?" },
+      { id: 3, author: 1, at: "2026-10-17T12:40:30Z", text: "@João Martins um app de lista de compras com login. Simples, mas tem tudo: banco, API e tela." },
+      { id: 4, author: VIEWER, at: "2026-10-17T12:41:00Z", text: "Salvei pra assistir hoje à noite!" }
+    ]
+  };
+
+  const avatar = a => `<span class="avatar" style="background:${a.bg}">${a.ini}${dot(a.cat)}</span>`;
+  // RF25: foto + nome do autor = um único link para o perfil público
+  const authorLink = (uid, iso) => { const a = AUTHORS[uid];
+    return `<a class="author" href="#/u/${uid}" data-user="${uid}" aria-label="Ver perfil de ${a.name}">${dot(a.cat)}<div class="who"><b>${a.name}</b><span>${a.role} · ${when(iso)}</span></div></a>`; };
+
+  // RF26: botões reais com contagem; o texto do aria-label traz o número por extenso
+  const likeBtn = (p, label = false) => `<button class="act" data-act="like" aria-pressed="${p.liked}" aria-label="${p.liked ? "Descurtir" : "Curtir"} · ${nf.format(p.likes)} curtidas">${icon("heart", "sm")}<span>${label ? "Curtir" : fmtCount(p.likes)}</span></button>`;
+  const commentBtn = (p, label = false) => `<button class="act" data-act="comment" aria-label="Comentar · ${nf.format(p.comments)} comentários">${icon("msg", "sm")}<span>${label ? "Comentar" : fmtCount(p.comments)}</span></button>`;
+  const shareBtn = (p, label = false) => `<button class="act" data-act="share" aria-label="Compartilhar · ${nf.format(p.shares)} compartilhamentos">${icon("share", "sm")}<span>${label ? "Compartilhar" : fmtCount(p.shares)}</span></button>`;
+  const saveBtn = (p, label = false) => `<button class="act" data-act="save" aria-pressed="${p.saved}" aria-label="${p.saved ? "Remover dos salvos" : "Salvar"}">${icon("bookmark", "sm")}${label ? `<span>${p.saved ? "Salvo" : "Salvar"}</span>` : ""}</button>`;
+  const FRAG = {
+    actions: p => `${likeBtn(p)}${commentBtn(p)}${shareBtn(p)}${saveBtn(p)}${p.trend ? TREND[p.trend] : ""}`,
+    pmCounts: p => `<span><b>${nf.format(p.likes)}</b> curtidas</span><span><b>${nf.format(p.comments)}</b> comentários</span><span><b>${nf.format(p.shares)}</b> compartilhamentos</span>`,
+    pmActions: p => `${likeBtn(p, true)}${commentBtn(p, true)}${shareBtn(p, true)}${saveBtn(p, true)}`
+  };
+  const actions = p => `<div class="actions" data-frag="actions">${FRAG.actions(p)}</div>`;
+
+  const card = p => `<article class="card" data-post="${p.id}" style="--cc:var(${CAT[AUTHORS[p.author].cat].v})">
       <div class="card-top">
-        <div class="author">${dot(c.cat)}<div class="who"><b>${c.handle}</b><span>${c.role} · ${c.when}</span></div></div>
-        <div class="meta"><span class="type">${icon(c.typeIcon, "xs")}${c.type}</span>${rating(c.rating)}</div>
+        ${authorLink(p.author, p.at)}
+        <div class="meta"><span class="type">${icon(p.typeIcon, "xs")}${p.type}</span>${p.rating ? rating(p.rating) : ""}</div>
       </div>
-      ${c.media ? `<div class="media" style="background:${c.media}">${c.video ? `<span class="play">${icon("play")}</span><span class="dur">${c.video}</span>` : ""}</div>` : ""}
-      <h3 class="c-title">${c.title}</h3>
-      ${c.sub ? `<p class="c-sub">${c.sub}</p>` : ""}
-      ${c.sponsored ? `<p class="sponsored">Publicidade · conteúdo de marca</p>` : ""}
-      ${actions(c.likes, c.comments, c.trend)}
+      ${p.media ? `<div class="media" style="background:${p.media}">${p.video ? `<span class="play">${icon("play")}</span><span class="dur">${p.video}</span>` : ""}</div>` : ""}
+      <h3 class="c-title"><a class="c-link" href="#/p/${p.id}">${p.title}</a></h3>
+      ${p.sub ? `<p class="c-sub">${p.sub}</p>` : ""}
+      ${p.sponsored ? `<p class="sponsored">Publicidade · conteúdo de marca</p>` : ""}
+      ${actions(p)}
     </article>`;
 
   // forma de onda determinística (no app: picos pré-computados pelo backend)
@@ -359,14 +534,15 @@
     }
     return `<div class="wave">${bars}</div>`;
   };
-  const audioCard = a => `<article class="card" style="--cc:var(${CAT[a.cat].v})">
+  const audioCard = a => `<article class="card" data-post="${a.id}" style="--cc:var(${CAT[AUTHORS[a.author].cat].v})">
       <div class="card-top">
-        <div class="author">${dot(a.cat)}<div class="who"><b>${a.handle}</b><span>${a.role} · ${a.when}</span></div></div>
+        ${authorLink(a.author, a.at)}
         <div class="meta"><span class="type">${icon("mic", "xs")}${a.kind}</span>${rating(a.rating)}</div>
       </div>
-      <h3 class="c-title">${a.title}</h3>
+      <h3 class="c-title"><a class="c-link" href="#/p/${a.id}">${a.title}</a></h3>
       ${wave(a.seed, a.played)}
-      <div class="audio-row"><span class="play-sm">${icon("play", "sm")}</span><span class="time">${a.pos} / ${a.dur}</span>${TREND[a.trend]}</div>
+      <div class="audio-row"><span class="play-sm">${icon("play", "sm")}</span><span class="time">${a.pos} / ${a.dur}</span></div>
+      ${actions(a)}
     </article>`;
 
   // ---------- telas ----------
@@ -376,15 +552,9 @@
     ${filters([catChip(), chip("Tipo"), chip("Curitiba · 10 km", "pin", true), chip("Brasil"), chip("Cidade")])}
     <div class="feed">
       <div class="section-title"><span>Para você</span><span>Recentes ▾</span></div>
-      ${card({ cat: "AMARELO", handle: "techblog.br", role: "Imprensa", when: "3 min", type: "VÍDEO", typeIcon: "video", rating: "LIVRE",
-        media: "linear-gradient(135deg,#3B2A10,#7A4F12 45%,#F7C948)", video: "12:48",
-        title: "O que ninguém te conta sobre começar a programar", likes: "2,1 mil", comments: 184, trend: "hot" })}
-      ${card({ cat: "VERDE", handle: "Ana Ribeiro", role: "Pessoa física", when: "12 min", type: "TEXTO", typeIcon: "file", rating: "LIVRE",
-        title: "Troquei o carro pela bike por 30 dias. O resultado me surpreendeu",
-        sub: "Não foi o tempo de deslocamento que mudou — foi como eu passei a enxergar o bairro…", likes: 318, comments: 42, trend: "up" })}
-      ${card({ cat: "AZUL", handle: "Lumen Store", role: "Marketing", when: "1 h", type: "IMAGEM", typeIcon: "image", rating: "LIVRE",
-        media: "linear-gradient(160deg,#0E2547,#1D5FCC 55%,#8FB8FF)", sponsored: true,
-        title: "Coleção de inverno chega às lojas parceiras nesta sexta", likes: 96, comments: 8, trend: "flat" })}
+      ${card(POSTS.p1)}
+      ${card(POSTS.p2)}
+      ${card(POSTS.p3)}
     </div><div class="fade"></div>${tabbar("home")}`;
 
   SCREENS.audio = () => `${statusbar()}${topbar()}${switcher("audio")}
@@ -392,18 +562,15 @@
     <div class="feed">
       <div class="now-playing"><span class="np-btn">${icon("pause")}</span>
         <div class="np-info"><small>Tocando agora · Ep. 12</small><b>Tendências de tecnologia em 2026</b><div class="progress"><i></i></div></div></div>
-      ${audioCard({ cat: "AMARELO", handle: "TechCast BR", role: "Imprensa", when: "ontem", kind: "PODCAST", rating: "LIVRE",
-        title: "Ep. 13 — IA no dia a dia: o que já mudou e o que é só barulho", seed: 1.3, played: 0, pos: "00:00", dur: "48:10", trend: "hot" })}
-      ${audioCard({ cat: "VERDE", handle: "João Martins", role: "Pessoa física", when: "2 h", kind: "PESSOAL", rating: "LIVRE",
-        title: "Recado rápido pra galera do grupo de corrida", seed: 3.1, played: .35, pos: "00:29", dur: "01:24", trend: "flat" })}
-      ${audioCard({ cat: "LARANJA", handle: "Coral Vozes do Sul", role: "Comunidade", when: "5 h", kind: "MÚSICA", rating: "LIVRE",
-        title: "Ensaio aberto: Asa Branca em quatro vozes", seed: 5.7, played: 0, pos: "00:00", dur: "03:52", trend: "up" })}
+      ${audioCard(POSTS.a1)}
+      ${audioCard(POSTS.a2)}
+      ${audioCard(POSTS.a3)}
     </div><div class="fade"></div>${tabbar("home")}`;
 
   SCREENS.alert = () => `${statusbar()}${topbar()}${switcher("alert")}<div class="hazard"></div>
     ${filters([chip("Curitiba · 25 km", "pin", true), chip("Desastres naturais"), chip("Vagas"), chip("Oficiais")])}
     <div class="feed">
-      <article class="card alert-card" style="--cc:var(--c-vermelho)">
+      <article class="card alert-card" data-post="al1" style="--cc:var(--c-vermelho)">
         <div class="card-top">
           <span class="sev">${icon("alert", "sm")} Alerta severo · chuva forte</span>
           <span class="type">${icon("clock", "xs")}AGORA</span>
@@ -416,16 +583,9 @@
           <dt>Válido até</dt><dd>hoje, 23:00 · protocolo CAP 1.2</dd>
           <dt>O que fazer</dt><dd>Evite áreas próximas a rios e passagens subterrâneas.</dd>
         </dl>
+        <div class="actions">${shareBtn(POSTS.al1)}<span class="trend flat">sem curtidas em alerta oficial</span></div>
       </article>
-      <article class="card" style="--cc:var(--c-vermelho)">
-        <div class="card-top">
-          <div class="author">${dot("VERMELHO")}<div class="who"><b>Nimbus Tecnologia</b><span>Instituição · 1 h</span></div></div>
-          <div class="meta"><span class="type">${icon("briefcase", "xs")}VAGA</span></div>
-        </div>
-        <h3 class="c-title">Pessoa desenvolvedora back-end Java · híbrido em Curitiba</h3>
-        <p class="c-sub">Spring Boot, PostgreSQL e mensageria. Candidaturas abertas até 30/10.</p>
-        ${actions(57, 12, "flat")}
-      </article>
+      ${card(POSTS.j1)}
       <p class="note">${icon("lock", "xs")} Só fontes verificadas publicam alertas com notificação. Alertas enviados por usuários passam por moderação antes de aparecer aqui.</p>
     </div><div class="fade"></div>${tabbar("home")}`;
 
@@ -475,6 +635,90 @@
       </div></section>
     </div>${tabbar("me")}`;
 
+  // ---------- RF24 · modal do post ----------
+  const commentItem = (c, postAuthor) => { const a = AUTHORS[c.author];
+    const mine = c.author === VIEWER, canDelete = mine || postAuthor === VIEWER;
+    const name = c.author === VIEWER ? `<b>${a.name}</b>` : `<a href="#/u/${c.author}" data-user="${c.author}" aria-label="Ver perfil de ${a.name}">${a.name}</a>`;
+    return `<div class="comment">${c.author === VIEWER ? dot(a.cat) : `<a href="#/u/${c.author}" data-user="${c.author}" tabindex="-1" aria-hidden="true">${dot(a.cat)}</a>`}
+      <div class="c-main"><div class="c-head">${name}<time datetime="${c.at}" title="${absDate(c.at)}">${ago(c.at).short}</time>
+      ${canDelete ? `<button class="del" data-del="${c.id}" aria-label="Apagar comentário">Apagar</button>` : ""}</div><p>${c.text}</p></div></div>`; };
+
+  const postModal = p => { const a = AUTHORS[p.author];
+    return `<div class="overlay" data-post="${p.id}" role="dialog" aria-modal="true" aria-labelledby="pm-${p.id}">
+      <div class="scrim" data-close></div>
+      <div class="sheet tall"><div class="grabber"></div>
+        <div class="sheet-head"><span class="type">${icon(p.typeIcon, "xs")}${p.type}</span><button class="close" data-close aria-label="Fechar">${icon("close")}</button></div>
+        <div class="sheet-body">
+          <a class="pm-author" href="#/u/${p.author}" data-user="${p.author}" aria-label="Ver perfil de ${a.name}">${avatar(a)}
+            <span class="txt"><b>${a.name}</b><small>${CAT[a.cat].label} · ver perfil e posts</small></span>${icon("chevron", "sm")}</a>
+          ${p.media ? `<div class="media" style="background:${p.media};height:180px">${p.video ? `<span class="play">${icon("play")}</span><span class="dur">${p.video}</span>` : ""}</div>` : ""}
+          <h2 class="pm-title" id="pm-${p.id}">${p.title}</h2>
+          ${p.sub ? `<p class="pm-sub">${p.sub}</p>` : ""}
+          ${p.body ? `<div class="pm-body">${p.body.map(t => `<p>${t}</p>`).join("")}</div>` : ""}
+          <div class="pm-meta">
+            <span>${icon("calendar", "xs")}<time datetime="${p.at}">Publicado em ${absDate(p.at)}</time></span>
+            <span>${icon("clock", "xs")}${ago(p.at).long}</span>
+            ${p.loc ? `<span>${icon("pin", "xs")}${p.loc}</span>` : ""}${p.rating ? rating(p.rating) : ""}
+          </div>
+          <div class="pm-counts" data-frag="pmCounts">${FRAG.pmCounts(p)}</div>
+          <div class="pm-actions" data-frag="pmActions">${FRAG.pmActions(p)}</div>
+          <section class="pm-comments"><h3>Comentários</h3>
+            ${(COMMENTS[p.id] || []).slice(0, 2).map(c => commentItem(c, p.author)).join("")}
+            <button class="link-btn" data-act="comment">Ver todos os ${nf.format(p.comments)} comentários</button>
+          </section>
+        </div>
+      </div></div>`; };
+
+  // ---------- RF26 · caixa de comentários ----------
+  const commentsSheet = (p, draft = "") => `<div class="overlay" data-post="${p.id}" role="dialog" aria-modal="true" aria-labelledby="cs-${p.id}">
+      <div class="scrim" data-close></div>
+      <div class="sheet tall"><div class="grabber"></div>
+        <div class="sheet-head"><h2 id="cs-${p.id}">Comentários<small data-frag="commentTotal">${nf.format(p.comments)}</small></h2><button class="close" data-close aria-label="Fechar comentários">${icon("close")}</button></div>
+        <div class="sheet-body" data-frag="commentList">${FRAG.commentList(p)}</div>
+        <form class="composer" data-compose>
+          <div class="box"><textarea name="body" maxlength="2000" placeholder="Escreva um comentário…" aria-label="Escreva um comentário">${draft}</textarea>
+            <button class="send" type="submit" aria-label="Enviar comentário" ${draft.trim() ? "" : "disabled"}>${icon("send")}</button></div>
+          <div class="hint"><span>Seja gentil · comentários passam por moderação</span><span data-count>${draft.length} / 2.000</span></div>
+        </form>
+      </div></div>`;
+  FRAG.commentList = p => (COMMENTS[p.id] || []).map(c => commentItem(c, p.author)).join("")
+      + (p.comments > (COMMENTS[p.id] || []).length ? `<button class="link-btn" type="button">Carregar mais comentários</button>` : "");
+  FRAG.commentTotal = p => nf.format(p.comments);
+
+  // ---------- RF26 · folha de compartilhamento ----------
+  const SHARE = [["COPY_LINK", "Copiar link", icon("link")], ["WHATSAPP", "WhatsApp", "W"], ["TELEGRAM", "Telegram", icon("send")],
+                 ["X", "X", "𝕏"], ["EMAIL", "E-mail", icon("mail")], ["NATIVE", "Mais opções", icon("more")]];
+  const shareUrl = p => `https://orange.social/p/${p.id}`;
+  const shareSheet = p => `<div class="overlay" data-post="${p.id}" role="dialog" aria-modal="true" aria-labelledby="sh-${p.id}">
+      <div class="scrim" data-close></div>
+      <div class="sheet"><div class="grabber"></div>
+        <div class="sheet-head"><h2 id="sh-${p.id}">Compartilhar</h2><button class="close" data-close aria-label="Fechar">${icon("close")}</button></div>
+        <div class="sheet-body">
+          <div class="share-preview"><span class="thumb" style="background:${p.media || `var(${CAT[AUTHORS[p.author]?.cat || "VERMELHO"].v})`}"></span>
+            <div style="min-width:0"><b>${p.title}</b><code>${shareUrl(p).replace("https://", "")}</code></div></div>
+          <div class="share-grid">${SHARE.map(([ch, label, ic]) => `<button class="share-opt" data-channel="${ch}"><span class="ic">${ic}</span>${label}</button>`).join("")}</div>
+          <p class="share-note">${icon("lock", "xs")}<span><b data-frag="shareTotal">${nf.format(p.shares)}</b> compartilhamentos. O link não identifica quem compartilhou.</span></p>
+        </div>
+      </div></div>`;
+  FRAG.shareTotal = p => nf.format(p.shares);
+
+  // ---------- RF25 · perfil público do autor ----------
+  const fmtSince = iso => new Intl.DateTimeFormat("pt-BR", { month: "short", year: "numeric", timeZone: TZ }).format(new Date(iso));
+  SCREENS.author = (uid = 1) => { const a = AUTHORS[uid];
+    const posts = Object.values(POSTS).filter(p => p.author === Number(uid) && !p.kind).sort((x, y) => y.at.localeCompare(x.at));
+    return `${statusbar()}
+    <div class="p-top"><button class="icon-btn" data-back aria-label="Voltar">${icon("back")}</button><h2>${a.name}</h2></div>
+    <div class="profile-head">${avatar(a)}<div><b>${a.name}</b>
+      <span class="p-cat">${dot(a.cat)}${CAT[a.cat].label}</span>
+      <div class="since">Membro desde ${fmtSince(a.since)}</div></div></div>
+    <div class="p-stats"><div><b>${nf.format(a.posts)}</b><span>posts</span></div><div><b>${fmtCount(a.likes)}</b><span>curtidas recebidas</span></div></div>
+    <p class="p-section">Posts de ${a.name}</p>
+    <div class="feed">${posts.map(card).join("")}</div><div class="fade"></div>${tabbar("explore")}`; };
+
+  SCREENS.postModal = () => SCREENS.post() + postModal(POSTS.p1);
+  SCREENS.comments = () => SCREENS.post() + commentsSheet(POSTS.p1, "Também larguei uns três cursos no meio 😅");
+  SCREENS.share = () => SCREENS.post() + shareSheet(POSTS.p1);
+
   const legend = () => `<div class="legend" id="legend">
       <h4>Categorias de usuário</h4>
       <p>Cor nunca é o único sinal: cada categoria tem glifo VSL e rótulo. Tema escuro / variante do tema claro.</p>
@@ -505,13 +749,130 @@
     ["03-alert-feed", "Alert Feed", "alert", ""],
     ["04-profile-feed", "Profile Feed", "profile", ""],
     ["05-config-lgpd", "Configurações LGPD", "settings", ""],
-    ["06-post-feed-claro", "Post Feed · tema claro", "post", "light"]
+    ["06-post-feed-claro", "Post Feed · tema claro", "post", "light"],
+    ["09-post-modal", "Modal do post (RF24)", "postModal", ""],
+    ["10-perfil-autor", "Perfil do autor (RF25)", "author", ""],
+    ["11-comentarios", "Caixa de comentários (RF26)", "comments", ""],
+    ["12-compartilhar", "Compartilhar (RF26)", "share", ""]
   ];
   const g = document.getElementById("gallery");
   g.innerHTML = SHOTS.map(([id, label, scr, theme]) =>
-    `<div><p class="shot-label">${label}</p><div class="phone ${theme}" data-shot="${id}">${SCREENS[scr]()}</div></div>`).join("")
+    `<div><p class="shot-label">${label}</p><div class="phone ${theme}" data-shot="${id}" data-screen="${scr}">${SCREENS[scr]()}</div></div>`).join("")
     + `<div><p class="shot-label">Legenda</p>${legend()}</div>`
     + `<div><p class="shot-label">Marca</p>${brandPanel()}</div>`;
+
+  // ---------- interação (protótipo navegável; no app, cada ação chama a API do RF correspondente) ----------
+  const refresh = id => document.querySelectorAll(`[data-post="${id}"] [data-frag]`).forEach(el => {
+    if (el.dataset.frag in FRAG) el.innerHTML = FRAG[el.dataset.frag](POSTS[id]);
+  });
+  const toast = (phone, msg) => {
+    phone.querySelector(".toast")?.remove();
+    const t = Object.assign(document.createElement("div"), { className: "toast", textContent: msg });
+    t.setAttribute("role", "status");
+    phone.append(t);
+    setTimeout(() => t.remove(), 2200);
+  };
+  const openOverlay = (phone, html, opener) => {
+    phone.insertAdjacentHTML("beforeend", html);
+    const ov = phone.lastElementChild;
+    ov._opener = opener;
+    (ov.querySelector("textarea") || ov.querySelector(".close"))?.focus();
+  };
+  const closeTop = phone => {
+    const ovs = phone.querySelectorAll(".overlay");
+    const top = ovs[ovs.length - 1];
+    if (!top) return false;
+    top.remove();
+    top._opener?.focus?.();
+    return true;
+  };
+  const showScreen = (phone, html) => { phone.innerHTML = html; phone.querySelector("[data-back]")?.focus(); };
+
+  document.addEventListener("click", e => {
+    const phone = e.target.closest(".phone");
+    if (!phone) return;
+    const t = e.target;
+    if (t.closest("[data-close]")) { e.preventDefault(); closeTop(phone); return; }
+    if (t.closest("[data-back]")) { showScreen(phone, SCREENS[phone.dataset.screen]()); return; }
+
+    const user = t.closest("[data-user]");
+    if (user) {                                                 // RF25: foto ou nome → perfil
+      e.preventDefault();
+      showScreen(phone, SCREENS.author(user.dataset.user));
+      return;
+    }
+    const host = t.closest("[data-post]");
+    const p = host && POSTS[host.dataset.post];
+    const act = t.closest("[data-act]");
+    if (act && p) {                                             // RF26
+      e.preventDefault();
+      if (act.dataset.act === "like") { p.liked = !p.liked; p.likes += p.liked ? 1 : -1; refresh(p.id); }
+      if (act.dataset.act === "save") { p.saved = !p.saved; refresh(p.id); toast(phone, p.saved ? "Salvo — só você vê seus salvos" : "Removido dos salvos"); }
+      if (act.dataset.act === "comment") openOverlay(phone, commentsSheet(p), act);
+      if (act.dataset.act === "share") openOverlay(phone, shareSheet(p), act);
+      return;
+    }
+    const opt = t.closest("[data-channel]");
+    if (opt && p) {
+      const ch = opt.dataset.channel, url = shareUrl(p), text = `${p.title} ${url}`;
+      p.channels = p.channels || new Set();
+      if (!p.channels.has(ch)) { p.channels.add(ch); p.shares += 1; refresh(p.id); }   // 1 por (usuário, canal)
+      if (ch === "COPY_LINK") { navigator.clipboard?.writeText(url).catch(() => {}); toast(phone, "Link copiado"); }
+      if (ch === "NATIVE") { navigator.share ? navigator.share({ title: p.title, url }).catch(() => {}) : toast(phone, "Folha do sistema indisponível neste navegador"); }
+      const ext = { WHATSAPP: `https://wa.me/?text=${encodeURIComponent(text)}`, TELEGRAM: `https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(p.title)}`,
+                    X: `https://x.com/intent/post?text=${encodeURIComponent(text)}`, EMAIL: `mailto:?subject=${encodeURIComponent(p.title)}&body=${encodeURIComponent(url)}` }[ch];
+      if (ext) window.open(ext, "_blank", "noopener");
+      return;
+    }
+    const del = t.closest("[data-del]");
+    if (del && p) {
+      COMMENTS[p.id] = COMMENTS[p.id].filter(c => c.id !== Number(del.dataset.del));
+      p.comments -= 1; refresh(p.id); toast(phone, "Comentário apagado");
+      return;
+    }
+    const cardEl = t.closest(".card[data-post]");
+    if (cardEl && p && !p.alert && !t.closest(".overlay")) {     // RF24: toque no card → modal
+      e.preventDefault();
+      openOverlay(phone, postModal(p), cardEl.querySelector(".c-link") || cardEl);
+    }
+  });
+
+  document.addEventListener("input", e => {
+    const form = e.target.closest("[data-compose]");
+    if (!form) return;
+    const v = e.target.value;
+    form.querySelector("[data-count]").textContent = `${nf.format(v.length)} / 2.000`;
+    form.querySelector(".send").disabled = !v.trim();
+  });
+  document.addEventListener("submit", e => {
+    const form = e.target.closest("[data-compose]");
+    if (!form) return;
+    e.preventDefault();
+    const p = POSTS[form.closest("[data-post]").dataset.post];
+    const body = form.elements.body.value.trim();
+    if (!body) return;
+    (COMMENTS[p.id] = COMMENTS[p.id] || []).push({ id: Date.now(), author: VIEWER, at: NOW.toISOString(), text: body });
+    p.comments += 1;
+    refresh(p.id);
+    form.elements.body.value = "";
+    form.querySelector("[data-count]").textContent = "0 / 2.000";
+    form.querySelector(".send").disabled = true;
+    const list = form.closest(".overlay").querySelector("[data-frag=commentList]");
+    list.scrollTop = list.scrollHeight;
+  });
+  document.addEventListener("keydown", e => {
+    const phone = document.activeElement?.closest?.(".phone");
+    if (e.key === "Escape" && phone) { closeTop(phone); return; }
+    if (e.key === "Tab" && phone) {                             // foco preso dentro do diálogo aberto
+      const ovs = phone.querySelectorAll(".overlay");
+      const top = ovs[ovs.length - 1];
+      if (!top) return;
+      const f = [...top.querySelectorAll("a[href], button:not([disabled]), textarea")];
+      if (!f.length) return;
+      if (e.shiftKey && document.activeElement === f[0]) { e.preventDefault(); f[f.length - 1].focus(); }
+      else if (!e.shiftKey && document.activeElement === f[f.length - 1]) { e.preventDefault(); f[0].focus(); }
+    }
+  });
 })();
 </script>
 </body>

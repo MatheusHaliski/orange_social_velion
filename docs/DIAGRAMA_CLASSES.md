@@ -98,26 +98,85 @@ classDiagram
     }
 
     class Post {
-        <<abstract>>
-        #UUID id
-        #Long authorId
-        #UserCategoryEnum authorCategory
-        #FeedType feed
+        <<Entity · PostgreSQL post>>
+        #UUID id «UUIDv7»
+        #Long authorUserId
+        #UserCategoryEnum authorUserType
+        #FeedType feedType
+        #MediaType mediaType
         #String title
         #String subtitle
+        #String body
+        #String mediaObjectKey
         #AgeRating ageRating
         #PostStatus status
         #String country
         #String city
-        #long views
-        #long likes
-        #long comments
-        #long shares
-        #Instant createdAt
+        #long likeCount «somente leitura»
+        #long commentCount «somente leitura»
+        #long shareCount «somente leitura»
+        #long viewCount
+        #Instant createdAt «data de publicação»
         +publish() void
         +archive() void
-        +remove(String reason) void
+        +remove() void
+        +isVisibleTo(Long viewerId) boolean
+        +acceptsInteractions() boolean
         +trendingScore() double
+    }
+
+    class PostStatus {
+        <<enumeration>>
+        DRAFT
+        PUBLISHED
+        ARCHIVED
+        REMOVED
+        +canTransitionTo(PostStatus) boolean
+    }
+
+    class AgeRating {
+        <<enumeration>>
+        LIVRE
+        AGE_12
+        AGE_16
+        AGE_18
+        SENSITIVE
+    }
+
+    class PostComment {
+        <<Entity · PostgreSQL post_comment>>
+        -Long id
+        -UUID postId
+        -Long authorUserId
+        -String body «máx. 2000»
+        -CommentStatus status
+        -Instant createdAt
+        +remove() void
+        +canBeRemovedBy(Long userId, Post post) boolean
+    }
+
+    class PostReaction {
+        <<tabela post_reaction>>
+        UUID postId
+        Long userId
+        ReactionKind kind «LIKE · SAVE»
+    }
+
+    class PostShare {
+        <<tabela post_share>>
+        UUID postId
+        Long userId «NULL após LGPD»
+        ShareChannel channel
+    }
+
+    class ShareChannel {
+        <<enumeration>>
+        COPY_LINK
+        NATIVE
+        WHATSAPP
+        TELEGRAM
+        X
+        EMAIL
     }
 
     class MediaPost {
@@ -192,6 +251,15 @@ classDiagram
     VSusercontrolist "1" -- "1" VelionPoints : wallet
     VSusercontrolist "1" -- "0..*" VelionTrophy : trophies
     VSusercontrolist "1" -- "0..*" Post : publica
+    VSusercontrolist "1" -- "0..*" PostComment : escreve
+    VSusercontrolist "1" -- "0..*" PostReaction : curte / salva
+    VSusercontrolist "0..1" -- "0..*" PostShare : compartilha
+    Post "1" *-- "0..*" PostComment : caixa de mensagens
+    Post "1" *-- "0..*" PostReaction
+    Post "1" *-- "0..*" PostShare
+    Post --> PostStatus
+    Post --> AgeRating
+    PostShare --> ShareChannel
 
     Post <|-- MediaPost
     Post <|-- AudioContent
@@ -208,7 +276,8 @@ classDiagram
 | Classe | Armazenamento | Observação |
 |---|---|---|
 | `VSusercontrolist`, `ConsentEvent`, `VelionPoints`, `VelionTrophy` | PostgreSQL 17 + PostGIS | Fonte da verdade, transações ACID |
-| `Post` (+ subclasses) — metadados | PostgreSQL 17 + PostGIS | Registro canônico do post |
+| `Post` (+ subclasses) — metadados e contadores | PostgreSQL 17 + PostGIS (`post`) | Registro canônico do post (V2) |
+| `PostComment`, `PostReaction`, `PostShare` | PostgreSQL (`post_comment`, `post_reaction`, `post_share`) | Interações RF26; contadores na linha do `post` |
 | `Post` — projeção de timeline | Cassandra `post_timeline` | Fan-out on write por seguidor/feed |
 | `Post.trendingScore()` | Valkey ZSET `trending:{feed}[:{categoria}]` | Ranking em tempo real |
 | Mídias (`photoObjectKey`, `mediaObjectKeys`, `audioObjectKey`) | AWS S3 | O banco guarda apenas a chave do objeto |
@@ -221,3 +290,6 @@ classDiagram
 - **Cor do autor desnormalizada:** `Post.authorCategory` é copiada no momento da publicação para
   permitir filtro por categoria na timeline sem join.
 - **`ANONYMOUS_LGPD_DELETED` é terminal:** nenhum método de domínio aceita transição a partir dele.
+- **Visibilidade do post (RF24):** `PUBLISHED`/`ARCHIVED` para todos, `DRAFT` só para o autor, `REMOVED` para
+  ninguém; autor não `ACTIVE` esconde o post de terceiros. Só `PUBLISHED` aceita interações (RF26).
+- **Contadores somente leitura no JPA:** quem altera é o `PostInteractionService`, com UPDATE atômico.

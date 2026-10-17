@@ -12,8 +12,13 @@ telas e cards do Trello.
 | RF2 | Editar informações pessoais e preferências do perfil | 🟡 parcial | [RF02-editar-perfil.md](RF02-editar-perfil.md) |
 | RF3 | Gerenciar consentimentos e privacidade *(escopo inferido)* | 🟡 parcial | [RF03-consentimento-privacidade.md](RF03-consentimento-privacidade.md) |
 | RF23 | Direitos do titular — portabilidade e eliminação *(escopo inferido)* | 🟡 parcial | [RF23-direitos-titular-lgpd.md](RF23-direitos-titular-lgpd.md) |
+| RF24 | Visualizar post em detalhe (modal, data de publicação) *(numeração provisória)* | 🟡 parcial | [RF24-visualizar-post.md](RF24-visualizar-post.md) |
+| RF25 | Perfil público do autor com o feed dele *(numeração provisória)* | 🟡 parcial | [RF25-perfil-publico-autor.md](RF25-perfil-publico-autor.md) |
+| RF26 | Interações com contagem: curtir, comentar, compartilhar, salvar *(numeração provisória)* | 🟡 parcial | [RF26-interacoes-post.md](RF26-interacoes-post.md) |
 
-> RF4–RF22 ainda não têm documento: a lista oficial não está no repositório. Ao adicioná-los, siga a regra abaixo.
+> RF4–RF22 ainda não têm documento: a lista oficial não está no repositório. RF24–RF26 nasceram da
+> auditoria de 2026-10-17 e foram numerados depois de RF23 para não colidir; renumerar quando a lista
+> oficial chegar. Ao adicionar RFs, siga a regra abaixo.
 
 ## Regra: diagramas sempre atualizados
 
@@ -24,8 +29,9 @@ telas e cards do Trello.
    - estrutura: todo RF do catálogo tem documento, cabeçalho completo e ao menos um diagrama;
    - desatualização: se um arquivo de `paths` mudou e o documento do RF não, o job falha;
    - sintaxe: um diagrama que não renderiza falha o job.
-4. Mudança sem efeito no comportamento (renomear, formatar)? Inclua `[rf-docs-skip]` na mensagem de um
-   commit do PR, explicando o motivo.
+4. Mudança sem efeito no comportamento (renomear, formatar)? Comece uma linha da mensagem de um commit
+   do PR com `[rf-docs-skip: RF2, RF3] motivo` para dispensar só os RFs listados, ou `[rf-docs-skip] motivo`
+   para todos. O marcador só vale no início da linha: citá-lo no meio de um texto não desliga nada.
 
 ### Cabeçalho obrigatório
 

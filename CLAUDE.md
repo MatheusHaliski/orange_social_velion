@@ -14,7 +14,8 @@ Ao trabalhar em qualquer RF:
   os diagramas (caso de uso, sequência, estados, atividades) e a tabela de rastreabilidade daquele RF.
 - **Arquivo novo que implementa um RF** → incluí-lo em `paths` do RF correspondente.
 - Diagramas transversais (`docs/DIAGRAMA_*.md`, `docs/MAQUINA_ESTADOS.md`) também devem refletir o código.
-- `[rf-docs-skip]` na mensagem de commit só para mudanças sem efeito no comportamento, com o motivo.
+- `[rf-docs-skip: RFn, …] motivo` (ou `[rf-docs-skip]` para todos), **no início de uma linha** da mensagem de
+  commit, só para mudanças sem efeito no comportamento daqueles RFs.
 
 Antes de commitar, rode `python3 scripts/check_rf_docs.py --base origin/main`. O job **Docs por RF** do CI
 repete essa verificação e renderiza todo Mermaid de `docs/`; diagrama inválido ou desatualizado falha o build.
@@ -31,8 +32,10 @@ docker compose up -d                       # PostGIS, Valkey, Garage (+ --profil
 
 ## Convenções
 
-- `schema.sql` é a DDL de referência; `db/migration/V1__baseline.sql` deve ser idêntico (`SchemaConsistencyTest`).
-  Mudança de schema = nova migração `V{n}__*.sql` + atualização de `schema.sql`.
+- `schema.sql` é a DDL de referência e deve ser a concatenação exata de `db/migration/V1..Vn` (`SchemaConsistencyTest`).
+  Mudança de schema = nova migração `V{n}__*.sql` (começando com uma linha em branco) + o mesmo texto anexado a `schema.sql`.
+- Identidade na API: até o Keycloak (OS-13) não há login; `orange-social.auth.dev-header-enabled` (cabeçalho
+  `X-Orange-Dev-User`) existe só para dev e testes de integração — nunca ligar em produção.
 - Cores, glifos e contraste seguem `docs/DESIGN_SYSTEM.md`; a cor nunca é o único sinal.
 - Decisões de tecnologia ficam em `docs/PESQUISA_TECNOLOGIAS.md` (ADRs); backlog em `docs/TRELLO_BACKLOG.md`
   e no quadro Trello "Orange Social - Velion Tech".

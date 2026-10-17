@@ -6,6 +6,10 @@ Uso:
     python3 scripts/check_rf_docs.py --base origin/main # + desatualização em relação a um ref
 
 Regras: ver docs/rf/README.md. Sai com código 1 se algo falhar.
+
+Exceção por commit (o marcador precisa começar a linha da mensagem):
+    [rf-docs-skip] motivo            ignora a desatualização de todos os RFs
+    [rf-docs-skip: RF2, RF3] motivo  ignora só os RFs listados
 """
 from __future__ import annotations
 
@@ -22,6 +26,8 @@ CATALOG = RF_DIR / "README.md"
 REQUIRED = ("rf", "titulo", "status", "paths")
 STATUSES = {"planejado", "parcial", "pronto"}
 SKIP_MARK = "[rf-docs-skip]"
+# Só no início de uma linha: citar o marcador no meio de um texto não deve desligar a verificação.
+SKIP_RE = re.compile(r"^\[rf-docs-skip(?::\s*([^\]]*))?\]", re.M)
 
 
 def parse_front_matter(text: str) -> dict:
@@ -101,13 +107,18 @@ def check_drift(docs, base: str) -> list[str]:
                              capture_output=True, text=True, check=True).stdout.splitlines()
     messages = subprocess.run(["git", "log", "--format=%B", rng], cwd=ROOT,
                               capture_output=True, text=True, check=True).stdout
-    if SKIP_MARK in messages:
-        print(f"aviso: {SKIP_MARK} encontrado nos commits de {rng}; verificação de desatualização ignorada")
-        return []
+    skipped: set[str] = set()
+    for m in SKIP_RE.finditer(messages):
+        if not m.group(1):
+            print(f"aviso: {SKIP_MARK} encontrado nos commits de {rng}; verificação de desatualização ignorada")
+            return []
+        skipped |= {rf.strip().upper() for rf in m.group(1).split(",") if rf.strip()}
+    if skipped:
+        print(f"aviso: desatualização ignorada para {', '.join(sorted(skipped))} ({SKIP_MARK} nos commits de {rng})")
     errors: list[str] = []
     for path, fm, _ in docs:
         rel = str(path.relative_to(ROOT))
-        if not fm.get("paths") or rel in changed:
+        if not fm.get("paths") or rel in changed or fm["rf"].upper() in skipped:
             continue
         touched = sorted(f for f in changed if matches(f, fm["paths"]))
         if touched:
@@ -129,7 +140,8 @@ def main() -> int:
     for e in errors:
         print(f"ERRO {e}")
     if errors:
-        print(f"\nVeja as regras em docs/rf/README.md (use {SKIP_MARK} só para mudanças sem efeito no comportamento).")
+        print(f"\nVeja as regras em docs/rf/README.md (use {SKIP_MARK} ou [rf-docs-skip: RFn] no início de uma linha "
+              "do commit só para mudanças sem efeito no comportamento daquele RF).")
     return 1 if errors else 0
 
 

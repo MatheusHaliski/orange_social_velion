@@ -13,3 +13,7 @@ spring:
       timeout: 20s
     connection:
       init-query-timeout: 20s
+
+orange-social:
+  auth:
+    dev-header-enabled: true  # identidade via X-Orange-Dev-User nos *IT (ver ViewerResolver)

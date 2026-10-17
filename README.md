@@ -44,6 +44,20 @@ src/main/java/com/orangesocial/
 - [Protótipo de interface](design/prototype/index.html) · [telas renderizadas](design/prototype/screens/) ·
   [marca e logo](design/brand/) ([regras](docs/DESIGN_SYSTEM.md#8-marca))
 
+## API (até agora)
+
+| Método e rota | RF | O que faz |
+|---|---|---|
+| `GET /api/v1/posts/{id}` | RF24 | Post completo para o modal: autor, `publishedAt`, contagens, estado dos botões, `shareUrl` |
+| `GET /api/v1/users/{id}/profile` · `GET /api/v1/users/{id}/posts?cursor=` | RF25 | Perfil público (dados mínimos) e feed do autor paginado por cursor |
+| `PUT`/`DELETE /api/v1/posts/{id}/like` · `…/save` | RF26 | Curtir e salvar, idempotentes |
+| `GET`/`POST /api/v1/posts/{id}/comments` · `DELETE …/comments/{cid}` | RF26 | Caixa de mensagens do post |
+| `POST /api/v1/posts/{id}/shares` `{channel}` | RF26 | Registra o compartilhamento e devolve link e total |
+
+Erros em Problem Details (RFC 9457) com mensagem em pt-BR. Ainda não há login (Keycloak no OS-13): em
+desenvolvimento, `ORANGE_DEV_HEADER_AUTH=true` aceita o usuário no cabeçalho `X-Orange-Dev-User` —
+nunca em produção.
+
 ## Ambiente local
 
 ```bash

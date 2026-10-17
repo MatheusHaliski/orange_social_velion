@@ -7,9 +7,9 @@ paths:
   - src/main/java/com/orangesocial/domain/model/UserControlList.java
   - src/main/java/com/orangesocial/domain/model/UserCategoryEnum.java
   - src/main/java/com/orangesocial/domain/model/AccountStatus.java
-  - src/main/java/com/orangesocial/infrastructure/persistence/postgres/**
+  - src/main/java/com/orangesocial/infrastructure/persistence/postgres/UserControlListRepository.java
   - src/main/resources/schema.sql
-  - src/main/resources/db/migration/**
+  - src/main/resources/db/migration/V1__baseline.sql
 ---
 
 # RF1 · Cadastro de usuário
@@ -82,6 +82,7 @@ sequenceDiagram
 erDiagram
     VSusercontrolist ||--o{ consent_event : registra
     VSusercontrolist ||--o| user_key : "DEK (crypto-shredding)"
+    VSusercontrolist ||--o{ post : "publica (RF24–RF26)"
     VSusercontrolist {
         bigint id PK
         varchar email UK
@@ -105,7 +106,16 @@ erDiagram
         bytea wrapped_dek
         timestamptz destroyed_at
     }
+    post {
+        uuid id PK
+        bigint author_user_id FK
+        varchar author_user_type "cópia da categoria"
+    }
 ```
+
+Só conta `ACTIVE` aparece como autor com link para o perfil público ([RF25](RF25-perfil-publico-autor.md)) e
+pode curtir, comentar ou compartilhar ([RF26](RF26-interacoes-post.md)); o cadastro em
+`PENDING_VERIFICATION` lê, mas recebe 403 ao interagir.
 
 Fluxo de atividades completo do cadastro (por Usertype, comunidades e GPS):
 [`DIAGRAMA_ATIVIDADES.md`](../DIAGRAMA_ATIVIDADES.md) · estados da conta: [`MAQUINA_ESTADOS.md`](../MAQUINA_ESTADOS.md).
@@ -115,7 +125,7 @@ Fluxo de atividades completo do cadastro (por Usertype, comunidades e GPS):
 | Camada | Artefato | Situação |
 |---|---|---|
 | Domínio | `UserControlList`, `UserCategoryEnum`, `AccountStatus`, `GeoLocation`, `CommunityInterest` | ✅ |
-| Persistência | `schema.sql` / `V1__baseline.sql`, `UserControlListRepository` | ✅ |
+| Persistência | `V1__baseline.sql` (parte de `schema.sql`), `UserControlListRepository` | ✅ |
 | Testes | `DomainModelTest`, `UserControlListRepositoryIT` (PostGIS real) | ✅ |
 | API | `POST /api/v1/users`, verificação de código | ⏳ OS-11, OS-12 |
 | Tela | Protótipo: [Perfis](../../design/prototype/screens/04-profile-feed.png) (resultado do cadastro) | 🟡 tela de cadastro ainda não desenhada |

@@ -127,6 +127,15 @@ Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 | OS-4C **(novo)** | Backups em sa-east-1 com Vault Lock; política de retenção ≤ 35 dias; reaplicar exclusões após restore | 🔴 🔵 | 3 | RPO ≤ 5 min, RTO ≤ 4 h; restore testado por trimestre |
 | OS-4D **(novo)** | Moderação automatizada (texto, imagem, áudio) + hash CSAM | 🔴 🔵 | 8 | Pipeline via Kafka; score alto bloqueia, médio vai para fila humana; logs de decisão para apelação |
 
+### Posts: detalhe, perfil do autor e interações — RF24 · RF25 · RF26 (auditoria 17/10/2026)
+
+| ID | Título | Etiqueta | Pts | Critérios de aceite |
+|---|---|---|---|---|
+| OS-56 | RF24 — Modal do post com dados completos e data de publicação | 🔵 🟠 | 5 | ✅ `GET /api/v1/posts/{id}` (rascunho só para o autor, removido/autor suspenso = 404), `PostApiIT`, protótipo `09-post-modal`; data relativa no card com `<time>` + tooltip absoluto; modal acessível (foco preso, `Esc`); pendente no app (OS-39) |
+| OS-57 | RF25 — Perfil público do autor + feed dele (toque na foto ou no nome) | 🔵 🟠 🔴 | 5 | ✅ `GET /api/v1/users/{id}/profile` com minimização LGPD e `GET …/posts` com cursor; protótipo `10-perfil-autor`; conta suspensa/eliminada sem link |
+| OS-58 | RF26 — Curtir, comentar (caixa de mensagens), compartilhar e salvar com contagem | 🔵 🟠 | 8 | ✅ tabelas `post_reaction`/`post_comment`/`post_share` (V2), contadores atômicos e idempotentes, 401/403/409, protótipo `11-comentarios` e `12-compartilhar`; botões `<button>` com `aria-label`/`aria-pressed` |
+| OS-59 | RF26 — Interações em tempo real, notificação ao autor, moderação e limites | 🔵 🔴 | 8 | Contadores via SSE (OS-2B); notificação LIKE/COMMENT (OS-27); comentários na moderação (OS-4D); rate limit por usuário/rota (OS-47) |
+
 ### Ecossistema Velion (Backlog)
 
 | ID | Título | Etiqueta | Pts | Critérios de aceite |
@@ -145,8 +154,8 @@ Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 1. **Sprint 0:** OS-01 → OS-08
 2. **Sprint 1:** OS-10, OS-11, OS-12, OS-13, OS-40, OS-46, OS-30
 3. **Sprint 2:** OS-14, OS-15, OS-16, OS-17, OS-18, OS-19, OS-41, OS-49, OS-31, OS-32, OS-38
-4. **Sprint 3:** OS-20, OS-21, OS-22, OS-23, OS-24, OS-28, OS-33, OS-3A
-5. **Sprint 4:** OS-25, OS-26, OS-27, OS-2B, OS-34, OS-35, OS-36, OS-37
+4. **Sprint 3:** OS-20, OS-21, OS-22, OS-23, OS-24, OS-28, OS-33, OS-3A, OS-56, OS-57, OS-58
+5. **Sprint 4:** OS-25, OS-26, OS-27, OS-2B, OS-34, OS-35, OS-36, OS-37, OS-59
 6. **Sprint 5:** OS-43, OS-44, OS-45, OS-47, OS-48, OS-4A, OS-4B, OS-4C
 7. **Sprint 6:** OS-2A, OS-2C, OS-4D, OS-42, OS-39
 8. **Sprint 7+:** OS-29, OS-50 → OS-55
