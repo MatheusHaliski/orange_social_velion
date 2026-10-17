@@ -1,5 +1,8 @@
 # Orange Social
 
+[![CI](https://github.com/matheushaliski/orange_social_velion/actions/workflows/ci.yml/badge.svg)](https://github.com/matheushaliski/orange_social_velion/actions/workflows/ci.yml)
+[![CodeQL](https://github.com/matheushaliski/orange_social_velion/actions/workflows/codeql.yml/badge.svg)](https://github.com/matheushaliski/orange_social_velion/actions/workflows/codeql.yml)
+
 Rede social do ecossistema **Velion** com categorização visual de usuários (6 cores), quatro feeds
 independentes (Profile · Post · Audio · Alert), filtro multidimensional de 6 eixos e conformidade
 LGPD por construção.
@@ -53,6 +56,9 @@ mvn test                        # unitários (sem Docker)
 mvn verify                      # + testes de integração *IT com Testcontainers (PostGIS, Valkey, Cassandra 5)
 python3 scripts/wcag_contrast.py
 ```
+
+`mvn package` também gera o SBOM CycloneDX em `target/classes/META-INF/sbom/application.cdx.json` (exposto em `/actuator/sbom` quando o Actuator estiver habilitado); `mvn package jib:dockerBuild` constrói a imagem
+OCI `orange-social:local` no daemon Docker sem Dockerfile.
 
 Os testes de integração usam `@ServiceConnection` (`src/test/java/com/orangesocial/support/PolyglotContainers.java`)
 e o perfil `it`. Com `testcontainers.reuse.enable=true` em `~/.testcontainers.properties` os containers

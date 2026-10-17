@@ -19,8 +19,11 @@
 
     <properties>
         <!-- Alvo de produção: Java 25 LTS (ver docs/PESQUISA_TECNOLOGIAS.md, ADR-01).
-             21 é o mínimo suportado pelo projeto e o que o ambiente local usa hoje. -->
+             21 é o mínimo suportado pelo projeto; o CI valida em 21 e 25. -->
         <java.version>21</java.version>
+        <jib-maven-plugin.version>3.5.2</jib-maven-plugin.version>
+        <!-- Sobrescrito no CI com -Dimage=... -->
+        <image>orange-social:local</image>
     </properties>
 
     <dependencies>
@@ -107,6 +110,34 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <!-- Imagem OCI sem Dockerfile, reprodutível (ADR-11); base JRE 25 não-root -->
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>${jib-maven-plugin.version}</version>
+                <configuration>
+                    <from>
+                        <image>eclipse-temurin:25-jre-noble</image>
+                    </from>
+                    <to>
+                        <image>${image}</image>
+                    </to>
+                    <container>
+                        <user>65532:65532</user>
+                        <ports>
+                            <port>8080</port>
+                        </ports>
+                        <jvmFlags>
+                            <jvmFlag>-XX:MaxRAMPercentage=75</jvmFlag>
+                            <jvmFlag>-XX:+UseZGC</jvmFlag>
+                        </jvmFlags>
+                        <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+                        <labels>
+                            <org.opencontainers.image.source>https://github.com/matheushaliski/orange_social_velion</org.opencontainers.image.source>
+                        </labels>
+                    </container>
+                </configuration>
             </plugin>
             <!-- Unitários (*Test) no surefire; integração (*IT, exigem Docker) no failsafe via `mvn verify` -->
             <plugin>
