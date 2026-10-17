@@ -7,6 +7,7 @@
 Entradas em backgrounds/src/ (artes originais). Saídas em backgrounds/:
     {nome}.webp       resolução original (~1200 px), para o fundo do app
     {nome}-thumb.webp 320 px, para a escolha em Configurações → Exibição
+    visao-geral.png   as seis artes lado a lado
 
 Como funciona:
   * "placa" (mosaicos clássico, profundo, brilho, céu): o ícone de rede genérico dentro da placa escura é
@@ -14,6 +15,8 @@ Como funciona:
     e o logo oficial (orange-social-mark-528.png) entra centrado no mesmo lugar.
   * "balão" (mosaico areia): o balãozinho de mensagem é coberto pelo logo oficial; a "cauda" do balão,
     que ficaria aparecendo, é reconstruída por inpainting a partir das pastilhas em volta.
+  * "disco" (mosaico laranja): o disco com a rede do logo vira o logo oficial simples, no mesmo padrão do
+    mosaico areia; a borda escura do disco que sobraria em volta é reconstruída a partir das pastilhas.
 Coordenadas medidas nas artes originais (grade de 20 px).
 """
 from __future__ import annotations
@@ -38,6 +41,7 @@ ART = [
     ("mosaico-brilho", "placa", (415, 411), 56, (364, 466), 48),
     ("mosaico-ceu", "placa", (411, 406), 56, (358, 462), 48),
     ("mosaico-areia", "balao", (269, 425), 72, None, 72),
+    ("mosaico-laranja", "disco", (211, 342), 80, None, 75),
 ]
 
 
@@ -68,6 +72,14 @@ def bubble_tail_mask(img: np.ndarray, center, radius: int) -> np.ndarray:
     yy, xx = np.mgrid[0:h, 0:w]
     mask[(xx - cx) ** 2 + (yy - cy) ** 2 <= (radius - 2) ** 2] = 0   # o logo cobre o resto
     return cv2.dilate(mask, np.ones((3, 3), np.uint8), iterations=2)
+
+
+def disc_rim_mask(img: np.ndarray, center, outer: int, logo_r: int) -> np.ndarray:
+    """Anel entre a borda do logo novo e a borda do disco antigo (o centro fica sob o logo)."""
+    h, w, _ = img.shape
+    yy, xx = np.mgrid[0:h, 0:w]
+    d2 = (xx - center[0]) ** 2 + (yy - center[1]) ** 2
+    return ((d2 <= outer ** 2) & (d2 >= (logo_r - 3) ** 2)).astype(np.uint8) * 255
 
 
 def add_grain(img: np.ndarray, mask: np.ndarray, reference: np.ndarray) -> np.ndarray:
@@ -104,9 +116,12 @@ def main() -> None:
             fixed = cv2.inpaint(bgr, mask, 9, cv2.INPAINT_TELEA)
             plaque_px = bgr[(cv2.dilate(mask, np.ones((15, 15), np.uint8)) > 0) & (mask == 0)]
             fixed = add_grain(fixed, mask, plaque_px)
-        else:
+        elif kind == "balao":
             mask = bubble_tail_mask(rgb, center, logo_r)
             fixed = cv2.inpaint(bgr, mask, 7, cv2.INPAINT_TELEA)
+        else:
+            mask = disc_rim_mask(rgb, center, icon_r, logo_r)
+            fixed = cv2.inpaint(bgr, mask, 9, cv2.INPAINT_TELEA)
         edited = paste_mark(Image.fromarray(cv2.cvtColor(fixed, cv2.COLOR_BGR2RGB)), center, logo_r)
 
         full = edited  # resolução original (1184–1200 px): ampliar só aumentaria o arquivo
@@ -114,6 +129,14 @@ def main() -> None:
         thumb = edited.resize((320, round(edited.height * 320 / edited.width)), Image.LANCZOS)
         thumb.save(OUT / f"{name}-thumb.webp", "WEBP", quality=78, method=6)
         print("ok", name)
+
+    overview = Image.new("RGB", (3 * 410 + 10, 2 * 305 + 10), (23, 18, 13))
+    order = ["mosaico-laranja", "mosaico-classico", "mosaico-profundo", "mosaico-brilho", "mosaico-ceu", "mosaico-areia"]
+    for i, name in enumerate(order):
+        im = Image.open(OUT / f"{name}.webp")
+        im.thumbnail((400, 300))
+        overview.paste(im, (10 + (i % 3) * 410, 10 + (i // 3) * 305))
+    overview.save(OUT / "visao-geral.png", optimize=True)
 
 
 if __name__ == "__main__":
