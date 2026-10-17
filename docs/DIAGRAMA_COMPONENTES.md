@@ -1,6 +1,9 @@
 # Diagrama de Componentes — Orange Social
 
-Arquitetura em camadas Spring Boot 3 / Java 21 com persistência poliglota.
+Arquitetura em camadas Spring Boot 4.1 / Java 21+ com persistência poliglota. Componentes já implementados:
+`PostController`, `UserProfileController`, `PostQueryService`, `PostInteractionService`, `PostContentEraser`,
+`PostRepository`, `PostCommentRepository`, `UserControlListRepository`, `PostTimelineRepository`,
+`TrendingScoreRepository` (RF24–RF26, RF23); os demais são o desenho alvo.
 
 ```mermaid
 flowchart TB
@@ -24,7 +27,9 @@ flowchart TB
             AUTHC["AuthController"]
             USERC["UserController"]
             FEEDC["FeedController<br/>(profile · post · audio · alert)"]
-            POSTC["PostController"]
+            POSTC["PostController<br/>(detalhe · curtir · comentar · compartilhar · salvar)"]
+            PROFC["UserProfileController<br/>(perfil público · feed do autor)"]
+            VIEWER["ViewerResolver<br/>(identidade · Keycloak no OS-13)"]
             MEDIAC["MediaController<br/>(URLs pré-assinadas)"]
             PRIVC["PrivacyController<br/>(exportar · excluir · consentimentos)"]
             VELC["VelionIntegrationController"]
@@ -35,6 +40,9 @@ flowchart TB
             USERS["UserService"]
             FEEDS["FeedService<br/>(filtro 6 eixos)"]
             POSTS["PostPublishingService"]
+            POSTQ["PostQueryService<br/>(RF24 · RF25)"]
+            POSTI["PostInteractionService<br/>(RF26 · contadores atômicos)"]
+            ERASER["PostContentEraser<br/>(RF23 · passo da saga)"]
             TRENDS["TrendingService"]
             MEDIAS["MediaStorageService"]
             LGPDS["LgpdService<br/>(portabilidade · eliminação)"]
@@ -45,7 +53,8 @@ flowchart TB
         subgraph Repositories["Repositories"]
             USERR["UserControlListRepository<br/>(JPA)"]
             CONSR["ConsentEventRepository<br/>(JPA)"]
-            POSTR["PostRepository<br/>(JPA)"]
+            POSTR["PostRepository<br/>(JPA · reações · compartilhamentos)"]
+            COMR["PostCommentRepository<br/>(JPA)"]
             TIMER["PostTimelineRepository<br/>(Spring Data Cassandra)"]
             TRENDR["TrendingScoreRepository<br/>(StringRedisTemplate · ZSET)"]
             SESSR["SessionRepository<br/>(Valkey)"]
@@ -54,7 +63,7 @@ flowchart TB
     end
 
     subgraph Data["Persistência Poliglota"]
-        MYSQL[("PostgreSQL 17 + PostGIS<br/>VSusercontrolist · consent_event<br/>post · velion_points")]
+        MYSQL[("PostgreSQL 17 + PostGIS<br/>VSusercontrolist · consent_event<br/>post · post_reaction · post_comment<br/>post_share · velion_points")]
         REDIS[("Valkey<br/>trending:{feed}:{cor}<br/>session:{jwtId}")]
         CASS[("Cassandra<br/>post_timeline · activity_log<br/>notification")]
         S3[("AWS S3<br/>fotos · vídeos · áudios")]
@@ -62,12 +71,16 @@ flowchart TB
 
     WEB & MOBILE & VELION -->|HTTPS + JWT| JWT
     JWT --> RATE --> CONSENT --> AUDIT
-    AUDIT --> AUTHC & USERC & FEEDC & POSTC & MEDIAC & PRIVC & VELC
+    AUDIT --> AUTHC & USERC & FEEDC & POSTC & PROFC & MEDIAC & PRIVC & VELC
+    POSTC & PROFC --> VIEWER
 
     AUTHC --> AUTHS
     USERC --> USERS
     FEEDC --> FEEDS
-    POSTC --> POSTS
+    POSTC --> POSTS & POSTQ & POSTI
+    PROFC --> POSTQ
+    POSTQ --> POSTR & USERR
+    POSTI --> POSTR & COMR & USERR
     MEDIAC --> MEDIAS
     PRIVC --> LGPDS
     VELC --> POINTS
@@ -78,11 +91,12 @@ flowchart TB
     POSTS --> POSTR & TIMER & TRENDS & EVENTS
     TRENDS --> TRENDR
     MEDIAS --> S3A
-    LGPDS --> USERR & CONSR & TIMER & TRENDR & S3A & SESSR
+    LGPDS --> ERASER & USERR & CONSR & TIMER & TRENDR & S3A & SESSR
+    ERASER --> POSTR & COMR
     POINTS --> USERR
     EVENTS -.->|PostPublished| POINTS
 
-    USERR & CONSR & POSTR --> MYSQL
+    USERR & CONSR & POSTR & COMR --> MYSQL
     TRENDR & SESSR --> REDIS
     TIMER --> CASS
     S3A --> S3
@@ -107,3 +121,6 @@ flowchart TB
   (`@TransactionalEventListener(phase = AFTER_COMMIT)`), com retentativa idempotente
   (o `post_id` é `timeuuid` gerado uma única vez).
 - Mídia é enviada **antes** da publicação (URL pré-assinada); o post só referencia a chave do objeto.
+- **Contadores de interação** (`like_count`, `comment_count`, `share_count`) vivem na linha do `post` e mudam
+  na mesma transação da reação/comentário/compartilhamento, só quando a linha de associação realmente entrou
+  ou saiu (`ON CONFLICT DO NOTHING`). O JPA nunca os grava (`insertable/updatable = false`).

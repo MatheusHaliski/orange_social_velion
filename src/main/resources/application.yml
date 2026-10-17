@@ -20,7 +20,7 @@ spring:
   flyway:
     enabled: true
     locations: classpath:db/migration
-    # V1__baseline.sql é idêntico a schema.sql (verificado por SchemaConsistencyTest)
+    # schema.sql = V1 + V2 + ... concatenados (verificado por SchemaConsistencyTest)
   sql:
     init:
       mode: never   # o schema é aplicado pelo Flyway, nunca pelo sql init
@@ -30,18 +30,27 @@ spring:
     redis:
       host: ${VALKEY_HOST:localhost}
       port: ${VALKEY_PORT:6379}
-    # Cassandra · timeline / logs / notificações
-    cassandra:
-      keyspace-name: orange_social
-      contact-points: ${CASSANDRA_CONTACT_POINTS:localhost:9042}
-      local-datacenter: ${CASSANDRA_DC:datacenter1}
-      schema-action: none
+
+  # Cassandra · timeline / logs / notificações
+  cassandra:
+    keyspace-name: orange_social
+    contact-points: ${CASSANDRA_CONTACT_POINTS:localhost:9042}
+    local-datacenter: ${CASSANDRA_DC:datacenter1}
+    schema-action: none
 
 orange-social:
+  # base dos links compartilhados (RF26): {public-base-url}/p/{postId}
+  public-base-url: ${PUBLIC_BASE_URL:http://localhost:3000}
+  auth:
+    # SOMENTE dev/testes: identidade no cabeçalho X-Orange-Dev-User, sem autenticação.
+    # Produção usa Keycloak (OS-13); manter false.
+    dev-header-enabled: ${ORANGE_DEV_HEADER_AUTH:false}
   storage:
     # API S3: AWS S3 (sa-east-1) em produção, Garage em desenvolvimento
     endpoint: ${S3_ENDPOINT:http://localhost:3900}
     region: ${S3_REGION:sa-east-1}
     bucket: ${S3_BUCKET:orange-social-media}
+    # de onde o app baixa mídias e avatares (CDN em produção)
+    public-url: ${S3_PUBLIC_URL:http://localhost:3900/orange-social-media}
   trending:
     window-hours: 48

@@ -89,3 +89,27 @@ stateDiagram-v2
 | `Trending` | Sim (destaque 🔥/📈) | Sim (top N) | Sim |
 | `Archived` | Só no perfil do autor | Removido (`ZREM`) | Mantido até TTL |
 | `Removed` | Não | Removido | Removido |
+
+Implementação: `PostStatus` + `Post.publish/archive/remove` (`Trending` é derivado do ZSET, não persistido).
+Detalhe e interações por estado ([RF24](rf/RF24-visualizar-post.md), [RF26](rf/RF26-interacoes-post.md)):
+
+| Estado | Abre no modal | Curtir / comentar / compartilhar | Feed do autor ([RF25](rf/RF25-perfil-publico-autor.md)) |
+|---|---|---|---|
+| `Draft` | Só o autor | Não (409) | Não |
+| `Published` | Todos | Sim | Sim |
+| `Archived` | Todos | Não (409); descurtir continua permitido | Sim |
+| `Removed` | Ninguém (404) | Não | Não |
+
+## 2.1 Comentário (`CommentStatus`)
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> Visible : POST …/comments (1–2000 caracteres)
+    Visible --> Removed : quem escreveu ou dono do post apaga
+    Visible --> Removed : moderação
+    Visible --> Removed : eliminação LGPD do autor (texto apagado)
+    Removed --> [*]
+```
+
+Remover apaga o texto (`body = NULL`), decrementa `post.comment_count` e mantém o id para auditoria.

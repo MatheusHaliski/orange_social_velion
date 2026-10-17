@@ -1,7 +1,11 @@
 # Trello Backlog — Orange Social
 
-Plano de montagem do quadro **Orange Social · Engenharia** no Trello.
+Fonte do quadro **[Orange Social - Velion Tech](https://trello.com/b/ImdiBMps/orange-social-velion-tech)** no Trello.
 Atualizado em 17/10/2026 após a pesquisa de tecnologias ([`PESQUISA_TECNOLOGIAS.md`](PESQUISA_TECNOLOGIAS.md)).
+
+> **Estado no Trello (17/10/2026):** 6 listas, 62 cards e etiquetas de cor aplicados via API.
+> As etiquetas foram criadas sem nome (limitação da API usada) — nomeie-as no quadro conforme a
+> tabela abaixo. Cards OS-01 → OS-08 estão em *Current Sprint*; OS-02 em *Done*; os demais em *Backlog*.
 
 ## Listas (da esquerda para a direita)
 
@@ -49,9 +53,9 @@ Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 | OS-01 | Estrutura do repositório, Maven, **Spring Boot 4.1 / Java 25** | 🔵 | 3 | `mvn test` verde; pacotes `domain`, `infrastructure`, `config`; virtual threads ligadas; CI com JDK 25 |
 | OS-02 | Documentação UML em Mermaid (`docs/`) | 🔵 | 3 | 5 diagramas: classes, estados, componentes, sequência, atividades |
 | OS-03 | Docker Compose local: **PostgreSQL 17 + PostGIS, Valkey 9, Cassandra 5, Garage** | 🔵 | 3 | ✅ `docker-compose.yml` + `infra/garage/`; Cassandra no profile `full`; falta validar em máquina com Docker |
-| OS-04 | Pipeline CI no GitHub Actions | 🔵 🔴 | 3 | `mvn verify` + Testcontainers; CodeQL, Dependabot, Gitleaks com push protection, Trivy, SBOM CycloneDX; PR bloqueado se falhar |
-| OS-05 | Migrações versionadas (Flyway) a partir de `schema.sql` | 🔵 | 2 | ✅ `db/migration/V1__baseline.sql` + `SchemaConsistencyTest`; falta rodar `validate` contra o PostGIS real (OS-06) |
-| OS-06 | Testes de integração com Testcontainers 2.0 (PostGIS, Valkey, Cassandra) | 🔵 | 3 | `@ServiceConnection`; repositórios testados contra containers reais |
+| OS-04 | Pipeline CI no GitHub Actions | 🔵 🔴 | 3 | ✅ `ci.yml` (verify JDK 21+25, Gitleaks, Trivy fs + imagem Jib, SBOM), `codeql.yml`, `dependabot.yml`; Code scanning ativo e recebendo CodeQL + SARIF do Trivy (CI #8 verde). **Ainda manual no GitHub:** Secret scanning + Push protection, Dependabot alerts e proteção da `main` exigindo os checks `Build & test (JDK 21)`, `Build & test (JDK 25)`, `Gitleaks`, `Trivy (dependências e config)`, `Imagem OCI (Jib) + Trivy`, `Analyze (java-kotlin)`, `Analyze (actions)` |
+| OS-05 | Migrações versionadas (Flyway) a partir de `schema.sql` | 🔵 | 2 | ✅ `V1__baseline.sql` aplicado pelo Flyway e `ddl-auto=validate` verde contra PostGIS real (`UserControlListRepositoryIT`) |
+| OS-06 | Testes de integração com Testcontainers 2.0 (PostGIS, Valkey, Cassandra) | 🔵 | 3 | ✅ `PolyglotContainers` + 3 classes `*IT` rodando em `mvn verify` (failsafe); unitários continuam em `mvn test` |
 | OS-07 **(novo)** | Spring Modulith 2.x: módulos `profile`, `post`, `audio`, `alert`, `trending`, `filter`, `lgpd`, `velion` | 🔵 | 5 | Teste de fronteiras (ArchUnit) verde; Event Publication Registry como outbox no MVP |
 | OS-08 **(novo)** | IaC em OpenTofu: VPC, ECS Fargate, RDS PostgreSQL, ElastiCache Valkey, S3 (sa-east-1) | 🔵 | 8 | `tofu plan` limpo em `dev`; state em S3 com locking; contas separadas por ambiente |
 
@@ -123,6 +127,15 @@ Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 | OS-4C **(novo)** | Backups em sa-east-1 com Vault Lock; política de retenção ≤ 35 dias; reaplicar exclusões após restore | 🔴 🔵 | 3 | RPO ≤ 5 min, RTO ≤ 4 h; restore testado por trimestre |
 | OS-4D **(novo)** | Moderação automatizada (texto, imagem, áudio) + hash CSAM | 🔴 🔵 | 8 | Pipeline via Kafka; score alto bloqueia, médio vai para fila humana; logs de decisão para apelação |
 
+### Posts: detalhe, perfil do autor e interações — RF24 · RF25 · RF26 (auditoria 17/10/2026)
+
+| ID | Título | Etiqueta | Pts | Critérios de aceite |
+|---|---|---|---|---|
+| OS-56 | RF24 — Modal do post com dados completos e data de publicação | 🔵 🟠 | 5 | ✅ `GET /api/v1/posts/{id}` (rascunho só para o autor, removido/autor suspenso = 404), `PostApiIT`, protótipo `09-post-modal`; data relativa no card com `<time>` + tooltip absoluto; modal acessível (foco preso, `Esc`); pendente no app (OS-39) |
+| OS-57 | RF25 — Perfil público do autor + feed dele (toque na foto ou no nome) | 🔵 🟠 🔴 | 5 | ✅ `GET /api/v1/users/{id}/profile` com minimização LGPD e `GET …/posts` com cursor; protótipo `10-perfil-autor`; conta suspensa/eliminada sem link |
+| OS-58 | RF26 — Curtir, comentar (caixa de mensagens), compartilhar e salvar com contagem | 🔵 🟠 | 8 | ✅ tabelas `post_reaction`/`post_comment`/`post_share` (V2), contadores atômicos e idempotentes, 401/403/409, protótipo `11-comentarios` e `12-compartilhar`; botões `<button>` com `aria-label`/`aria-pressed` |
+| OS-59 | RF26 — Interações em tempo real, notificação ao autor, moderação e limites | 🔵 🔴 | 8 | Contadores via SSE (OS-2B); notificação LIKE/COMMENT (OS-27); comentários na moderação (OS-4D); rate limit por usuário/rota (OS-47) |
+
 ### Ecossistema Velion (Backlog)
 
 | ID | Título | Etiqueta | Pts | Critérios de aceite |
@@ -141,8 +154,8 @@ Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 1. **Sprint 0:** OS-01 → OS-08
 2. **Sprint 1:** OS-10, OS-11, OS-12, OS-13, OS-40, OS-46, OS-30
 3. **Sprint 2:** OS-14, OS-15, OS-16, OS-17, OS-18, OS-19, OS-41, OS-49, OS-31, OS-32, OS-38
-4. **Sprint 3:** OS-20, OS-21, OS-22, OS-23, OS-24, OS-28, OS-33, OS-3A
-5. **Sprint 4:** OS-25, OS-26, OS-27, OS-2B, OS-34, OS-35, OS-36, OS-37
+4. **Sprint 3:** OS-20, OS-21, OS-22, OS-23, OS-24, OS-28, OS-33, OS-3A, OS-56, OS-57, OS-58
+5. **Sprint 4:** OS-25, OS-26, OS-27, OS-2B, OS-34, OS-35, OS-36, OS-37, OS-59
 6. **Sprint 5:** OS-43, OS-44, OS-45, OS-47, OS-48, OS-4A, OS-4B, OS-4C
 7. **Sprint 6:** OS-2A, OS-2C, OS-4D, OS-42, OS-39
 8. **Sprint 7+:** OS-29, OS-50 → OS-55

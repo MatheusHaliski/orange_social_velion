@@ -19,8 +19,19 @@
 
     <properties>
         <!-- Alvo de produção: Java 25 LTS (ver docs/PESQUISA_TECNOLOGIAS.md, ADR-01).
-             21 é o mínimo suportado pelo projeto e o que o ambiente local usa hoje. -->
+             21 é o mínimo suportado pelo projeto; o CI valida em 21 e 25. -->
         <java.version>21</java.version>
+        <jib-maven-plugin.version>3.5.2</jib-maven-plugin.version>
+        <!-- Sobrescrito no CI com -Dimage=... -->
+        <image>orange-social:local</image>
+
+        <!-- Correções de CVE acima do BOM do Boot 4.1.1 (Trivy na imagem, CI run #3):
+             Tomcat 11.0.24 → CVE-2026-65182/65905/68525 (CRITICAL);
+             Jackson 2.21.5 e 3.1.5 → CVE-2026-89407/89425/68497/91776/91777 (HIGH).
+             Remover quando o parent trouxer versões iguais ou superiores. -->
+        <tomcat.version>11.0.27</tomcat.version>
+        <jackson-2-bom.version>2.21.7</jackson-2-bom.version>
+        <jackson-bom.version>3.1.7</jackson-bom.version>
     </properties>
 
     <dependencies>
@@ -38,6 +49,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+        <!-- Hibernate serializa colunas JSONB (GeoLocation, CommunityInterest) com Jackson 2;
+             o módulo jsr310 habilita java.time.Instant nesse caminho -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.datatype</groupId>
+            <artifactId>jackson-datatype-jsr310</artifactId>
         </dependency>
         <dependency>
             <groupId>org.postgresql</groupId>
@@ -72,6 +89,28 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <!-- Testes de integração contra containers reais (Testcontainers 2.x) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-testcontainers</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-postgresql</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.testcontainers</groupId>
+            <artifactId>testcontainers-cassandra</artifactId>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
 
     <build>
@@ -79,6 +118,54 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <!-- SBOM CycloneDX: o parent do Spring Boot configura o plugin (pluginManagement,
+                 fase generate-resources → META-INF/sbom/application.cdx.json); declará-lo aqui o ativa.
+                 O arquivo vai no jar e na imagem, e o Trivy o usa como fonte de verdade. -->
+            <plugin>
+                <groupId>org.cyclonedx</groupId>
+                <artifactId>cyclonedx-maven-plugin</artifactId>
+            </plugin>
+            <!-- Imagem OCI sem Dockerfile, reprodutível (ADR-11); base JRE 25 não-root -->
+            <plugin>
+                <groupId>com.google.cloud.tools</groupId>
+                <artifactId>jib-maven-plugin</artifactId>
+                <version>${jib-maven-plugin.version}</version>
+                <configuration>
+                    <from>
+                        <image>eclipse-temurin:25-jre-noble</image>
+                    </from>
+                    <to>
+                        <image>${image}</image>
+                    </to>
+                    <container>
+                        <user>65532:65532</user>
+                        <ports>
+                            <port>8080</port>
+                        </ports>
+                        <jvmFlags>
+                            <jvmFlag>-XX:MaxRAMPercentage=75</jvmFlag>
+                            <jvmFlag>-XX:+UseZGC</jvmFlag>
+                        </jvmFlags>
+                        <creationTime>USE_CURRENT_TIMESTAMP</creationTime>
+                        <labels>
+                            <org.opencontainers.image.source>https://github.com/matheushaliski/orange_social_velion</org.opencontainers.image.source>
+                        </labels>
+                    </container>
+                </configuration>
+            </plugin>
+            <!-- Unitários (*Test) no surefire; integração (*IT, exigem Docker) no failsafe via `mvn verify` -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
         </plugins>
     </build>

@@ -143,7 +143,9 @@ adicionar `glyph`); `rating.*` ↔ `ageRating` do post; `content.border.*` ↔ `
 | Componente | Regras |
 |---|---|
 | **TopBar + Segmented Switcher** | 4 abas (Profile · Post · Audio · Alert), `role="tablist"`, navegação por setas, estado persistido; transição com layout animation |
-| **FeedCard** | bolinha (cor + glifo + `aria-label`), borda por tipo, chip de classificação, título obrigatório, subtítulo opcional, ações, indicador de trending (🔥 📈 ➖ 📉) discreto |
+| **FeedCard** | bolinha (cor + glifo + `aria-label`), borda por tipo, chip de classificação, título obrigatório, subtítulo opcional, ações, indicador de trending (🔥 📈 ➖ 📉) discreto; foto + nome do autor = um link para o perfil (RF25); data relativa em `<time datetime>` com a absoluta no `title`; toque no card abre o PostModal |
+| **PostModal** (RF24) | sheet de 92 % da altura, `role="dialog"` + `aria-modal`, foco no "Fechar", `Esc` fecha e devolve o foco ao card; autor em destaque, mídia, texto completo, "Publicado em {data absoluta}" + relativo, contagens por extenso e as 4 ações com rótulo |
+| **CommentsSheet / ShareSheet** (RF26) | caixa de mensagens com lista, apagar o próprio comentário e campo com contador 0/2.000; folha com prévia do link, Copiar link, WhatsApp, Telegram, X, e-mail e "Mais opções" (Web Share API) |
 | **AudioCard** | waveform pré-computado (JSON de ~1.000 picos), play/pause acessível, duração, categoria do autor |
 | **AlertCard** | faixa hazard, fonte verificada visível, validade (`expires` do CAP), nunca sensacionalista; variante "vaga" |
 | **FilterBar** | 6 chips combináveis (Categoria, Tipo, Local, País, Cidade, Nome), "limpar filtros", estado na URL |
@@ -151,10 +153,66 @@ adicionar `glyph`); `rating.*` ↔ `ageRating` do post; `content.border.*` ↔ `
 
 Matriz de testes visuais: 6 categorias × 2 temas × 6 chips de classificação.
 
-## 7. Referências
+## 7. Ícones
+
+Um só estilo para tudo que não é glifo de categoria: **Lucide** (ISC), versão fixada (`lucide-react` /
+`lucide-react-native`; no protótipo, caminhos copiados de `lucide-static@0.460.0`). Nada de ícones
+desenhados à mão "parecidos com Lucide": eles divergem no traço e nos cantos e quebram a consistência.
+
+| Regra | Valor |
+|---|---|
+| Grade / traço | 24 × 24, `stroke-width` 2, pontas e junções arredondadas, `fill="none"` |
+| Tamanhos | `icon.size.md` 18 px (topbar, tab bar) · `sm` 14 px (ações do card, abas) · `xs` 12 px (chips, selos) |
+| Cor | `currentColor`, herdando o texto; estado ativo usa `--brand` **e** muda a forma (ex.: coração preenchido) |
+| Preenchido | só para estado (curtido, salvo) e para play/pause |
+| Acessibilidade | decorativo → `aria-hidden`; ícone sozinho em controle → `<button>` com `aria-label` por extenso |
+| Glifos de categoria | **não** são Lucide: losango, estrela, triângulo, hexágono, retângulo e círculo duplo (§4) |
+
+**Um ícone, um significado** — ações do card:
+
+| Ação | Ícone Lucide | Contagem visível | Observação |
+|---|---|---|---|
+| Curtir | `heart` (preenchido quando ativo) | sim | |
+| Comentar | `message-circle` | sim | abre a caixa de comentários |
+| Compartilhar | `share-2` | sim | abre a folha de compartilhamento (Web Share API / nativa) |
+| Repostar | `repeat-2` | sim | só se o produto tiver repost; não usar `repeat` para "compartilhar" |
+| Salvar | `bookmark` (preenchido quando ativo) | não (privado) | |
+| Trending | `flame` · `trending-up` · `minus` · `trending-down` | texto ao lado | indicador, não botão |
+
+Alerta oficial (Alert Feed) tem **só compartilhar**: sem curtidas nem comentários, para não premiar
+sensacionalismo. Card de áudio e vaga têm as quatro ações.
+
+Implementado no protótipo ([RF26](rf/RF26-interacoes-post.md)): ações são `<button>` com contagem,
+`aria-label` com o número por extenso e `aria-pressed` em curtir/salvar; comentar abre a caixa de
+mensagens e compartilhar abre a folha de compartilhamento.
+
+## 8. Marca
+
+Logo principal: **a laranja "OS" no centro de uma rede de usuários**, com os nós nas 6 cores de categoria
+(§3; PRETO aparece em cinza `#7A7570` para ser visível no disco). Arquivos em `design/brand/`, gerados por
+`python3 design/brand/build_logo.py` (recriação vetorial da arte de referência):
+
+| Arquivo | Uso |
+|---|---|
+| `orange-social-logo.svg` | logo completo — splash, login, loja de apps, materiais, cabeçalhos ≥ 48 px |
+| `orange-social-mark.svg` | só a laranja — topbar, favicon, ícone de notificação, avatar oficial, < 48 px |
+
+- **Tamanho mínimo:** logo completo 48 px; abaixo disso a rede vira ruído e usa-se o mark (mínimo 16 px).
+- **Área de proteção:** ¼ do diâmetro em volta do disco; nada de texto ou borda dentro dela.
+- **Fundo:** funciona sobre `#17120D`, branco e laranja da marca; nunca sobre foto sem véu escuro.
+- **Não fazer:** recolorir os nós fora da paleta de categorias, esticar, girar, trocar "OS" por outra
+  sigla, aplicar sombra/brilho extra, usar a rede sem a laranja.
+- **Assinatura:** mark + "orange." em Bricolage Grotesque 800, ponto em `--brand-text`.
+- A arte raster original deve ficar versionada como `design/brand/orange-social-logo-original.png` para
+  referência; os SVGs são a fonte para produção.
+
+Tela de referência: `design/prototype/screens/08-marca.png`.
+
+## 9. Referências
 
 - [DTCG 2025.10 — primeira versão estável](https://www.w3.org/community/design-tokens/2025/10/28/design-tokens-specification-reaches-first-stable-version/) · [Format Module](https://www.w3.org/community/reports/design-tokens/CG-FINAL-format-20251028/)
 - [Style Dictionary v5 + DTCG](https://help.zeroheight.com/hc/en-us/articles/48049028236187) · [Terrazzo: importar do Figma](https://terrazzo.app/docs/guides/import-from-figma)
 - [Expo SDK 55 changelog](https://expo.dev/changelog/sdk-55) · [NativeWind v5](https://www.nativewind.dev/v5/customization/configuration) · [gluestack-ui v5](https://gluestack.io/blogs/gluestack-ui-v5-alpha-release)
 - [FlashList v2](https://shopify.engineering/flashlist-v2) · [Storybook 10](https://storybook.js.org/releases/10.0)
+- [Lucide](https://lucide.dev) (ISC) — guia de design dos ícones: grade 24, traço 2
 - WCAG 2.x: 1.4.1 (uso da cor), 1.4.3 (contraste mínimo), 1.4.11 (contraste não textual). APCA é informativo (rascunho WCAG 3).
