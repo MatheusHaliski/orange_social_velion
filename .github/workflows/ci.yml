@@ -6,8 +6,9 @@
 # dependencies    → Trivy (CVEs em dependências e configuração)
 # image           → imagem OCI via Jib + Trivy na imagem
 #
-# Push protection do GitHub e branch protection são configurações do repositório,
-# não deste arquivo — ver docs/TRELLO_BACKLOG.md (OS-04).
+# Configurações do repositório (não deste arquivo) — ver docs/TRELLO_BACKLOG.md (OS-04):
+#   Settings → Advanced Security: Code scanning (recebe os SARIF do Trivy e habilita o CodeQL),
+#   Secret scanning + Push protection, Dependabot alerts; Branches: proteção de `main`.
 name: CI
 
 on:
@@ -103,8 +104,17 @@ jobs:
           format: sarif
           output: trivy-fs.sarif
           exit-code: "1"
-      - name: Publicar SARIF
+      - name: SARIF como artefato
         if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-fs-sarif
+          path: trivy-fs.sarif
+          retention-days: 30
+      # Exige "Code scanning" habilitado em Settings → Advanced Security; até lá não derruba o job
+      - name: Publicar SARIF no Code scanning
+        if: always()
+        continue-on-error: true
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-fs.sarif
@@ -136,8 +146,16 @@ jobs:
           format: sarif
           output: trivy-image.sarif
           exit-code: "1"
-      - name: Publicar SARIF
+      - name: SARIF como artefato
         if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trivy-image-sarif
+          path: trivy-image.sarif
+          retention-days: 30
+      - name: Publicar SARIF no Code scanning
+        if: always()
+        continue-on-error: true
         uses: github/codeql-action/upload-sarif@v4
         with:
           sarif_file: trivy-image.sarif
