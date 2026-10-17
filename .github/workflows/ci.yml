@@ -54,7 +54,7 @@ jobs:
 
       - name: Relatórios de teste
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: test-reports-jdk${{ matrix.java }}
           path: |
@@ -64,7 +64,7 @@ jobs:
 
       - name: SBOM (CycloneDX gerado pelo spring-boot-starter-parent no package)
         if: matrix.java == '25'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: sbom-cyclonedx
           path: target/classes/META-INF/sbom/application.cdx.json
@@ -149,7 +149,7 @@ jobs:
           exit-code: "1"
       - name: SARIF como artefato
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: trivy-fs-sarif
           path: trivy-fs.sarif
@@ -191,7 +191,7 @@ jobs:
           exit-code: "1"
       - name: SARIF como artefato
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: trivy-image-sarif
           path: trivy-image.sarif
