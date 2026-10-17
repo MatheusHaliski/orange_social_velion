@@ -32,6 +32,7 @@ src/main/java/com/orangesocial/
 
 ## Documentação
 
+- **[Requisitos funcionais — diagramas por RF](docs/rf/README.md)** (mantidos junto com o código; verificados no CI)
 - [Diagrama de classes](docs/DIAGRAMA_CLASSES.md) · [Máquinas de estados](docs/MAQUINA_ESTADOS.md) ·
   [Componentes](docs/DIAGRAMA_COMPONENTES.md) · [Sequência: Audio Feed](docs/DIAGRAMA_SEQUENCIA.md) ·
   [Atividades: cadastro](docs/DIAGRAMA_ATIVIDADES.md)

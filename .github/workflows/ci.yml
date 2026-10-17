@@ -5,6 +5,7 @@
 # secrets         → Gitleaks no histórico do push/PR
 # dependencies    → Trivy (CVEs em dependências e configuração)
 # image           → imagem OCI via Jib + Trivy na imagem
+# rf-docs         → diagramas por RF: estrutura, desatualização em relação ao código e sintaxe Mermaid
 #
 # Configurações do repositório (não deste arquivo) — ver docs/TRELLO_BACKLOG.md (OS-04):
 #   Settings → Advanced Security: Code scanning ativo (CodeQL + SARIF do Trivy), Secret scanning +
@@ -69,6 +70,44 @@ jobs:
           path: target/classes/META-INF/sbom/application.cdx.json
           if-no-files-found: error
           retention-days: 90
+
+  rf-docs:
+    name: Docs por RF
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Estrutura dos documentos de RF
+        run: python3 scripts/check_rf_docs.py
+      - name: Diagramas atualizados junto com o código
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [ -z "$BASE" ] || [ "$BASE" = "0000000000000000000000000000000000000000" ] || ! git cat-file -e "$BASE^{commit}" 2>/dev/null; then
+            echo "Sem commit base comparável (branch nova ou force-push); verificação de desatualização ignorada."
+            exit 0
+          fi
+          python3 scripts/check_rf_docs.py --base "$BASE"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Sintaxe Mermaid (renderiza todos os diagramas de docs/)
+        run: |
+          echo '{"args":["--no-sandbox"]}' > /tmp/puppeteer.json
+          mkdir -p /tmp/mmd
+          fail=0
+          for f in $(git ls-files 'docs/*.md'); do
+            grep -q '```mermaid' "$f" || continue
+            if npx -y @mermaid-js/mermaid-cli@11.4.2 -q -p /tmp/puppeteer.json -i "$f" -o "/tmp/mmd/$(basename "$f")"; then
+              echo "ok  $f"
+            else
+              echo "::error file=$f::diagrama Mermaid inválido"
+              fail=1
+            fi
+          done
+          exit $fail
 
   secrets:
     name: Gitleaks
