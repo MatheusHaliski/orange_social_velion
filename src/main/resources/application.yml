@@ -1,0 +1,39 @@
+spring:
+  application:
+    name: orange-social
+
+  # MySQL 8.0 · fonte da verdade
+  datasource:
+    url: ${MYSQL_URL:jdbc:mysql://localhost:3306/orange_social?useSSL=false&serverTimezone=UTC}
+    username: ${MYSQL_USER:orange}
+    password: ${MYSQL_PASSWORD:orange}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+      naming:
+        # preserva nomes explícitos (ex.: tabela VSusercontrolist com maiúsculas)
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+  sql:
+    init:
+      mode: ${SQL_INIT_MODE:never}   # "always" em dev para aplicar schema.sql
+
+  data:
+    # Redis · cache L1, sessões e Trending Score
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+    # Cassandra · timeline / logs / notificações
+    cassandra:
+      keyspace-name: orange_social
+      contact-points: ${CASSANDRA_CONTACT_POINTS:localhost:9042}
+      local-datacenter: ${CASSANDRA_DC:datacenter1}
+      schema-action: none
+
+orange-social:
+  storage:
+    # AWS S3 em produção, MinIO em desenvolvimento
+    endpoint: ${S3_ENDPOINT:http://localhost:9000}
+    bucket: ${S3_BUCKET:orange-social-media}
+  trending:
+    window-hours: 48
