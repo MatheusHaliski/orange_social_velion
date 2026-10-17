@@ -60,6 +60,9 @@ python3 scripts/wcag_contrast.py
 `mvn package` também gera o SBOM CycloneDX em `target/classes/META-INF/sbom/application.cdx.json` (exposto em `/actuator/sbom` quando o Actuator estiver habilitado); `mvn package jib:dockerBuild` constrói a imagem
 OCI `orange-social:local` no daemon Docker sem Dockerfile.
 
+Para reproduzir o scan de imagem do CI localmente:
+`docker run --rm -v /var/run/docker.sock:/var/run/docker.sock aquasec/trivy image --severity HIGH,CRITICAL --ignore-unfixed orange-social:local`.
+
 Os testes de integração usam `@ServiceConnection` (`src/test/java/com/orangesocial/support/PolyglotContainers.java`)
 e o perfil `it`. Com `testcontainers.reuse.enable=true` em `~/.testcontainers.properties` os containers
 são reaproveitados entre execuções.
