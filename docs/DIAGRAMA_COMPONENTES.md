@@ -1,6 +1,9 @@
 # Diagrama de Componentes — Orange Social
 
-Arquitetura em camadas Spring Boot 4.1 / Java 21+ com persistência poliglota. Componentes já implementados:
+Arquitetura em camadas Spring Boot 4.1 / Java 21+ com persistência poliglota. Já implementados também:
+`SecurityConfig`, `SessionService`, `LoginThrottle`, `AuthController`, `MeController`, `AuthService`,
+`RegistrationService`, `MfaService`, `AccountService`, `PreferencesService`, `ProfileService` (RF1, RF2, RF23, RF27).
+Componentes já implementados antes:
 `PostController`, `UserProfileController`, `PostQueryService`, `PostInteractionService`, `PostContentEraser`,
 `PostRepository`, `PostCommentRepository`, `UserControlListRepository`, `PostTimelineRepository`,
 `TrendingScoreRepository` (RF24–RF26, RF23); os demais são o desenho alvo.
@@ -16,16 +19,16 @@ flowchart TB
     subgraph App["Orange Social · Spring Boot"]
         direction TB
 
-        subgraph Security["Camada de Segurança & LGPD"]
-            JWT["JwtAuthenticationFilter"]
-            RATE["RateLimitFilter"]
+        subgraph Security["Camada de Segurança & LGPD (RF27)"]
+            JWT["SessionRepositoryFilter + SecurityConfig<br/>(sessão opaca no Valkey · CSRF SPA ·<br/>AbsoluteSessionTimeoutFilter)"]
+            RATE["LoginThrottle<br/>(conta e IP · Valkey)"]
             CONSENT["ConsentGuard<br/>(Art. 7º I / Art. 11)"]
             AUDIT["LgpdAuditInterceptor<br/>(Art. 37 – registro de operações)"]
         end
 
         subgraph Controllers["Controllers (REST /api/v1)"]
-            AUTHC["AuthController"]
-            USERC["UserController"]
+            AUTHC["AuthController<br/>(cadastro · login · 2FA · reativar · sair)"]
+            USERC["MeController<br/>(perfil · preferências · sessões · 2FA · excluir)"]
             FEEDC["FeedController<br/>(profile · post · audio · alert)"]
             POSTC["PostController<br/>(detalhe · curtir · comentar · compartilhar · salvar)"]
             PROFC["UserProfileController<br/>(perfil público · feed do autor)"]
@@ -36,8 +39,8 @@ flowchart TB
         end
 
         subgraph Services["Services (regras de negócio)"]
-            AUTHS["AuthService"]
-            USERS["UserService"]
+            AUTHS["AuthService · MfaService · StepUp"]
+            USERS["RegistrationService · ProfileService ·<br/>PreferencesService · AccountService"]
             FEEDS["FeedService<br/>(filtro 6 eixos)"]
             POSTS["PostPublishingService"]
             POSTQ["PostQueryService<br/>(RF24 · RF25)"]
@@ -69,7 +72,7 @@ flowchart TB
         S3[("AWS S3<br/>fotos · vídeos · áudios")]
     end
 
-    WEB & MOBILE & VELION -->|HTTPS + JWT| JWT
+    WEB & MOBILE & VELION -->|HTTPS + cookie de sessão + X-XSRF-TOKEN| JWT
     JWT --> RATE --> CONSENT --> AUDIT
     AUDIT --> AUTHC & USERC & FEEDC & POSTC & PROFC & MEDIAC & PRIVC & VELC
     POSTC & PROFC --> VIEWER
@@ -108,7 +111,7 @@ flowchart TB
 
 | Camada | Pacote | Responsabilidade |
 |---|---|---|
-| Segurança | `com.orangesocial.security` | Validação JWT, rate limit, verificação de consentimento antes de tratar dados opcionais, trilha de auditoria |
+| Segurança | `com.orangesocial.security` | Sessão opaca no Valkey, CSRF, tempo absoluto de sessão, limite de tentativas, TOTP e cifra de segredos (RF27); consentimento e auditoria a seguir |
 | Controllers | `com.orangesocial.api` | DTOs de entrada/saída, validação Bean Validation, códigos HTTP |
 | Services | `com.orangesocial.application` | Casos de uso, transações (`@Transactional` só no PostgreSQL), orquestração entre armazenamentos |
 | Domínio | `com.orangesocial.domain.model` | Entidades, enums (`UserCategoryEnum`, `AccountStatus`, `FeedType`), regras de transição |

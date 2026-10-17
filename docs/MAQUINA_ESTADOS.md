@@ -14,18 +14,22 @@ stateDiagram-v2
     Pending_Verification --> Anonymous_LGPD_Deleted : TTL de verificação expirado (7 dias)\nou titular desiste
 
     Active --> Suspended : violação de termos\nou denúncia procedente
-    Active --> Anonymous_LGPD_Deleted : "Excluir conta"\n+ reautenticação (Art. 18, VI)
+    Active --> Pending_Deletion : "Excluir conta" no modal\nsenha + 2FA (Art. 18, VI)
+    Pending_Verification --> Pending_Deletion : "Excluir conta"
 
     Suspended --> Active : recurso aceito\nou fim da penalidade
-    Suspended --> Anonymous_LGPD_Deleted : "Excluir conta"\n+ reautenticação
+    Suspended --> Pending_Deletion : "Excluir conta"
+
+    Pending_Deletion --> Active : entra e reativa em até 30 dias\n(volta ao status anterior)
+    Pending_Deletion --> Anonymous_LGPD_Deleted : 30 dias sem reativar\n(job diário · saga RF23)
 
     Anonymous_LGPD_Deleted --> [*]
 
     state Active {
         direction LR
         [*] --> Online
-        Online --> Idle : sessão Valkey expira
-        Idle --> Online : novo login (JWT)
+        Online --> Idle : sessão Valkey expira (60 min ocioso · 24 h)
+        Idle --> Online : novo login (sessão opaca, RF27)
     }
 
     note right of Anonymous_LGPD_Deleted
@@ -40,10 +44,12 @@ stateDiagram-v2
 | Transição | Disparador | Efeitos colaterais |
 |---|---|---|
 | `[*] → Pending_Verification` | `POST /api/v1/users` | Grava `VSusercontrolist`, cria consentimentos com `granted=false` (Privacy by Default), envia código |
-| `Pending_Verification → Active` | Código validado | Emite JWT, cria carteira `VelionPoints` |
-| `Active → Suspended` | Moderação | Revoga JWTs (blacklist Valkey), oculta posts do ranking |
+| `Pending_Verification → Active` | Código de e-mail validado (`POST /api/v1/me/verify-email`) | Grava `email_verified_at`; a sessão aberta no cadastro passa a poder interagir |
+| `Active → Suspended` | Moderação | Apaga as sessões do usuário no Valkey, oculta posts do ranking |
 | `Suspended → Active` | Recurso aceito | Restaura posts no ranking |
-| `* → Anonymous_LGPD_Deleted` | Titular, com senha/2FA | Job assíncrono de eliminação + log em `activity_log` (comprovação) |
+| `* → Pending_Deletion` | Titular confirma no modal com senha (+2FA) | Guarda o status anterior, agenda para +30 dias, apaga **todas** as sessões; perfil e posts somem |
+| `Pending_Deletion → (status anterior)` | Login no prazo + "Reativar" | Limpa as datas da exclusão |
+| `Pending_Deletion → Anonymous_LGPD_Deleted` | `AccountDeletionJob` após 30 dias | `PostContentEraser`, apaga 2FA/preferências, anonimiza (sem @ e `type_details`) + log em `activity_log` |
 
 ---
 

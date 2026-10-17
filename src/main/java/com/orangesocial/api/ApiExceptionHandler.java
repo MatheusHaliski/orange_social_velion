@@ -1,6 +1,9 @@
 package com.orangesocial.api;
 
+import com.orangesocial.application.account.AccountExceptions;
 import com.orangesocial.application.post.PostExceptions;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -32,6 +35,38 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(PostExceptions.InteractionsClosed.class)
     ProblemDetail closed(PostExceptions.InteractionsClosed e) {
         return problem(HttpStatus.CONFLICT, "Interações encerradas", e.getMessage());
+    }
+
+    // ------------------------------------------------------------ conta e autenticação (RF1, RF27)
+
+    @ExceptionHandler(AccountExceptions.BadCredentials.class)
+    ProblemDetail badCredentials(AccountExceptions.BadCredentials e) {
+        return problem(HttpStatus.UNAUTHORIZED, "Não foi possível entrar", e.getMessage());
+    }
+
+    @ExceptionHandler(AccountExceptions.TooManyAttempts.class)
+    ResponseEntity<ProblemDetail> tooMany(AccountExceptions.TooManyAttempts e) {
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .header(HttpHeaders.RETRY_AFTER, Long.toString(Math.max(1, e.retryAfter().toSeconds())))
+                .body(problem(HttpStatus.TOO_MANY_REQUESTS, "Muitas tentativas", e.getMessage()));
+    }
+
+    @ExceptionHandler(AccountExceptions.Forbidden.class)
+    ProblemDetail accountForbidden(AccountExceptions.Forbidden e) {
+        return problem(HttpStatus.FORBIDDEN, "Ação não permitida", e.getMessage());
+    }
+
+    @ExceptionHandler(AccountExceptions.Conflict.class)
+    ProblemDetail conflict(AccountExceptions.Conflict e) {
+        return problem(HttpStatus.CONFLICT, "Conflito", e.getMessage());
+    }
+
+    /** 422 com todos os problemas de uma vez em {@code errors}, para o formulário marcar cada campo. */
+    @ExceptionHandler(AccountExceptions.Invalid.class)
+    ProblemDetail invalid(AccountExceptions.Invalid e) {
+        ProblemDetail p = problem(HttpStatus.UNPROCESSABLE_CONTENT, "Revise os dados", e.getMessage());
+        p.setProperty("errors", e.errors());
+        return p;
     }
 
     /** Cursor inválido, comentário vazio após remover espaços, etc. */

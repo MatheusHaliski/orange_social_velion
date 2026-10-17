@@ -1,0 +1,13 @@
+# Perfil de desenvolvimento local: mvn spring-boot:run (o plugin ativa "dev")
+# Segredo efêmero (AppSecrets), cookie sem __Host-/Secure para funcionar em http://localhost
+# e o código de verificação de e-mail aparece no log.
+server:
+  servlet:
+    session:
+      cookie:
+        name: orange_session
+        secure: false
+
+orange-social:
+  notifications:
+    log-codes: true

@@ -12,6 +12,8 @@ paths:
   - src/main/resources/cassandra/schema.cql
   - src/main/java/com/orangesocial/infrastructure/cache/redis/TrendingScoreRepository.java
   - src/main/java/com/orangesocial/application/post/PostContentEraser.java
+  - src/main/java/com/orangesocial/application/account/AccountService.java
+  - src/main/java/com/orangesocial/application/account/AccountDeletionJob.java
   - src/main/java/com/orangesocial/infrastructure/persistence/postgres/PostRepository.java
   - src/main/java/com/orangesocial/infrastructure/persistence/postgres/PostCommentRepository.java
 ---
@@ -28,7 +30,8 @@ paths:
 |---|---|
 | **Base legal (LGPD)** | Art. 18, V (portabilidade) · Art. 18, VI (eliminação) · Art. 16 (conservação permitida) · Art. 37 (registro das operações) |
 | **Retenção legal** | Registros de acesso: 6 meses (Marco Civil, Art. 15) |
-| **Status** | 🟡 Parcial — anonimização no domínio, estado terminal, `user_key` (DEK), TTLs e o passo de posts e interações (`PostContentEraser`) prontos; jobs de exportação e a orquestração da saga ainda não |
+| **Exclusão com carência** | Modal explica as consequências e pede senha (+2FA) e confirmação; a conta fica `PENDING_DELETION` por **30 dias** (oculta, todas as sessões encerradas); entrar de novo no prazo oferece **reativar**; vencido o prazo, o job diário elimina |
+| **Status** | 🟡 Parcial — carência de 30 dias com reativação, job de eliminação (posts, interações, 2FA, preferências, anonimização), `user_key` (DEK) e TTLs prontos; exportação, S3, Cassandra e destruição da DEK na saga ainda não |
 
 ## Exportar meus dados (Art. 18, V)
 
@@ -57,43 +60,79 @@ sequenceDiagram
     W->>CS: INSERT activity_log DATA_EXPORTED
 ```
 
-## Excluir conta (Art. 18, VI) — saga idempotente
+## Excluir conta — modal, carência de 30 dias e reativação
+
+O modal (`role="alertdialog"`, foco inicial em **Cancelar**) diz, antes de confirmar:
+
+- **O que será apagado:** perfil, publicações, fotos, comentários, curtidas, seguidores e configurações.
+- **O que continua existindo:**
+  - mensagens enviadas ficam com quem recebeu, como "Conta excluída";
+  - registros de acesso são guardados por 6 meses (Marco Civil, art. 15).
+- **Como reativar:** entrar de novo antes de DD/MM.
+- **Antes de excluir:** link para baixar uma cópia dos dados.
+
+Confirmar exige marcar "Entendo as consequências" e digitar a senha (e o código, com 2FA).
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor T as Titular
-    participant API as PrivacyController
-    participant SG as DeletionSaga
+    participant APP as App (modal)
+    participant API as MeController
+    participant AC as AccountService
+    participant VK as Valkey (sessões)
+    participant DB as PostgreSQL
+
+    T->>APP: Seus dados → Excluir conta
+    APP-->>T: modal: consequências, prazo de 30 dias, baixar dados, senha
+    T->>APP: marca "entendo" + senha (+ código 2FA)
+    APP->>API: POST /api/v1/me/deletion {password, code, confirm: true}
+    API->>API: modo sudo (senha + 2FA)
+    API->>AC: requestDeletion
+    AC->>DB: status PENDING_DELETION · deletion_scheduled_for = agora + 30 dias
+    AC->>VK: apaga todas as sessões do usuário (inclusive esta)
+    API-->>APP: 202 {deletionScheduledFor, graceDays: 30}
+    Note over T,DB: Perfil e posts somem dos feeds na hora (autor não ACTIVE)
+    T->>API: (dia 12) POST /api/v1/auth/login
+    API-->>APP: {status: REACTIVATION_AVAILABLE, deletionScheduledFor}
+    T->>API: POST /api/v1/auth/reactivate
+    API->>DB: volta ao status anterior · limpa as datas
+    API-->>APP: 200 AUTHENTICATED
+```
+
+## Eliminação depois do prazo — saga idempotente
+
+```mermaid
+sequenceDiagram
+    autonumber
+    participant JOB as AccountDeletionJob (03:15)
+    participant SG as AccountService.eliminate
     participant VK as Valkey
     participant PG as PostgreSQL
     participant CS as Cassandra
     participant S3 as S3
     participant KMS as KMS (DEK)
 
-    T->>API: DELETE /api/v1/me (com reautenticação)
-    API->>SG: start(userId) · carência opcional de 15 dias
+    JOB->>SG: contas PENDING_DELETION com prazo vencido (uma transação cada)
     SG->>VK: revoga sessões e remove do ranking (ZREM)
     SG->>PG: PostContentEraser.eraseContentOf(userId)
     Note over SG,PG: curtidas e salvos apagados · comentários sem texto ·<br/>compartilhamentos sem vínculo · posts REMOVED ·<br/>contadores dos posts de terceiros corrigidos · devolve chaves S3
-    SG->>PG: anonymizeForLgpdDeletion() · status = ANONYMOUS_LGPD_DELETED
+    SG->>PG: apaga 2FA, códigos de recuperação e preferências
+    SG->>PG: anonymizeForLgpdDeletion() · status = ANONYMOUS_LGPD_DELETED (sem @, sem type_details)
     SG->>CS: DELETE partições da timeline e notificações
     SG->>S3: DELETE objetos e versões (foto + mídias devolvidas pelo eraser)
     SG->>KMS: destrói a DEK em user_key (crypto-shredding)
     Note over SG,KMS: Backups e SSTables antigas ficam ilegíveis sem a DEK
     SG->>CS: INSERT activity_log ACCOUNT_DELETED (recibo)
-    SG-->>T: e-mail de confirmação
 ```
 
 ## Estados da saga
 
 ```mermaid
 stateDiagram-v2
-    [*] --> Solicitada
-    Solicitada --> EmCarencia : carência habilitada
-    Solicitada --> Executando : sem carência
-    EmCarencia --> Cancelada : titular desiste
-    EmCarencia --> Executando : prazo vence
+    [*] --> EmCarencia : titular confirma no modal (senha + 2FA)
+    EmCarencia --> Cancelada : titular entra e reativa (≤ 30 dias)
+    EmCarencia --> Executando : prazo de 30 dias vence (job diário)
     Executando --> Executando : passo falhou · retry idempotente
     Executando --> Concluida : todos os passos ok + DEK destruída
     Concluida --> [*]
@@ -116,6 +155,8 @@ Ciclo de vida da conta: [`MAQUINA_ESTADOS.md`](../MAQUINA_ESTADOS.md) (estado te
 | Testes | `DomainModelTest.lgpdDeletionIsTerminalAndErasesPersonalData`, `TrendingScoreRepositoryIT.removeClearsEveryRankingOfTheFeed`, `PostApiIT.lgpdErasureRemovesContentAndFixesOtherPostsCounters` | ✅ |
 | Perfil público | conta eliminada some do perfil público e aparece como "Conta excluída" sem link ([RF25](RF25-perfil-publico-autor.md)) | ✅ |
 | Exportação | job + ZIP cifrado + URL pré-assinada | ⏳ OS-43 |
-| Exclusão | saga + reconciliação + crypto-shredding | ⏳ OS-44, OS-46 |
+| Exclusão com carência | `UserControlList.requestDeletion/reactivate`, `AccountService.requestDeletion/eliminate`, `AccountDeletionJob`, `POST /api/v1/me/deletion`, `POST /api/v1/auth/reactivate` | ✅ |
+| Testes da carência | `AccountRulesTest.deletionGraceAllowsReactivationOnlyWithinTheWindow`, `AuthApiIT.deletionHidesAccountAllowsReactivationWithin30DaysAndEliminatesAfter` | ✅ |
+| Exclusão — passos fora do PostgreSQL | S3, Cassandra, Valkey (ranking), destruição da DEK, reconciliação | ⏳ OS-44, OS-46 |
 | Auditoria | registro de operações (Art. 37) | ⏳ OS-45, OS-4A |
-| Tela | Protótipo: [Configurações → Seus dados](../../design/prototype/screens/05-config-lgpd.png) | ✅ protótipo |
+| Tela | Protótipo: [Configurações → Seus dados](../../design/prototype/screens/05-config-lgpd.png); modal de exclusão | ⏳ próximo commit |

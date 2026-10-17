@@ -197,6 +197,12 @@ Fontes: [CAP v1.2](https://docs.oasis-open.org/emergency/cap/v1.2/CAP-v1.2.html)
 | Auth0 / Clerk / Cognito | Rápido | Custo por MAU em rede social; transferência internacional (Res. ANPD 19/2024) | Não |
 | Zitadel | Event-sourced, passkeys | Licença AGPL (confirmar) | Alternativa |
 
+> **Atualização 17/10/2026 (RF27):** o login do Orange Social entrou primeiro com **Spring Security 7 +
+> sessão opaca no Valkey (Spring Session indexado)**, Argon2id, TOTP próprio (RFC 6238) e 10 códigos de
+> recuperação — sem dependência externa e com os mesmos controles (CSRF, timeouts, limite de tentativas).
+> O Keycloak continua o destino quando houver **SSO entre os apps Velion** (OS-13); a migração troca só a
+> camada de autenticação, porque sessão, `user_mfa` e regras de conta já seguem os mesmos padrões.
+
 **Decisões:**
 - **Keycloak 26.x** no Brasil; **passkeys** como primeiro fator desde o cadastro; TOTP/passkey como
   2FA (obrigatório para admins); SMS só como último recurso; **step-up** (`max_age`/`acr`) para

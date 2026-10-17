@@ -136,6 +136,16 @@ Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 | OS-58 | RF26 — Curtir, comentar (caixa de mensagens), compartilhar e salvar com contagem | 🔵 🟠 | 8 | ✅ tabelas `post_reaction`/`post_comment`/`post_share` (V2), contadores atômicos e idempotentes, 401/403/409, protótipo `11-comentarios` e `12-compartilhar`; botões `<button>` com `aria-label`/`aria-pressed` |
 | OS-59 | RF26 — Interações em tempo real, notificação ao autor, moderação e limites | 🔵 🔴 | 8 | Contadores via SSE (OS-2B); notificação LIKE/COMMENT (OS-27); comentários na moderação (OS-4D); rate limit por usuário/rota (OS-47) |
 
+### Conta, sessão, configurações e exclusão — RF1 · RF2 · RF23 · RF27 (17/10/2026)
+
+| ID | Título | Etiqueta | Pts | Critérios de aceite |
+|---|---|---|---|---|
+| OS-60 | RF1 — Cadastro com escolha do tipo de usuário, campos por tipo e aceite dos Termos de Uso da Velion | 🟢 🔴 | 8 | ✅ API `POST /api/v1/auth/register` (CNPJ alfanumérico, idade 13+/16/18, 6 consentimentos false, `terms_acceptance`), verificação de e-mail; `docs/legal/TERMOS_DE_USO.md` com `{{marcadores}}` para preencher; ⏳ telas e revisão jurídica |
+| OS-61 | RF27 — Login em etapas, sessão opaca no Valkey, CSRF, limites, sessões ativas e 2FA TOTP | 🟢 🔴 🔵 | 8 | ✅ cookie sem Max-Age (aba anônima deslogada), logout no servidor, 60 min/24 h, 10 códigos de recuperação, anti-replay; `AuthApiIT` |
+| OS-62 | RF27 — Passkeys (WebAuthn) e "lembrar este navegador por 30 dias" | 🟢 🔴 | 5 | Passkey como 1º fator; dispositivo confiável revogável na lista de sessões |
+| OS-63 | RF2 — Configurações (9 seções) e fundo do app (liso, rede, 6 mosaicos com o logo oficial) | 🟠 🟢 | 5 | ✅ API de perfil e preferências; menor de 16 com proteções travadas; ⏳ telas |
+| OS-64 | RF23 — Excluir conta: modal de consequências, 30 dias para reativar e job de eliminação | 🔴 | 5 | ✅ `POST /api/v1/me/deletion`, reativação no login, `AccountDeletionJob`; ⏳ modal no app, passos S3/Cassandra/DEK (OS-44) |
+
 ### Ecossistema Velion (Backlog)
 
 | ID | Título | Etiqueta | Pts | Critérios de aceite |
@@ -152,7 +162,7 @@ Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 ## Ordem sugerida das sprints
 
 1. **Sprint 0:** OS-01 → OS-08
-2. **Sprint 1:** OS-10, OS-11, OS-12, OS-13, OS-40, OS-46, OS-30
+2. **Sprint 1:** OS-10, OS-11, OS-12, OS-13, OS-40, OS-46, OS-30, OS-60, OS-61, OS-63, OS-64
 3. **Sprint 2:** OS-14, OS-15, OS-16, OS-17, OS-18, OS-19, OS-41, OS-49, OS-31, OS-32, OS-38
 4. **Sprint 3:** OS-20, OS-21, OS-22, OS-23, OS-24, OS-28, OS-33, OS-3A, OS-56, OS-57, OS-58
 5. **Sprint 4:** OS-25, OS-26, OS-27, OS-2B, OS-34, OS-35, OS-36, OS-37, OS-59

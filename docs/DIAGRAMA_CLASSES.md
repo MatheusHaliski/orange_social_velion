@@ -31,11 +31,23 @@ classDiagram
         -List~CommunityInterest~ listOfCommunitiesOfInterest
         -GeoLocation lastSavedLocation
         -AccountStatus accountStatus
+        -String handle «@usuário»
+        -String bio
+        -List~String~ pronouns
+        -List~String~ links
+        -Map typeDetails «campos do tipo»
+        -CategoryVerification categoryVerification
+        -Instant emailVerifiedAt
+        -Instant deletionScheduledFor
+        -AccountStatus statusBeforeDeletion
         -Instant createdAt
         -Instant updatedAt
         -Instant deletedAt
         +activate() void
         +suspend() void
+        +markEmailVerified(Instant) void
+        +requestDeletion(Instant, Duration) Instant
+        +reactivate(Instant) void
         +anonymizeForLgpdDeletion(String hash) void
     }
 
@@ -59,8 +71,56 @@ classDiagram
         PENDING_VERIFICATION
         ACTIVE
         SUSPENDED
+        PENDING_DELETION
         ANONYMOUS_LGPD_DELETED
         +canTransitionTo(AccountStatus) boolean
+    }
+
+    class CategoryVerification {
+        <<enumeration>>
+        NOT_REQUIRED
+        PENDING
+        VERIFIED
+        REJECTED
+    }
+
+    class TermsAcceptance {
+        <<Entity · PostgreSQL terms_acceptance>>
+        -Long userId
+        -String document «TERMS_OF_USE»
+        -String version
+        -Instant acceptedAt
+        -String channel
+        -String ipHash «HMAC»
+    }
+
+    class UserPreference {
+        <<Entity · PostgreSQL user_preference>>
+        -Theme theme
+        -AppBackground appBackground «PLAIN NETWORK MOSAIC MOSAIC_*»
+        -String language
+        -short fontScale
+        -boolean reduceMotion
+        -boolean profilePrivate
+        -CommentAudience whoCanComment
+        -FeedType defaultFeed
+        -SensitiveContent sensitiveContent
+        -Map notifications
+        -boolean loginAlerts
+        +defaultsFor(userId, minor) UserPreference
+    }
+
+    class UserMfa {
+        <<Entity · PostgreSQL user_mfa>>
+        -byte[] totpSecret «AES-256-GCM»
+        -long lastUsedStep «anti-replay»
+        +consumeStep(long) boolean
+    }
+
+    class RecoveryCode {
+        <<Entity · PostgreSQL user_recovery_code>>
+        -String codeHash «Argon2id»
+        -Instant usedAt
     }
 
     class GeoLocation {
@@ -248,6 +308,11 @@ classDiagram
     VSusercontrolist "1" *-- "0..1" GeoLocation : lastSavedLocation
     VSusercontrolist "1" *-- "0..*" CommunityInterest : communities
     VSusercontrolist "1" *-- "0..*" ConsentEvent : consents
+    VSusercontrolist "1" *-- "1..*" TermsAcceptance : aceita
+    VSusercontrolist "1" *-- "1" UserPreference : configura
+    VSusercontrolist "1" *-- "0..1" UserMfa : 2FA
+    VSusercontrolist "1" *-- "0..10" RecoveryCode : recuperação
+    VSusercontrolist "1" --> "1" CategoryVerification : selo
     VSusercontrolist "1" -- "1" VelionPoints : wallet
     VSusercontrolist "1" -- "0..*" VelionTrophy : trophies
     VSusercontrolist "1" -- "0..*" Post : publica

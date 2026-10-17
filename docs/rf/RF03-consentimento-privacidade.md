@@ -81,6 +81,8 @@ sequenceDiagram
 | Camada | Artefato | Situação |
 |---|---|---|
 | Persistência | `consent_event`, view `user_consent_current` (`schema.sql`) | ✅ |
+| Cadastro | `RegistrationService` grava as 6 finalidades com `granted = false` na mesma transação do usuário (Privacy by Default) — `AuthApiIT` confere | ✅ |
+| Preferências de privacidade | perfil privado, quem comenta e ano de nascimento em `user_preference` ([RF2](RF02-editar-perfil.md)); travadas para menor de 16 | ✅ |
 | API | `GET/PUT /api/v1/me/consents/{purpose}` | ⏳ OS-40, OS-41 |
 | Efeitos | consumidores de `ConsentRevoked` | ⏳ OS-16, OS-42 |
 | Menores | bloqueio por idade | ⏳ OS-49 |

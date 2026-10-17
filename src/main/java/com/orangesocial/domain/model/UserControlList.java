@@ -20,6 +20,7 @@ import jakarta.validation.constraints.Size;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -144,6 +145,48 @@ public class UserControlList {
     @Column(name = "deleted_at")
     private Instant deletedAt;
 
+    @Column(name = "email_verified_at")
+    private Instant emailVerifiedAt;
+
+    // ---------------------------------------------------------------- perfil comum (docs/PESQUISA_DADOS_USUARIO.md §2)
+
+    /** @usuário público: minúsculas, dígitos, ponto e sublinhado; 3 a 30 caracteres. */
+    @Pattern(regexp = "^[a-z0-9._]{3,30}$")
+    @Column(name = "handle", length = 30)
+    private String handle;
+
+    @Size(max = 150)
+    @Column(name = "bio", length = 150)
+    private String bio;
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "pronouns")
+    private List<String> pronouns = new ArrayList<>();
+
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "links")
+    private List<String> links = new ArrayList<>();
+
+    /** Campos específicos da categoria (§3), validados por {@code UserTypeDetailsValidator}. */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "type_details")
+    private java.util.Map<String, Object> typeDetails = new java.util.LinkedHashMap<>();
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category_verification", nullable = false)
+    private CategoryVerification categoryVerification = CategoryVerification.NOT_REQUIRED;
+
+    /** Exclusão com carência (RF23): pedido, fim do prazo e status para o qual a conta volta se reativada. */
+    @Column(name = "deletion_requested_at")
+    private Instant deletionRequestedAt;
+
+    @Column(name = "deletion_scheduled_for")
+    private Instant deletionScheduledFor;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status_before_deletion")
+    private AccountStatus statusBeforeDeletion;
+
     @Version
     @Column(name = "version", nullable = false)
     private Long version;
@@ -154,7 +197,7 @@ public class UserControlList {
 
     public UserControlList(String name, String email, String passwordHash, UserCategoryEnum userType) {
         this.name = name;
-        this.email = email;
+        this.email = normalizeEmail(email);
         this.passwordHash = passwordHash;
         this.userType = userType;
     }
@@ -181,6 +224,46 @@ public class UserControlList {
         transitionTo(AccountStatus.SUSPENDED);
     }
 
+    /** Código de e-mail confirmado (RF1): conta pendente vira ativa; trocar e-mail depois só registra a data. */
+    public void markEmailVerified(Instant when) {
+        this.emailVerifiedAt = when;
+        if (accountStatus == AccountStatus.PENDING_VERIFICATION) {
+            transitionTo(AccountStatus.ACTIVE);
+        }
+    }
+
+    /**
+     * "Excluir conta" confirmado (RF23): a conta some do app na hora e fica {@code grace} esperando.
+     * Entrar de novo dentro do prazo permite {@link #reactivate(Instant)}; depois dele, a saga elimina.
+     */
+    public Instant requestDeletion(Instant now, Duration grace) {
+        AccountStatus previous = accountStatus;
+        transitionTo(AccountStatus.PENDING_DELETION);
+        this.statusBeforeDeletion = previous;
+        this.deletionRequestedAt = now;
+        this.deletionScheduledFor = now.plus(grace);
+        return deletionScheduledFor;
+    }
+
+    public boolean canReactivate(Instant now) {
+        return accountStatus == AccountStatus.PENDING_DELETION && now.isBefore(deletionScheduledFor);
+    }
+
+    /** Desfaz o pedido de exclusão dentro do prazo, devolvendo o status anterior (ativa, pendente ou suspensa). */
+    public void reactivate(Instant now) {
+        if (!canReactivate(now)) {
+            throw new IllegalStateException("O prazo para reativar esta conta terminou.");
+        }
+        transitionTo(statusBeforeDeletion == null ? AccountStatus.ACTIVE : statusBeforeDeletion);
+        this.statusBeforeDeletion = null;
+        this.deletionRequestedAt = null;
+        this.deletionScheduledFor = null;
+    }
+
+    public static String normalizeEmail(String email) {
+        return email == null ? null : email.strip().toLowerCase(java.util.Locale.ROOT);
+    }
+
     /**
      * Eliminação a pedido do titular (LGPD Art. 18, VI). Mantém apenas o id para
      * integridade referencial; todos os dados pessoais são removidos ou substituídos.
@@ -204,6 +287,11 @@ public class UserControlList {
         this.gender = null;
         this.sexualPreference = null;
         this.photoObjectKey = null;
+        this.handle = null;
+        this.bio = null;
+        this.pronouns = new ArrayList<>();
+        this.links = new ArrayList<>();
+        this.typeDetails = new java.util.LinkedHashMap<>();
         this.listOfCommunitiesOfInterest = new ArrayList<>();
         this.lastSavedLocation = null;
         this.deletedAt = Instant.now();
@@ -243,7 +331,7 @@ public class UserControlList {
     }
 
     public void setEmail(String email) {
-        this.email = email;
+        this.email = normalizeEmail(email);
     }
 
     public String getRecoveryEmail() {
@@ -388,6 +476,70 @@ public class UserControlList {
 
     public Instant getDeletedAt() {
         return deletedAt;
+    }
+
+    public String getHandle() {
+        return handle;
+    }
+
+    public void setHandle(String handle) {
+        this.handle = handle == null ? null : handle.strip().toLowerCase(java.util.Locale.ROOT);
+    }
+
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
+    public List<String> getPronouns() {
+        return pronouns;
+    }
+
+    public void setPronouns(List<String> pronouns) {
+        this.pronouns = pronouns == null ? new ArrayList<>() : new ArrayList<>(pronouns);
+    }
+
+    public List<String> getLinks() {
+        return links;
+    }
+
+    public void setLinks(List<String> links) {
+        this.links = links == null ? new ArrayList<>() : new ArrayList<>(links);
+    }
+
+    public java.util.Map<String, Object> getTypeDetails() {
+        return typeDetails;
+    }
+
+    public void setTypeDetails(java.util.Map<String, Object> typeDetails) {
+        this.typeDetails = typeDetails == null ? new java.util.LinkedHashMap<>() : new java.util.LinkedHashMap<>(typeDetails);
+    }
+
+    public CategoryVerification getCategoryVerification() {
+        return categoryVerification;
+    }
+
+    public void setCategoryVerification(CategoryVerification categoryVerification) {
+        this.categoryVerification = categoryVerification;
+    }
+
+    public Instant getEmailVerifiedAt() {
+        return emailVerifiedAt;
+    }
+
+    public Instant getDeletionRequestedAt() {
+        return deletionRequestedAt;
+    }
+
+    public Instant getDeletionScheduledFor() {
+        return deletionScheduledFor;
+    }
+
+    public AccountStatus getStatusBeforeDeletion() {
+        return statusBeforeDeletion;
     }
 
     public Long getVersion() {

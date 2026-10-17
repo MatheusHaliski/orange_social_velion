@@ -34,8 +34,11 @@ docker compose up -d                       # PostGIS, Valkey, Garage (+ --profil
 
 - `schema.sql` é a DDL de referência e deve ser a concatenação exata de `db/migration/V1..Vn` (`SchemaConsistencyTest`).
   Mudança de schema = nova migração `V{n}__*.sql` (começando com uma linha em branco) + o mesmo texto anexado a `schema.sql`.
-- Identidade na API: até o Keycloak (OS-13) não há login; `orange-social.auth.dev-header-enabled` (cabeçalho
-  `X-Orange-Dev-User`) existe só para dev e testes de integração — nunca ligar em produção.
+- Identidade na API: sessão opaca no Valkey (Spring Session) criada por `/api/v1/auth/*` (RF27); escrita exige
+  `X-XSRF-TOKEN`. Nunca JWT/token em localStorage. Testes de integração entram com login real (`support/ApiClient`).
+- Segredos: `ORANGE_APP_SECRET` (Base64, 32+ bytes) é obrigatório fora dos perfis `dev`/`it`; nada de segredo em yml.
+- Termos de Uso da Velion em `docs/legal/TERMOS_DE_USO.md` (marcadores `{{…}}`); mudar o texto = nova
+  `orange-social.legal.terms-version`.
 - Cores, glifos e contraste seguem `docs/DESIGN_SYSTEM.md`; a cor nunca é o único sinal.
 - Decisões de tecnologia ficam em `docs/PESQUISA_TECNOLOGIAS.md` (ADRs); backlog em `docs/TRELLO_BACKLOG.md`
   e no quadro Trello "Orange Social - Velion Tech".

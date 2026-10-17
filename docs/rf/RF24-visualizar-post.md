@@ -154,8 +154,8 @@ flowchart TD
 }
 ```
 
-Erros em Problem Details (RFC 9457) com `detail` em pt-BR. Identidade: até o OS-13 (Keycloak) não há
-login; em dev/testes o cabeçalho `X-Orange-Dev-User` simula o usuário (`ViewerResolver`, nunca em produção).
+Erros em Problem Details (RFC 9457) com `detail` em pt-BR. Identidade: a sessão opaca criada pelo login
+([RF27](RF27-autenticacao-sessao.md)); sem sessão — inclusive numa aba anônima — o modal abre como visitante.
 
 ## Rastreabilidade
 
@@ -167,4 +167,5 @@ login; em dev/testes o cabeçalho `X-Orange-Dev-User` simula o usuário (`Viewer
 | Testes | `PostDomainTest`, `PostApiIT.anonymousVisitorOpensFullPostWithAuthorDateAndCounts`, `PostApiIT.draftOfSomeoneElseRemovedPostAndSuspendedAuthorAnswer404` | ✅ |
 | Tela | Protótipo: modal [09-post-modal](../../design/prototype/screens/09-post-modal.png); card com `<time>` e tooltip em [01-post-feed](../../design/prototype/screens/01-post-feed.png) | ✅ protótipo |
 | App | modal em Next.js/Expo, rota `/p/{id}` | ⏳ OS-39 |
+| Identidade | `ViewerResolver` lê a sessão autenticada ([RF27](RF27-autenticacao-sessao.md)); o cabeçalho de dev `X-Orange-Dev-User` foi removido e os testes entram com login real (sessão + CSRF) | ✅ |
 | Pendências | contagem de visualizações (HyperLogLog, OS-21); bloqueio por idade para conteúdo 16+/18+ (OS-49) | ⏳ |

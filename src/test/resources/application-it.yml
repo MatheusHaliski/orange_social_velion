@@ -14,6 +14,17 @@ spring:
     connection:
       init-query-timeout: 20s
 
+server:
+  servlet:
+    session:
+      cookie:
+        name: orange_session   # sem __Host-: os testes falam http com localhost
+        secure: false
+
 orange-social:
-  auth:
-    dev-header-enabled: true  # identidade via X-Orange-Dev-User nos *IT (ver ViewerResolver)
+  jobs:
+    enabled: false            # o job de exclusão é chamado direto nos testes
+  security:
+    login:
+      per-ip-minute: 10000    # todos os testes saem de 127.0.0.1; o limite por conta continua valendo
+      per-ip-hour: 10000

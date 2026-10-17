@@ -1,23 +1,27 @@
 # Diagrama de Atividades — Cadastro por Tipo de Usuário
 
-Cobre o RF1/RF2 (cadastro e perfil), a cadeia de seleção de comunidades de interesse
+Cobre o RF1/RF2 (cadastro e perfil; campos por tipo em `PESQUISA_DADOS_USUARIO.md` §3 e regras em
+`RegistrationService`/`UserTypeDetailsValidator`), a cadeia de seleção de comunidades de interesse
 (`typeofcommunity → selectcountry → selectcity`) e a captura opcional de GPS
 (`LastSavedLocation`) sob consentimento (LGPD Art. 7º, I).
 
 ```mermaid
 flowchart TD
-    START((Início)) --> A1[Informar Name, Email, Password,<br/>Recoveryemail, Cellphonenumber]
-    A1 --> D1{E-mail já<br/>cadastrado?}
-    D1 -- Sim --> E1[Exibir erro e sugerir<br/>recuperar senha] --> A1
-    D1 -- Não --> A2[Selecionar Usertype]
+    START((Início)) --> A1[Informar nome de exibição, @usuário,<br/>e-mail, senha 12+, data de nascimento]
+    A1 --> D1{E-mail ou @<br/>já em uso?}
+    D1 -- Sim --> E1[409: sugerir entrar<br/>ou recuperar senha] --> A1
+    D1 -- Não --> DI{Idade}
+    DI -- "< 13" --> E2[Recusar: Orange é 13+] --> FIM
+    DI -- "13 a 15" --> GU[E-mail do responsável<br/>ECA Digital · só VERDE<br/>proteções travadas] --> A2
+    DI -- "16+" --> A2[Selecionar Usertype<br/>6 cores · glifo · rótulo]
 
     A2 --> D2{Categoria escolhida}
-    D2 -- "VERDE · Pessoa Física" --> P1[Userdb, Gender<br/>sexualpreference opcional]
-    D2 -- "AMARELO · Imprensa/Networking" --> P2[Nome do veículo, área editorial]
-    D2 -- "AZUL · Marketing" --> P3[Razão social, segmento]
-    D2 -- "LARANJA · Comunidade" --> P4[Tipo de comunidade,<br/>responsável legal]
-    D2 -- "VERMELHO · Instituição" --> P5[CNPJ / órgão,<br/>documento comprobatório]
-    D2 -- "PRETO · Especial" --> P6[Tipo de evento/conta especial,<br/>aprovação manual]
+    D2 -- "VERDE · Pessoa Física" --> P1[cidade, site, ocupação<br/>tudo opcional · sexualpreference opcional]
+    D2 -- "AMARELO · Imprensa/Networking" --> P2[subtipo, veículo, site, função<br/>MTb e CNPJ opcionais]
+    D2 -- "AZUL · Marketing" --> P3[CNPJ, razão social, site,<br/>segmento, responsável]
+    D2 -- "LARANJA · Comunidade" --> P4[tipo de comunidade, cidade/UF,<br/>responsável · CNPJ opcional]
+    D2 -- "VERMELHO · Instituição" --> P5[subtipo, CNPJ, razão social, site,<br/>setor, representante legal]
+    D2 -- "PRETO · Especial" --> P6[subtipo e organizador<br/>evento: nome, data, local · banco: CNPJ + BCB]
 
     P1 --> D3{sexualpreference<br/>preenchido?}
     D3 -- Sim --> C0[Exigir consentimento específico<br/>SENSITIVE_PROFILE_DATA · Art. 11, I] --> A3
@@ -49,10 +53,10 @@ flowchart TD
     D6 -- Sim --> G3[Capturar lat, lng, timestamp<br/>→ LastSavedLocation]
     G3 --> A7
 
-    A7[Revisar termos e política de privacidade<br/>sem caixas pré-marcadas]
-    A7 --> A8[(INSERT VSusercontrolist<br/>status = PENDING_VERIFICATION)]
-    A8 --> A9[Enviar código por e-mail/SMS]
-    A9 --> D7{Código válido<br/>em até 7 dias?}
+    A7[Ler e aceitar os Termos de Uso da Velion<br/>caixa desmarcada · versão registrada]
+    A7 --> A8[(INSERT VSusercontrolist PENDING_VERIFICATION<br/>+ terms_acceptance + 6 consent_event false<br/>+ user_preference · sessão aberta)]
+    A8 --> A9[Enviar código de 6 dígitos por e-mail<br/>30 min · 5 tentativas · reenvio 1/min]
+    A9 --> D7{Código confirmado<br/>em até 7 dias?}
     D7 -- Sim --> A10[status = ACTIVE<br/>criar carteira Velion Points] --> FIM((Fim))
     D7 -- Não --> A11[Eliminar cadastro incompleto<br/>status = ANONYMOUS_LGPD_DELETED] --> FIM
 ```

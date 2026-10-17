@@ -54,18 +54,26 @@ src/main/java/com/orangesocial/
 | `GET`/`POST /api/v1/posts/{id}/comments` · `DELETE …/comments/{cid}` | RF26 | Caixa de mensagens do post |
 | `POST /api/v1/posts/{id}/shares` `{channel}` | RF26 | Registra o compartilhamento e devolve link e total |
 
-Erros em Problem Details (RFC 9457) com mensagem em pt-BR. Ainda não há login (Keycloak no OS-13): em
-desenvolvimento, `ORANGE_DEV_HEADER_AUTH=true` aceita o usuário no cabeçalho `X-Orange-Dev-User` —
-nunca em produção.
+| `GET /api/v1/auth/csrf` · `POST /api/v1/auth/register` · `POST /api/v1/auth/login` · `…/login/2fa` · `…/reactivate` · `…/logout` · `GET /api/v1/auth/session` | RF1, RF27 | Cadastro com tipo de usuário e aceite dos Termos da Velion; login em etapas (senha → 2FA → reativar) |
+| `GET/PATCH /api/v1/me/profile` · `GET/PATCH /api/v1/me/preferences` · `POST /api/v1/me/verify-email` | RF1, RF2 | Perfil, configurações (tema, fundo do app, privacidade, notificações) e verificação de e-mail |
+| `POST /api/v1/me/password` · `GET/DELETE /api/v1/me/sessions` · `/api/v1/me/mfa/**` | RF27 | Senha, sessões ativas e 2FA (TOTP + 10 códigos de recuperação) |
+| `POST /api/v1/me/deletion` | RF23 | Excluir conta: 30 dias para reativar, depois eliminação |
+| `GET /api/v1/legal/terms` | RF1 | Versão vigente dos [Termos de Uso](docs/legal/TERMOS_DE_USO.md) |
+
+Erros em Problem Details (RFC 9457) com mensagem em pt-BR. Sessão opaca no Valkey: cookie sem `Max-Age`,
+`HttpOnly`, `SameSite=Lax` (aba anônima abre deslogada); toda escrita leva `X-XSRF-TOKEN` (pegue em
+`GET /api/v1/auth/csrf`).
 
 ## Ambiente local
 
 ```bash
 docker compose up -d                  # PostgreSQL+PostGIS :5432 · Valkey :6379 · Garage (S3) :3900
 docker compose --profile full up -d   # + Cassandra 5 :9042 (aplica cassandra/schema.cql)
-mvn spring-boot:run                   # Flyway aplica db/migration/V1__baseline.sql
+mvn spring-boot:run                   # perfil dev; Flyway aplica db/migration/V1..V3
+                                      # o código de verificação de e-mail aparece no log (só em dev)
 ```
 
+Fora do perfil `dev`, defina `ORANGE_APP_SECRET` (Base64, 32+ bytes — ex.: `openssl rand -base64 32`).
 Credenciais de desenvolvimento: PostgreSQL `orange`/`orange`; Garage access key `GK0000000000000000orangedev`
 (secret em `infra/garage/init.sh`), bucket `orange-social-media`.
 
