@@ -135,7 +135,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Trivy filesystem scan
-        uses: aquasecurity/trivy-action@0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           scan-ref: .
@@ -180,7 +180,7 @@ jobs:
       - name: Build da imagem no daemon local (sem push)
         run: mvn -B -ntp -DskipTests package jib:dockerBuild -Dimage=orange-social:ci
       - name: Trivy image scan
-        uses: aquasecurity/trivy-action@0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           image-ref: orange-social:ci
           severity: HIGH,CRITICAL
