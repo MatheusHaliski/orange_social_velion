@@ -1,7 +1,11 @@
 # Trello Backlog — Orange Social
 
-Plano de montagem do quadro **Orange Social · Engenharia** no Trello.
+Fonte do quadro **[Orange Social - Velion Tech](https://trello.com/b/ImdiBMps/orange-social-velion-tech)** no Trello.
 Atualizado em 17/10/2026 após a pesquisa de tecnologias ([`PESQUISA_TECNOLOGIAS.md`](PESQUISA_TECNOLOGIAS.md)).
+
+> **Estado no Trello (17/10/2026):** 6 listas, 62 cards e etiquetas de cor aplicados via API.
+> As etiquetas foram criadas sem nome (limitação da API usada) — nomeie-as no quadro conforme a
+> tabela abaixo. Cards OS-01 → OS-08 estão em *Current Sprint*; OS-02 em *Done*; os demais em *Backlog*.
 
 ## Listas (da esquerda para a direita)
 
