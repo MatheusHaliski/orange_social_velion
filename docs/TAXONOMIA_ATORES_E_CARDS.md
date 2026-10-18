@@ -172,7 +172,7 @@ Um mesmo usuário assume papéis diferentes conforme o objeto. A API calcula ess
 | Entrar / 2FA | ✅ | ✅ | ✅ | ✅ | ❌ | oferta de reativar | — |
 | Editar perfil e preferências | 401 | ✅ | ✅ | ✅ (proteções travadas) | — | — | — |
 | Curtir, comentar, compartilhar, salvar | 401 | 403 | ✅ | ✅ | — | — | — |
-| Publicar post | 401 | 403 | ⏳ OS-23 | ⏳ | — | — | — |
+| Publicar post de texto ([RF29](rf/RF29-publicar-post.md)) | 401 | 403 | ✅ (instituição e banco só com selo) | ✅ sem 18+/sensível; moldura só do catálogo | — | — | — |
 | Publicar alerta oficial | — | — | só VERMELHO verificado | ❌ | — | — | curadoria |
 | Encerrar sessões, ativar 2FA, trocar senha | 401 | ✅ | ✅ | ✅ | — | — | — |
 | Excluir conta (30 dias para voltar) | — | ✅ | ✅ | ✅ | ✅ (sem login: pelo suporte ⏳) | reativar | — |
@@ -361,7 +361,7 @@ Finalidades de consentimento (`consent_event.purpose`, todas começam `false`): 
 | | `likeCount`, `commentCount`, `shareCount`, `viewCount` | sistema | público | Só leitura no JPA; mudam em UPDATE atômico |
 | | `createdAt`, `updatedAt`, `removedAt` | sistema | `createdAt` = `publishedAt` | — |
 | | ⏳ `sponsored`, `mediaAlt` | propostos | público | Selo de publicidade (CDC art. 36) e texto alternativo |
-| | ⏳ `background` (JSONB) | o (nulo = moldura padrão) | público | Moldura do post ([RF28](rf/RF28-moldura-post.md)): só ids do catálogo e chaves de asset, nunca URL nem CSS; `ALERT` ignora |
+| | ✅ `background` (JSONB) | o (nulo = moldura padrão) | público | Moldura do post ([RF28](rf/RF28-moldura-post.md)): só ids do catálogo e chaves de asset, nunca URL nem CSS; `ALERT` não aceita (422 + CHECK); apagado ao remover o post e na eliminação LGPD |
 | **AudioContent** ⏳ | `kind`, `transcript`, `tags`, picos da onda | — | público | `PODCAST` · `PERSONAL_AUDIO` · `MUSIC` |
 | **AlertContent** ⏳ | `category`, `severity`, `epicenter`, `radiusKm`, `expiresAt`, `verifiedSource`, `instruction` | — | público | `EMERGENCY` · `NATURAL_DISASTER` · `OFFICIAL_COMMUNICATION` · `JOB_OPENING`; severidade segue o CAP 1.2 (`Extreme` · `Severe` · `Moderate` · `Minor`) |
 | **Comentário** | `body` (1–2.000), `status`, `createdAt`, `removedAt` | O | público | Removido: texto apagado, id mantido |

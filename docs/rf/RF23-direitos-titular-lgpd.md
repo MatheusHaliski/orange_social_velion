@@ -152,8 +152,8 @@ Ciclo de vida da conta: [`MAQUINA_ESTADOS.md`](../MAQUINA_ESTADOS.md) (estado te
 |---|---|---|
 | Domínio | `UserControlList.anonymizeForLgpdDeletion`, `AccountStatus` (terminal) | ✅ |
 | Persistência | `user_key` (DEK), TTL em `post_timeline`/`notification`, `TrendingScoreRepository.remove` | ✅ |
-| Posts e interações | `PostContentEraser` + consultas de eliminação em `PostRepository` / `PostCommentRepository` (idempotente) | ✅ |
-| Testes | `DomainModelTest.lgpdDeletionIsTerminalAndErasesPersonalData`, `TrendingScoreRepositoryIT.removeClearsEveryRankingOfTheFeed`, `PostApiIT.lgpdErasureRemovesContentAndFixesOtherPostsCounters` | ✅ |
+| Posts e interações | `PostContentEraser` + consultas de eliminação em `PostRepository` / `PostCommentRepository` (idempotente); a eliminação também apaga a moldura (`post.background`, V4 · [RF28](RF28-moldura-post.md)) | ✅ |
+| Testes | `DomainModelTest.lgpdDeletionIsTerminalAndErasesPersonalData`, `TrendingScoreRepositoryIT.removeClearsEveryRankingOfTheFeed`, `PostApiIT.lgpdErasureRemovesContentAndFixesOtherPostsCounters` (inclui a moldura) | ✅ |
 | Perfil público | conta eliminada some do perfil público e aparece como "Conta excluída" sem link ([RF25](RF25-perfil-publico-autor.md)) | ✅ |
 | Exportação | job + ZIP cifrado + URL pré-assinada | ⏳ OS-43 |
 | Exclusão com carência | `UserControlList.requestDeletion/reactivate`, `AccountService.requestDeletion/eliminate`, `AccountDeletionJob`, `POST /api/v1/me/deletion`, `POST /api/v1/auth/reactivate` | ✅ |

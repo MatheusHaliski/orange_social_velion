@@ -81,7 +81,7 @@ Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 | OS-20 | `TrendingScoreRepository` (Valkey ZSET) | 🔵 | 3 | Ranking global e por cor; TTL 48h |
 | OS-21 | Trending Score com decaimento temporal e anti-manipulação | 🔵 | 5 | ✅ fórmula `log10(views)·W + Σ pesos / (idade_h + 2)^1.6` em `TrendingScoreCalculator`; pendente: HyperLogLog de views únicas, tempo mínimo de exibição, z-score e job de recálculo |
 | OS-22 | `PostTimelineEntity` + fan-out **híbrido** no Cassandra | 🔵 | 8 | On write para < 10k seguidores; merge na leitura (`author_posts`) para contas grandes; inativos > 30 dias sem fan-out |
-| OS-23 | Publicação de post (texto/imagem/vídeo) | 🔵 | 5 | Estados Draft → Published; mídia validada no S3 |
+| OS-23 | Publicação de post (texto/imagem/vídeo) — [RF29](rf/RF29-publicar-post.md) | 🔵 | 5 | ✅ texto: `POST/PATCH/DELETE /api/v1/posts`, arquivar/restaurar, conta ativa + selo, 422 com todos os erros; ⏳ foto/vídeo com URL pré-assinada e `HEAD` no S3; rascunho |
 | OS-24 | Publicação no Audio Feed (podcast, áudio pessoal, música) | 🔵 | 5 | Conforme `DIAGRAMA_SEQUENCIA.md`; waveform pré-computado (`audiowaveform`) |
 | OS-25 | Alert Feed **geográfico**: restrito a fontes verificadas | 🔵 🔴 | 8 | Somente VERMELHO verificado; consulta por geohash/município IBGE; sem timeline por seguidor; vagas para VERMELHO/AMARELO |
 | OS-26 | Filtro multidimensional (6 eixos) nos 4 feeds via PostgreSQL | 🔵 | 8 | Categoria, tipo, local (PostGIS `ST_DWithin`), país, cidade, nome (`pg_trgm` + `unaccent`) combináveis |
@@ -153,9 +153,9 @@ Detalhes em [`PESQUISA_BACKGROUND_STUDIO.md`](PESQUISA_BACKGROUND_STUDIO.md) e n
 
 | ID | Título | Etiqueta | Pts | Critérios de aceite |
 |---|---|---|---|---|
-| OS-65 | Moldura do post: `post.background` JSONB (só ids), validação no servidor e leitura resolvida | 🔵 🟠 | 5 | V4 com coluna e `background_asset`; ids conferidos contra o catálogo; sem CSS/URL livre; `ALERT` ignora; contraste tinta × container ≥ 4,5:1 senão 422 |
-| OS-66 | Catálogo procedural: `GET /api/v1/backgrounds/catalog` (público, ETag) | 🟠 🔵 | 5 | Cor lisa, gradientes, 12 auras estáticas, 4 materiais; proveniência e licença por item; tela "Créditos e licenças"; tokens web + Skia |
-| OS-67 | Cartela sazonal automática (Hemisfério Sul) | 🟠 | 3 | 12 cartelas; janelas `[início, fim)` em America/Sao_Paulo; Carnaval = Páscoa − 47; prioridades; Black Friday opt-in; variação por UF |
+| OS-65 | Moldura do post: `post.background` JSONB (só ids), validação no servidor e leitura resolvida | 🔵 🟠 | 5 | ✅ V4 (coluna + CHECKs); ids conferidos contra o catálogo; sem CSS/URL livre; `ALERT` recusa; contraste tinta × container ≥ 4,5:1 senão 422; moldura resolvida no detalhe e no feed; ⏳ `background_asset` (OS-70) |
+| OS-66 | Catálogo procedural: `GET /api/v1/backgrounds/catalog` (público, ETag) | 🟠 🔵 | 5 | ✅ catálogo com versão por hash, ETag/304 e recomendações; Cor lisa, gradientes, 12 auras estáticas (8 já no catálogo), 4 materiais; proveniência e licença por item; tela "Créditos e licenças"; tokens web + Skia |
+| OS-67 | Cartela sazonal automática (Hemisfério Sul) | 🟠 | 3 | ✅ `SeasonalCalendar` testado (2026–2028); 12 cartelas; janelas `[início, fim)` em America/Sao_Paulo; Carnaval = Páscoa − 47; prioridades; Black Friday opt-in; variação por UF |
 | OS-68 | Aura Hype conquistada + Metamorfose (Prisma, Constelação, Fio Vivo, Holografia) | 🟠 | 5 | Hype só com post em alta e texto "Em alta"; animação ≤ 5 s, só cards visíveis, orçamento por aparelho; estático com `reduceMotion` |
 | OS-69 | **Aura Plus**: arte animada em vídeo (H.264/AV1) + pôster, nunca GIF | 🟠 🔵 🔴 | 8 | Pipeline ffprobe → ffmpeg → EA IRIS → moderação → variantes ≤ 25/150/400 KB; preferência "Animações de fundo" (Só no Wi-Fi); Pouca Energia → pôster |
 | OS-70 | Arte própria: upload e geração por IA com moderação | 🔴 🟠 | 8 | 16+; quarentena; selo "Gerada por IA"; hash perceptual; notificação de direito autoral; sem GIPHY/Tenor |

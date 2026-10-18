@@ -174,6 +174,7 @@ classDiagram
         #PostStatus status
         #String country
         #String city
+        #Map background «JSONB · moldura RF28»
         #long likeCount «somente leitura»
         #long commentCount «somente leitura»
         #long shareCount «somente leitura»
@@ -361,4 +362,6 @@ classDiagram
 - **`ANONYMOUS_LGPD_DELETED` é terminal:** nenhum método de domínio aceita transição a partir dele.
 - **Visibilidade do post (RF24):** `PUBLISHED`/`ARCHIVED` para todos, `DRAFT` só para o autor, `REMOVED` para
   ninguém; autor não `ACTIVE` esconde o post de terceiros. Só `PUBLISHED` aceita interações (RF26).
+- **Moldura do post (RF28):** `Post.background` guarda só ids do catálogo, validados pelo `BackgroundValidator`
+  (uma arte por vez, contraste ≥ 4,5:1, sem moldura em `ALERT`); `remove()` e a eliminação LGPD apagam a moldura.
 - **Contadores somente leitura no JPA:** quem altera é o `PostInteractionService`, com UPDATE atômico.

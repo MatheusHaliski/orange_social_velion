@@ -171,10 +171,11 @@ sequenceDiagram
 
 | Rota | Visitante | Sessão (conta pendente) | Sessão (conta ativa) |
 |---|---|---|---|
-| `GET /api/v1/posts/**`, `GET /api/v1/users/**`, `GET /api/v1/legal/**` | ✅ | ✅ | ✅ |
+| `GET /api/v1/posts/**`, `GET /api/v1/users/**`, `GET /api/v1/legal/**`, `GET /api/v1/backgrounds/**` | ✅ | ✅ | ✅ |
 | `/api/v1/auth/**` (cadastro, login, 2FA, reativar, sair) | ✅ | ✅ | ✅ |
 | `/api/v1/me/**` (perfil, preferências, sessões, 2FA, excluir) | 401 | ✅ | ✅ |
 | Curtir, comentar, compartilhar, salvar | 401 | 403 | ✅ |
+| Publicar, editar, arquivar, apagar post ([RF29](RF29-publicar-post.md)) | 401 | 403 | ✅ (instituição e banco só com selo conferido) |
 
 ## Rastreabilidade
 

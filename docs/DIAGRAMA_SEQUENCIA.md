@@ -12,11 +12,12 @@
 | Perfil e feed do autor | [RF25](rf/RF25-perfil-publico-autor.md#sequência) |
 | Curtir · comentar · compartilhar | [RF26](rf/RF26-interacoes-post.md#sequência--curtir-idempotente) |
 | Login com 2FA · ativar 2FA | [RF27](rf/RF27-autenticacao-sessao.md#sequência--login-com-2fa) |
+| Publicar post de texto com moldura | [RF29](rf/RF29-publicar-post.md#sequência--publicar) · [RF28](rf/RF28-moldura-post.md#sequência--publicar-com-moldura-e-ver-no-feed) |
 
 ## Publicação no Audio Feed (desenho alvo · ⏳ OS-23)
 
-Ainda não implementado: `MediaController`, `PostPublishingService`, `TrendingService` e o fan-out são o desenho
-alvo. A autenticação já segue o que existe (RF27): sessão opaca no Valkey e `X-XSRF-TOKEN` em toda escrita —
+Ainda não implementado: `MediaController`, `TrendingService` e o fan-out são o desenho alvo. O `PostPublishingService`
+já existe para posts de texto ([RF29](rf/RF29-publicar-post.md)). A autenticação já segue o que existe (RF27): sessão opaca no Valkey e `X-XSRF-TOKEN` em toda escrita —
 nunca JWT no app.
 
 Fluxo completo: upload do áudio para o S3, persistência canônica no PostgreSQL, atualização do

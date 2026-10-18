@@ -96,7 +96,9 @@ stateDiagram-v2
 | `Archived` | Só no perfil do autor | Removido (`ZREM`) | Mantido até TTL |
 | `Removed` | Não | Removido | Removido |
 
-Implementação: `PostStatus` + `Post.publish/archive/remove` (`Trending` é derivado do ZSET, não persistido).
+Implementação: `PostStatus` + `Post.publish/archive/remove` (`Trending` é derivado do ZSET, não persistido). O autor
+publica, arquiva, restaura e apaga pela API do [RF29](rf/RF29-publicar-post.md). A criação já publica direto, e o rascunho
+ainda não é criado pela API (⏳).
 Detalhe e interações por estado ([RF24](rf/RF24-visualizar-post.md), [RF26](rf/RF26-interacoes-post.md)):
 
 | Estado | Abre no modal | Curtir / comentar / compartilhar | Feed do autor ([RF25](rf/RF25-perfil-publico-autor.md)) |

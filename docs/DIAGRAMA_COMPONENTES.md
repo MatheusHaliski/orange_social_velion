@@ -27,6 +27,8 @@ flowchart TB
             USERC["MeController<br/>(perfil · preferências · sessões · 2FA · excluir)"]
             LEGALC["LegalController<br/>(Termos de Uso vigentes)"]
             POSTC["PostController<br/>(detalhe · curtir · comentar · compartilhar · salvar)"]
+            PUBC["PostPublishingController<br/>(criar · editar · arquivar · restaurar · apagar)"]
+            BGC["BackgroundController<br/>(catálogo público · recomendações)"]
             PROFC["UserProfileController<br/>(perfil público · feed do autor)"]
             VIEWER["ViewerResolver<br/>(OrangePrincipal da sessão)"]
             FEEDC["FeedController<br/>(profile · post · audio · alert)"]:::planned
@@ -45,7 +47,8 @@ flowchart TB
             POSTI["PostInteractionService<br/>(RF26 · contadores atômicos)"]
             ERASER["PostContentEraser<br/>(RF23 · passo da saga)"]
             FEEDS["FeedService<br/>(filtro 6 eixos)"]:::planned
-            POSTS["PostPublishingService"]:::planned
+            POSTS["PostPublishingService<br/>(RF29 · publicar · editar · arquivar)"]
+            BGS["BackgroundService · BackgroundCatalog ·<br/>BackgroundValidator · SeasonalCalendar<br/>(RF28 · moldura do post)"]
             TRENDS["TrendingService"]:::planned
             MEDIAS["MediaStorageService"]:::planned
             LGPDS["LgpdService<br/>(portabilidade)"]:::planned
@@ -75,16 +78,18 @@ flowchart TB
 
     WEB & MOBILE & VELION -->|HTTPS + cookie de sessão + X-XSRF-TOKEN| SEC
     SEC --> RATE --> CONSENT --> AUDIT
-    AUDIT --> AUTHC & USERC & LEGALC & POSTC & PROFC & FEEDC & MEDIAC & PRIVC & VELC
+    AUDIT --> AUTHC & USERC & LEGALC & POSTC & PUBC & BGC & PROFC & FEEDC & MEDIAC & PRIVC & VELC
     POSTC & PROFC & USERC --> VIEWER
 
     AUTHC --> AUTHS & USERS
     USERC --> USERS & AUTHS
     LEGALC --> LEGALS
     FEEDC --> FEEDS
-    POSTC --> POSTS & POSTQ & POSTI
+    POSTC --> POSTQ & POSTI
+    PUBC --> POSTS
+    BGC --> BGS
     PROFC --> POSTQ
-    POSTQ --> POSTR & USERR
+    POSTQ --> POSTR & USERR & BGS
     POSTI --> POSTR & COMR & USERR
     MEDIAC --> MEDIAS
     PRIVC --> LGPDS
@@ -94,7 +99,8 @@ flowchart TB
     AUTHS --> USERR & ACCR & SESSR & RATE & NOTIF
     USERS --> USERR & ACCR & CONSR & SESSR & NOTIF & ERASER
     FEEDS --> TIMER & TRENDR & USERR
-    POSTS --> POSTR & TIMER & TRENDS & EVENTS
+    POSTS --> POSTR & USERR & BGS & POSTQ
+    POSTS -.->|alvo: mídia, ranking e timeline| TIMER & TRENDS & EVENTS & MEDIAS
     TRENDS --> TRENDR
     MEDIAS --> S3A
     LGPDS --> USERR & CONSR & TIMER & S3A

@@ -89,5 +89,8 @@ orange-social:
     bucket: ${S3_BUCKET:orange-social-media}
     # de onde o app baixa mídias e avatares (CDN em produção)
     public-url: ${S3_PUBLIC_URL:http://localhost:3900/orange-social-media}
+  backgrounds:
+    # artes da Aura Plus (RF28): vídeos e pôsteres de design/brand/auras/ publicados no bucket, servidos pela CDN
+    asset-base-url: ${BACKGROUNDS_ASSET_URL:${orange-social.storage.public-url}/backgrounds}
   trending:
     window-hours: 48

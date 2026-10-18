@@ -268,7 +268,11 @@ class PostApiIT {
         send(HttpMethod.PUT, base + "/save", reader.getId(), null);
         send(HttpMethod.POST, base + "/comments", reader.getId(), Map.of("body", "comentário pessoal"));
         send(HttpMethod.POST, base + "/shares", reader.getId(), Map.of("channel", "X"));
-        Post readersPost = newPost(reader, "Post da Ana", p -> { p.setMediaObjectKey("posts/ana.jpg"); p.publish(); });
+        Post readersPost = newPost(reader, "Post da Ana", p -> {
+            p.setMediaObjectKey("posts/ana.jpg");
+            p.setBackground(Map.of("v", 1, "auraPlusId", "brasa"));     // moldura do RF28 também some
+            p.publish();
+        });
 
         PostContentEraser.ErasureReport report = eraser.eraseContentOf(reader.getId());
 
@@ -283,6 +287,8 @@ class PostApiIT {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM post_comment WHERE body IS NOT NULL AND author_user_id = ?",
                 Integer.class, reader.getId())).isZero();
         assertThat(get("/api/v1/posts/" + readersPost.getId(), null).getStatusCode().value()).isEqualTo(404);
+        assertThat(jdbc.queryForObject("SELECT background IS NULL FROM post WHERE id = ?", Boolean.class,
+                readersPost.getId())).isTrue();
 
         PostContentEraser.ErasureReport again = eraser.eraseContentOf(reader.getId());
         assertThat(again.postsRemoved() + again.commentsRemoved() + again.reactionsDeleted()).isZero();

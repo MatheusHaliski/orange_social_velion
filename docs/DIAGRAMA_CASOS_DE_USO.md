@@ -209,10 +209,10 @@ flowchart LR
     COM(["Comentar ✅"])
     APC(["Apagar comentário ✅"])
     SALV(["Salvar ✅"])
-    PUB(["Publicar post ⏳ OS-23"]):::planned
+    PUB(["Publicar post de texto ✅<br/>foto e vídeo ⏳"])
     OUV(["Ouvir áudio ⏳"]):::planned
     SEG(["Seguir perfil ⏳"]):::planned
-    ARQ(["Arquivar ou restaurar post ⏳"]):::planned
+    ARQ(["Editar, arquivar, restaurar<br/>ou apagar post ✅"])
     LER(["Ler comentários ✅"])
     CANAL(["Escolher canal<br/>link · WhatsApp · Telegram · X · e-mail ✅"])
     MID(["Enviar mídia ao S3 ⏳"]):::planned
@@ -248,8 +248,8 @@ flowchart LR
     CONT(["Ajustar container e tinta ⏳"]):::planned
     VER(["Ver o card com a moldura ⏳"]):::planned
     PREV(["Ver prévia ao vivo ⏳"]):::planned
-    LIMPA(["Limpar escolhas incompatíveis ⏳"]):::planned
-    CONTR(["Validar contraste AA ⏳"]):::planned
+    LIMPA(["Recusar escolhas incompatíveis ✅<br/>servidor · 422"])
+    CONTR(["Validar contraste AA ✅<br/>servidor · 422"])
     POSTER(["Ver só o pôster ⏳"]):::planned
     HYPE(["Mostrar Aura Hype ⏳"]):::planned
     MODR(["Moderar e checar flashes ⏳"]):::planned
@@ -274,8 +274,8 @@ flowchart LR
     classDef planned stroke-dasharray:5 4
 ```
 
-Tudo ainda planejado no app; o fluxo inteiro já roda no protótipo (telas 22–28) e no teste
-`design/prototype/studio-smoke.mjs`.
+Telas ainda planejadas no app. A API ([RF28](rf/RF28-moldura-post.md) e [RF29](rf/RF29-publicar-post.md)) já valida e guarda a
+moldura, e o fluxo inteiro roda no protótipo (telas 22–28) e no teste `design/prototype/studio-smoke.mjs`.
 
 ---
 
@@ -340,8 +340,8 @@ o fluxo de publicação ainda não.
 | Abrir post no modal | Visitante, Usuário | [RF24](rf/RF24-visualizar-post.md) | `GET /api/v1/posts/{id}` | ✅ |
 | Ver perfil e feed do autor | Visitante, Usuário | [RF25](rf/RF25-perfil-publico-autor.md) | `GET /api/v1/users/{id}/profile`, `/posts` | ✅ |
 | Curtir, comentar, apagar, compartilhar, salvar | Usuário ativo, Dono do post | [RF26](rf/RF26-interacoes-post.md) | `PUT/DELETE …/like` e `…/save`, `GET/POST …/comments`, `DELETE …/comments/{id}`, `POST …/shares` | ✅ |
-| Publicar post | Usuário ativo | — | `POST /api/v1/posts` | ⏳ OS-23 |
-| Moldura do post (Background Studio, Aura Plus) | Autor, Leitor, Moderação | [RF28](rf/RF28-moldura-post.md) | `GET /api/v1/backgrounds/catalog`, `background` no post | ⏳ OS-65 a OS-72 (protótipo ✅) |
+| Publicar, editar, arquivar, restaurar e apagar post | Usuário ativo (instituição e banco com selo) | [RF29](rf/RF29-publicar-post.md) | `POST /api/v1/posts`, `PATCH`/`DELETE /api/v1/posts/{id}`, `…/archive`, `…/restore` | ✅ texto · ⏳ mídia (OS-23 parte 2) |
+| Moldura do post (Background Studio, Aura Plus) | Autor, Leitor, Moderação | [RF28](rf/RF28-moldura-post.md) | `GET /api/v1/backgrounds/catalog`, `/recommendations`, `background` no post | ✅ API e validação · protótipo ✅ · ⏳ arte própria e app |
 | Navegar nos feeds com filtros | Visitante, Usuário | — | `FeedController` | ⏳ |
 | Publicar alerta · vaga | Fonte oficial · Instituição | — | Alert Feed | ⏳ |
 | Moderação (selo, remoção, suspensão) | Moderação | — | papel e painel de moderação | ⏳ |

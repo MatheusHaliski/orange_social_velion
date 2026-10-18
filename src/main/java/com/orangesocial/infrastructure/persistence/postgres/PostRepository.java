@@ -135,7 +135,7 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     @Modifying
     @Query(value = """
             UPDATE post SET status = 'REMOVED', title = 'Conteúdo removido', subtitle = NULL, body = NULL,
-                            media_object_key = NULL, country = NULL, city = NULL,
+                            media_object_key = NULL, country = NULL, city = NULL, background = NULL,
                             removed_at = now(), updated_at = now(), version = version + 1
             WHERE author_user_id = :userId AND status <> 'REMOVED'
             """, nativeQuery = true)

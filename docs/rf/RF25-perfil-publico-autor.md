@@ -107,4 +107,5 @@ flowchart TD
 | Tela | Protótipo: [10-perfil-autor](../../design/prototype/screens/10-perfil-autor.png); autor como link no card e no modal | ✅ protótipo |
 | App | rota `/u/{id}` | ⏳ OS-39 |
 | Identidade | `ViewerResolver` lê a sessão autenticada ([RF27](RF27-autenticacao-sessao.md)); o cabeçalho de dev `X-Orange-Dev-User` foi removido e os testes entram com login real (sessão + CSRF) | ✅ |
+| Moldura | cada card do feed do autor traz `background` resolvido ([RF28](RF28-moldura-post.md)), sem consulta extra (vem da linha do `post`) | ✅ |
 | Pendências | seguir/deixar de seguir e contagem de seguidores; bloquear/silenciar | ⏳ novo RF |

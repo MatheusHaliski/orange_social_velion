@@ -1,5 +1,7 @@
 package com.orangesocial.application.post;
 
+import com.orangesocial.application.background.BackgroundService;
+
 import com.orangesocial.application.post.PostViews.AuthorView;
 import com.orangesocial.application.post.PostViews.CategoryView;
 import com.orangesocial.application.post.PostViews.CountersView;
@@ -39,11 +41,14 @@ public class PostQueryService {
     private final PostRepository posts;
     private final AuthorDirectory authors;
     private final PublicLinks links;
+    private final BackgroundService backgrounds;
 
-    public PostQueryService(PostRepository posts, AuthorDirectory authors, PublicLinks links) {
+    public PostQueryService(PostRepository posts, AuthorDirectory authors, PublicLinks links,
+                            BackgroundService backgrounds) {
         this.posts = posts;
         this.authors = authors;
         this.links = links;
+        this.backgrounds = backgrounds;
     }
 
     // ------------------------------------------------------------ RF24 · detalhe
@@ -67,7 +72,7 @@ public class PostQueryService {
                 post.getSubtitle(), post.getBody(), links.mediaUrl(post.getMediaObjectKey()),
                 post.getDurationSeconds(), post.getAgeRating(), post.getAgeRating().getLabel(), post.getStatus(),
                 post.getCountry(), post.getCity(), post.getCreatedAt(), authors.view(author), counters(post),
-                viewer, post.acceptsInteractions(), links.shareUrl(post.getId()));
+                viewer, post.acceptsInteractions(), links.shareUrl(post.getId()), backgrounds.resolve(post.getBackground()));
     }
 
     // ------------------------------------------------------------ RF25 · perfil público + feed do autor
@@ -102,7 +107,7 @@ public class PostQueryService {
                 p.getCreatedAt(), author, counters(p),
                 new ViewerStateView(liked.contains(p.getId()), saved.contains(p.getId()),
                         p.isAuthoredBy(viewerId.orElse(null))),
-                links.postPath(p.getId()))).toList();
+                links.postPath(p.getId()), backgrounds.resolve(p.getBackground()))).toList();
 
         String next = hasMore ? FeedCursor.encode(items.getLast()) : null;
         return new FeedPageView(cards, next);

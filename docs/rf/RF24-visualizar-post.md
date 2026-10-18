@@ -150,7 +150,10 @@ flowchart TD
   "counts": { "likes": 2100, "comments": 184, "shares": 57, "views": 0 },
   "viewer": { "liked": false, "saved": false, "isAuthor": false },
   "interactionsOpen": true,
-  "shareUrl": "https://orange…/p/0192f0c2-…"
+  "shareUrl": "https://orange…/p/0192f0c2-…",
+  "background": { "artKind": "AURA_PLUS", "artId": "brasa", "palette": [], "css": null,
+                  "auraPlus": { "poster": "…/brasa-poster.webp", "av1": "…/brasa-hq.mp4", "h264": "…/brasa-leve.mp4", "loopSeconds": 4, "maxPlaySeconds": 5 },
+                  "container": { "color": "#211A12", "ink": "#F5EDE3", "contrast": "14,8:1" }, "config": { "v": 1, "…": "…" } }
 }
 ```
 
@@ -168,4 +171,5 @@ Erros em Problem Details (RFC 9457) com `detail` em pt-BR. Identidade: a sessão
 | Tela | Protótipo: modal [09-post-modal](../../design/prototype/screens/09-post-modal.png); card com `<time>` e tooltip em [01-post-feed](../../design/prototype/screens/01-post-feed.png) | ✅ protótipo |
 | App | modal em Next.js/Expo, rota `/p/{id}` | ⏳ OS-39 |
 | Identidade | `ViewerResolver` lê a sessão autenticada ([RF27](RF27-autenticacao-sessao.md)); o cabeçalho de dev `X-Orange-Dev-User` foi removido e os testes entram com login real (sessão + CSRF) | ✅ |
+| Moldura | `background` resolvido no detalhe ([RF28](RF28-moldura-post.md)): `null` = moldura padrão; a arte nunca cobre o conteúdo do modal | ✅ |
 | Pendências | contagem de visualizações (HyperLogLog, OS-21); bloqueio por idade para conteúdo 16+/18+ (OS-49) | ⏳ |

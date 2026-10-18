@@ -56,6 +56,8 @@ src/main/java/com/orangesocial/
 | `PUT`/`DELETE /api/v1/posts/{id}/like` · `…/save` | RF26 | Curtir e salvar, idempotentes |
 | `GET`/`POST /api/v1/posts/{id}/comments` · `DELETE …/comments/{cid}` | RF26 | Caixa de mensagens do post |
 | `POST /api/v1/posts/{id}/shares` `{channel}` | RF26 | Registra o compartilhamento e devolve link e total |
+| `POST /api/v1/posts` · `PATCH`/`DELETE /api/v1/posts/{id}` · `…/archive` · `…/restore` | RF29 | Publicar (texto), editar, arquivar, restaurar e apagar o próprio post, com a moldura (`background`) |
+| `GET /api/v1/backgrounds/catalog` · `GET /api/v1/backgrounds/recommendations?category=` | RF28 | Catálogo público da moldura (ETag, cartela do dia) e direção recomendada |
 
 | `GET /api/v1/auth/csrf` · `POST /api/v1/auth/register` · `POST /api/v1/auth/login` · `…/login/2fa` · `…/reactivate` · `…/logout` · `GET /api/v1/auth/session` | RF1, RF27 | Cadastro com tipo de usuário e aceite dos Termos da Velion; login em etapas (senha → 2FA → reativar) |
 | `GET/PATCH /api/v1/me/profile` · `GET/PATCH /api/v1/me/preferences` · `POST /api/v1/me/verify-email` | RF1, RF2 | Perfil, configurações (tema, fundo do app, privacidade, notificações) e verificação de e-mail |

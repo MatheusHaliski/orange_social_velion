@@ -32,6 +32,18 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         return problem(HttpStatus.FORBIDDEN, "Sem permissão", e.getMessage());
     }
 
+    @ExceptionHandler(PostExceptions.Invalid.class)
+    ProblemDetail postInvalid(PostExceptions.Invalid e) {
+        ProblemDetail p = problem(HttpStatus.UNPROCESSABLE_CONTENT, "Revise o post", e.getMessage());
+        p.setProperty("errors", e.errors());
+        return p;
+    }
+
+    @ExceptionHandler(PostExceptions.Conflict.class)
+    ProblemDetail postConflict(PostExceptions.Conflict e) {
+        return problem(HttpStatus.CONFLICT, "Ação não disponível agora", e.getMessage());
+    }
+
     @ExceptionHandler(PostExceptions.InteractionsClosed.class)
     ProblemDetail closed(PostExceptions.InteractionsClosed e) {
         return problem(HttpStatus.CONFLICT, "Interações encerradas", e.getMessage());

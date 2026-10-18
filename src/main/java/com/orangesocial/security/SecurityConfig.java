@@ -46,7 +46,8 @@ public class SecurityConfig {
                 .securityContext(c -> c.securityContextRepository(securityContextRepository()))
                 .sessionManagement(s -> s.sessionFixation(f -> f.changeSessionId()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.GET, "/api/v1/posts/**", "/api/v1/users/**", "/api/v1/legal/**")
+                        .requestMatchers(HttpMethod.GET, "/api/v1/posts/**", "/api/v1/users/**", "/api/v1/legal/**",
+                                "/api/v1/backgrounds/**")
                         .permitAll()
                         .requestMatchers("/api/v1/auth/**", "/error").permitAll()
                         .anyRequest().authenticated())
