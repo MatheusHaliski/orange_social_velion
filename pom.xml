@@ -35,6 +35,9 @@
 
         <!-- Argon2id do Spring Security depende do BouncyCastle (ADR-09) -->
         <bouncycastle.version>1.86</bouncycastle.version>
+
+        <!-- API S3 (AWS S3 em produção, Garage em desenvolvimento): URLs pré-assinadas e mídia (RF29) -->
+        <awssdk.version>2.55.10</awssdk.version>
     </properties>
 
     <dependencies>
@@ -96,6 +99,30 @@
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
 
+        <!-- API S3: envio pré-assinado e mídia dos posts (RF29). Cliente HTTP do JDK, sem Apache nem Netty -->
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>s3</artifactId>
+            <exclusions>
+                <exclusion>
+                    <groupId>software.amazon.awssdk</groupId>
+                    <artifactId>apache-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>software.amazon.awssdk</groupId>
+                    <artifactId>netty-nio-client</artifactId>
+                </exclusion>
+                <exclusion>
+                    <groupId>software.amazon.awssdk</groupId>
+                    <artifactId>apache5-client</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>software.amazon.awssdk</groupId>
+            <artifactId>url-connection-client</artifactId>
+        </dependency>
+
         <!-- Cassandra: timeline de feeds, logs e notificações -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -130,6 +157,18 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>software.amazon.awssdk</groupId>
+                <artifactId>bom</artifactId>
+                <version>${awssdk.version}</version>
+                <type>pom</type>
+                <scope>import</scope>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
 
     <build>
         <plugins>

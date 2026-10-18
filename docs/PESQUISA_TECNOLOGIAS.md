@@ -133,6 +133,14 @@ AVIF + WebP (fallback JPEG), thumbnails 150/480/1080, EXIF/GPS removidos. **Víd
 Cloudflare Stream ou Mux atrás de uma interface `VideoProvider`; migrar para FFmpeg + HLS (CMAF)
 quando o custo justificar.
 
+**Aplicado (fase 1 · RF29, 10/2026):** AWS SDK v2 com endereço por caminho (igual no Garage e na AWS), cliente HTTP do
+JDK (sem Apache/Netty) e checksum só quando exigido. Envio direto por URL pré-assinada de `PUT` (15 min, tipo e tamanho
+dentro da assinatura). A limpeza da foto roda **na própria API, na publicação**, com `javax.imageio`: formato pelos
+bytes, limite de pixels lido do cabeçalho antes de decodificar, orientação EXIF aplicada e regravação sem metadados
+(JPEG 0,85 ou PNG, até 2.048 px). Escolha consciente para não trazer dependência nativa agora; a fila
+`media.uploaded`, libvips/imgproxy (AVIF/WebP, miniaturas 150/480/1080) e a moderação antes de publicar continuam
+sendo o alvo (⏳). Em dev e nos testes, Garage iniciado pela Admin API v2 (a imagem não tem shell).
+
 Fontes: [InfoQ: alternativas ao MinIO](https://infoq.com/news/2025/12/minio-s3-api-alternatives/) ·
 [MinIO remove console](https://blocksandfiles.com/2025/06/19/minio-removes-management-features-from-basic-community-edition-object-storage-code/) ·
 [Cloudflare Stream pricing](https://developers.cloudflare.com/stream/pricing/index.md) ·

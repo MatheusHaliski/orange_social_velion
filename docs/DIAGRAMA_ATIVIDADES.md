@@ -82,3 +82,4 @@ Passos marcados com ⏳ ainda não estão no código; foto por URL pré-assinada
 | O que muda com cada campo do perfil | [RF2](rf/RF02-editar-perfil.md#atividades--o-que-muda-junto-com-cada-campo-do-perfil) |
 | Paginação por cursor do feed do autor | [RF25](rf/RF25-perfil-publico-autor.md#paginação-por-cursor) |
 | Regras de visibilidade do post | [RF24](rf/RF24-visualizar-post.md#regras-de-visibilidade) |
+| Validação da publicação, com a foto (dono, formato pelos bytes, limite de pixels, sem EXIF/GPS) | [RF29](rf/RF29-publicar-post.md#atividades--validação-da-criação) |

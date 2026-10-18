@@ -114,7 +114,7 @@ class PostApiIT {
         assertThat(body).containsEntry("title", published.getTitle())
                 .containsEntry("subtitle", "Seis meses depois")
                 .containsEntry("body", "Texto completo do post.")
-                .containsEntry("mediaUrl", "http://localhost:3900/orange-social-media/posts/video.mp4")
+                .containsEntry("mediaUrl", "http://orange-social-media.web.garage.localhost:3902/posts/video.mp4")
                 .containsEntry("ageRatingLabel", "Livre")
                 .containsEntry("interactionsOpen", true)
                 .containsEntry("shareUrl", "http://localhost:3000/p/" + published.getId());
@@ -123,7 +123,7 @@ class PostApiIT {
         Map<String, Object> owner = map(body, "author");
         assertThat(owner).containsEntry("name", "techblog.br")
                 .containsEntry("profilePath", "/api/v1/users/" + author.getId() + "/profile")
-                .containsEntry("avatarUrl", "http://localhost:3900/orange-social-media/users/1/avatar.webp")
+                .containsEntry("avatarUrl", "http://orange-social-media.web.garage.localhost:3902/users/1/avatar.webp")
                 .containsEntry("available", true);
         assertThat(map(owner, "category")).containsEntry("code", "AMARELO").containsEntry("color", "#F7C948");
         assertThat(map(body, "counts")).containsEntry("likes", 0).containsEntry("comments", 0).containsEntry("shares", 0);

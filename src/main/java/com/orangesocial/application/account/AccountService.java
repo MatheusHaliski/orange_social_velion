@@ -1,6 +1,7 @@
 package com.orangesocial.application.account;
 
 import com.orangesocial.application.account.AccountViews.DeletionView;
+import com.orangesocial.application.media.MediaJanitor;
 import com.orangesocial.application.post.PostContentEraser;
 import com.orangesocial.domain.model.AccountStatus;
 import com.orangesocial.domain.model.UserControlList;
@@ -38,13 +39,14 @@ public class AccountService {
     private final PasswordEncoder passwords;
     private final SessionService sessions;
     private final PostContentEraser eraser;
+    private final MediaJanitor media;
     private final AccountNotifier notifier;
     private final Clock clock;
     private final Duration grace;
 
     public AccountService(UserControlListRepository users, UserMfaRepository mfa, RecoveryCodeRepository recovery,
                           UserPreferenceRepository preferences, PasswordEncoder passwords, SessionService sessions,
-                          PostContentEraser eraser, AccountNotifier notifier, Clock clock,
+                          PostContentEraser eraser, MediaJanitor media, AccountNotifier notifier, Clock clock,
                           @Value("${orange-social.account.deletion-grace:30d}") Duration grace) {
         this.users = users;
         this.mfa = mfa;
@@ -53,6 +55,7 @@ public class AccountService {
         this.passwords = passwords;
         this.sessions = sessions;
         this.eraser = eraser;
+        this.media = media;
         this.notifier = notifier;
         this.clock = clock;
         this.grace = grace;
@@ -107,7 +110,9 @@ public class AccountService {
         user.anonymizeForLgpdDeletion(passwords.encode(UUID.randomUUID().toString()));
         users.save(user);
         sessions.revokeAll(userId, null);
-        // Próximos passos da saga (OS-44): apagar report.mediaKeysToDelete() no S3, timeline no Cassandra, DEK.
+        // fotos dos posts saem do bucket só depois do commit (o banco já não aponta para elas)
+        media.deleteAfterCommit(report.mediaKeysToDelete());
+        // Próximos passos da saga (OS-44): timeline no Cassandra, DEK.
         log.info("Conta {} eliminada: {} posts, {} comentários, {} mídias para apagar",
                 userId, report.postsRemoved(), report.commentsRemoved(), report.mediaKeysToDelete().size());
     }

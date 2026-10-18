@@ -24,9 +24,9 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
- * Publicação de post pelo autor (RF29, OS-23 · 1ª parte: posts de texto no Post Feed) e a moldura escolhida no
- * Background Studio (RF28). Quem publica precisa de conta ativa; instituição e banco, do selo verificado.
- * Mídia (foto, vídeo, áudio) entra com o envio pré-assinado ao S3, na próxima etapa.
+ * Publicação de post pelo autor (RF29, OS-23: texto e foto no Post Feed) e a moldura escolhida no Background Studio
+ * (RF28). Quem publica precisa de conta ativa; instituição e banco, do selo verificado. A foto chega antes por URL
+ * pré-assinada e é limpa aqui ({@link PostMediaService}); vídeo e áudio ficam para as próximas etapas.
  */
 @Service
 @Transactional
@@ -40,7 +40,8 @@ public class PostPublishingService {
 
     /** Pedido de criação; {@code background} chega como JSON livre e é validado pelo {@link BackgroundValidator}. */
     public record NewPost(FeedType feed, MediaType mediaType, String title, String subtitle, String body,
-                          AgeRating ageRating, String country, String city, Object background) {
+                          AgeRating ageRating, String country, String city, Object background,
+                          String mediaObjectKey) {
     }
 
     private final PostRepository posts;
@@ -48,25 +49,39 @@ public class PostPublishingService {
     private final AgePolicy ages;
     private final BackgroundValidator backgrounds;
     private final PostQueryService queries;
+    private final PostMediaService media;
 
     public PostPublishingService(PostRepository posts, AuthorDirectory authors, AgePolicy ages,
-                                 BackgroundValidator backgrounds, PostQueryService queries) {
+                                 BackgroundValidator backgrounds, PostQueryService queries, PostMediaService media) {
         this.posts = posts;
         this.authors = authors;
         this.ages = ages;
         this.backgrounds = backgrounds;
         this.queries = queries;
+        this.media = media;
     }
 
     public PostDetailView create(long viewerId, NewPost cmd) {
         UserControlList author = requirePublisher(viewerId);
         FeedType feed = cmd.feed() == null ? FeedType.POST : cmd.feed();
-        MediaType media = cmd.mediaType() == null ? MediaType.TEXT : cmd.mediaType();
+        MediaType mediaType = cmd.mediaType() == null ? MediaType.TEXT : cmd.mediaType();
+        String uploadKey = trim(cmd.mediaObjectKey());
         List<String> errors = new ArrayList<>();
         switch (feed) {
             case POST -> {
-                if (media != MediaType.TEXT) {
-                    errors.add("Foto, vídeo e áudio chegam com o envio de mídia (próxima etapa); por enquanto, publique texto.");
+                switch (mediaType) {
+                    case TEXT -> {
+                        if (uploadKey != null) {
+                            errors.add("Post de texto não leva mídia: use \"mediaType\": \"IMAGE\" para publicar a foto.");
+                        }
+                    }
+                    case IMAGE -> {
+                        if (uploadKey == null) {
+                            errors.add("Envie a foto antes (POST /api/v1/media/uploads) e informe \"mediaObjectKey\".");
+                        }
+                    }
+                    case VIDEO -> errors.add("Vídeo ainda não: falta o processamento que tira os metadados e gera o pôster.");
+                    case AUDIO -> errors.add("Áudio vai para o Audio Feed, que ainda não está disponível (OS-24).");
                 }
             }
             case AUDIO -> errors.add("O Audio Feed precisa de envio de áudio, que ainda não está disponível (OS-24).");
@@ -80,8 +95,11 @@ public class PostPublishingService {
         if (!errors.isEmpty()) {
             throw new PostExceptions.Invalid(errors);
         }
-        Post post = new Post(author, feed, media, f.title());
+        // a foto só é processada quando o resto do post já passou: limpar imagem custa mais que validar texto
+        String mediaKey = mediaType == MediaType.IMAGE ? media.attachImage(author.getId(), uploadKey) : null;
+        Post post = new Post(author, feed, mediaType, f.title());
         apply(post, f);
+        post.setMediaObjectKey(mediaKey);
         post.setBackground(background);
         post.publish();
         posts.saveAndFlush(post);
@@ -139,11 +157,16 @@ public class PostPublishingService {
         return queries.getPost(postId, Optional.of(viewerId));
     }
 
-    /** Apagar pelo autor: o conteúdo some (título vira "[removido]") e o post responde 404 para todos. */
+    /**
+     * Apagar pelo autor: o conteúdo some (título vira "Conteúdo removido") e o post responde 404 para todos. A foto
+     * sai do bucket depois do commit.
+     */
     public void remove(long viewerId, UUID postId) {
         Post post = ownPost(viewerId, postId);
+        String mediaKey = post.getMediaObjectKey();
         post.remove();
         posts.saveAndFlush(post);
+        media.discard(mediaKey);
     }
 
     // ------------------------------------------------------------ regras

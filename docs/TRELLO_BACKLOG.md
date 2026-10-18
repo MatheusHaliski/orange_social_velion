@@ -71,7 +71,7 @@ Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 | OS-15 | Seleção encadeada typeofcommunity → selectcountry → selectcity | 🟢 🟠 | 5 | Listas filtradas pelo item anterior; grava `Listofcommunitiesofinterest` |
 | OS-16 | Captura de GPS `LastSavedLocation` com consentimento | 🟢 🔴 | 3 | Sem consentimento não grava; JSONB `{lat,lng,timestamp}`; `last_saved_point` gerado pelo PostGIS |
 | OS-17 | Fluxo de cadastro por Usertype (6 categorias) | 🟢 🟠 | 5 | Campos específicos por categoria; VERMELHO/PRETO com verificação manual |
-| OS-18 | Upload de foto de perfil via URL pré-assinada S3 | 🟢 🔵 | 3 | Banco guarda só a chave do objeto; EXIF/GPS removidos |
+| OS-18 | Upload de foto de perfil via URL pré-assinada S3 | 🟢 🔵 | 3 | Banco guarda só a chave do objeto; EXIF/GPS removidos. Reaproveita `MediaStorage` e `ImageSanitizer` do OS-23 |
 | OS-19 **(novo)** | Step-up de autenticação (`max_age`/`acr`) para Exportar e Excluir | 🟢 🔴 | 3 | Ações sensíveis exigem reautenticação recente |
 
 ### Backend & Persistência Poliglota (Backlog)
@@ -81,7 +81,7 @@ Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 | OS-20 | `TrendingScoreRepository` (Valkey ZSET) | 🔵 | 3 | Ranking global e por cor; TTL 48h |
 | OS-21 | Trending Score com decaimento temporal e anti-manipulação | 🔵 | 5 | ✅ fórmula `log10(views)·W + Σ pesos / (idade_h + 2)^1.6` em `TrendingScoreCalculator`; pendente: HyperLogLog de views únicas, tempo mínimo de exibição, z-score e job de recálculo |
 | OS-22 | `PostTimelineEntity` + fan-out **híbrido** no Cassandra | 🔵 | 8 | On write para < 10k seguidores; merge na leitura (`author_posts`) para contas grandes; inativos > 30 dias sem fan-out |
-| OS-23 | Publicação de post (texto/imagem/vídeo) — [RF29](rf/RF29-publicar-post.md) | 🔵 | 5 | ✅ texto: `POST/PATCH/DELETE /api/v1/posts`, arquivar/restaurar, conta ativa + selo, 422 com todos os erros; ⏳ foto/vídeo com URL pré-assinada e `HEAD` no S3; rascunho |
+| OS-23 | Publicação de post (texto/imagem/vídeo) — [RF29](rf/RF29-publicar-post.md) | 🔵 | 5 | ✅ texto: `POST/PATCH/DELETE /api/v1/posts`, arquivar/restaurar, conta ativa + selo, 422 com todos os erros; ✅ foto: `POST /api/v1/media/uploads` (URL pré-assinada, tipo e tamanho na assinatura), `HEAD` no S3, foto limpa sem EXIF/GPS (orientação aplicada, até 2.048 px), apagar o post apaga a foto; ⏳ vídeo, rascunho, AVIF/WebP + miniaturas, moderação da imagem |
 | OS-24 | Publicação no Audio Feed (podcast, áudio pessoal, música) | 🔵 | 5 | Conforme `DIAGRAMA_SEQUENCIA.md`; waveform pré-computado (`audiowaveform`) |
 | OS-25 | Alert Feed **geográfico**: restrito a fontes verificadas | 🔵 🔴 | 8 | Somente VERMELHO verificado; consulta por geohash/município IBGE; sem timeline por seguidor; vagas para VERMELHO/AMARELO |
 | OS-26 | Filtro multidimensional (6 eixos) nos 4 feeds via PostgreSQL | 🔵 | 8 | Categoria, tipo, local (PostGIS `ST_DWithin`), país, cidade, nome (`pg_trgm` + `unaccent`) combináveis |

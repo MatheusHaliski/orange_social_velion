@@ -169,7 +169,7 @@ classDiagram
         #String title
         #String subtitle
         #String body
-        #String mediaObjectKey
+        #String mediaObjectKey «posts/… · foto limpa, RF29»
         #AgeRating ageRating
         #PostStatus status
         #String country
@@ -364,4 +364,7 @@ classDiagram
   ninguém; autor não `ACTIVE` esconde o post de terceiros. Só `PUBLISHED` aceita interações (RF26).
 - **Moldura do post (RF28):** `Post.background` guarda só ids do catálogo, validados pelo `BackgroundValidator`
   (uma arte por vez, contraste ≥ 4,5:1, sem moldura em `ALERT`); `remove()` e a eliminação LGPD apagam a moldura.
+- **Foto do post (RF29):** `Post.mediaObjectKey` só aponta para a versão limpa em `posts/` (sem EXIF/GPS), gravada pelo
+  `PostMediaService`; o envio em `uploads/{autor}/` nunca vira `mediaUrl`. `remove()` zera a chave e o objeto sai do
+  bucket depois do commit.
 - **Contadores somente leitura no JPA:** quem altera é o `PostInteractionService`, com UPDATE atômico.

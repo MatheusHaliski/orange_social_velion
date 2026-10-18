@@ -354,7 +354,7 @@ Finalidades de consentimento (`consent_event.purpose`, todas começam `false`): 
 | | `mediaType` | O | público | `TEXT` · `IMAGE` · `VIDEO` · `AUDIO` |
 | | `title` | O | público | Sempre presente em todo card |
 | | `subtitle`, `body` | o | público | Card corta; modal mostra tudo |
-| | `mediaObjectKey`, `durationSeconds` | por mídia | público | Chave no S3; duração para áudio e vídeo |
+| | `mediaObjectKey`, `durationSeconds` | por mídia | público | Chave no S3: para foto, a versão limpa em `posts/` (sem EXIF/GPS, até 2.048 px · RF29); duração para áudio e vídeo |
 | | `ageRating` | O (padrão `LIVRE`) | público | `LIVRE` · `12+` · `16+` · `18+` · `Sensível` |
 | | `status` | sistema | autor | `DRAFT` · `PUBLISHED` · `ARCHIVED` · `REMOVED` |
 | | `country`, `city` | o | público | Filtros País e Cidade |

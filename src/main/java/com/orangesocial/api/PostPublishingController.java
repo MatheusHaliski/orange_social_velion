@@ -39,7 +39,8 @@ public class PostPublishingController {
     @ResponseStatus(HttpStatus.CREATED)
     public PostDetailView create(@RequestBody NewPostRequest body) {
         return publishing.create(viewer.requireViewer(), new NewPost(body.feed(), body.mediaType(), body.title(),
-                body.subtitle(), body.body(), body.ageRating(), body.country(), body.city(), body.background()));
+                body.subtitle(), body.body(), body.ageRating(), body.country(), body.city(), body.background(),
+                body.mediaObjectKey()));
     }
 
     /** Chave ausente mantém o valor; {@code "background": null} volta à moldura padrão. */
@@ -65,6 +66,7 @@ public class PostPublishingController {
     }
 
     public record NewPostRequest(FeedType feed, MediaType mediaType, String title, String subtitle, String body,
-                                 AgeRating ageRating, String country, String city, Map<String, Object> background) {
+                                 AgeRating ageRating, String country, String city, Map<String, Object> background,
+                                 String mediaObjectKey) {
     }
 }

@@ -209,13 +209,15 @@ flowchart LR
     COM(["Comentar ✅"])
     APC(["Apagar comentário ✅"])
     SALV(["Salvar ✅"])
-    PUB(["Publicar post de texto ✅<br/>foto e vídeo ⏳"])
+    PUB(["Publicar post de texto ou foto ✅<br/>vídeo ⏳"])
     OUV(["Ouvir áudio ⏳"]):::planned
     SEG(["Seguir perfil ⏳"]):::planned
     ARQ(["Editar, arquivar, restaurar<br/>ou apagar post ✅"])
     LER(["Ler comentários ✅"])
     CANAL(["Escolher canal<br/>link · WhatsApp · Telegram · X · e-mail ✅"])
-    MID(["Enviar mídia ao S3 ⏳"]):::planned
+    MID(["Enviar foto direto ao bucket ✅<br/>URL pré-assinada · 15 min"])
+    LIMP(["Limpar a foto ✅<br/>sem EXIF/GPS · até 2.048 px"])
+    BKT["Bucket S3<br/>Garage em dev"]:::actor
 
     VIS --- FEED & ABRIR & AUTOR & COMP
     USR --- CURT & COM & APC & SALV & PUB & OUV & SEG
@@ -224,6 +226,8 @@ flowchart LR
     AUTOR -. «extend» toque na foto ou no nome .-> ABRIR
     COMP -. «include» .-> CANAL
     PUB -. «include» .-> MID
+    PUB -. «include» .-> LIMP
+    MID --- BKT
 
     classDef actor fill:#FFF1E8,stroke:#FF6A2B,stroke-width:2px,color:#17120D,font-weight:bold
     classDef planned stroke-dasharray:5 4
@@ -340,7 +344,7 @@ o fluxo de publicação ainda não.
 | Abrir post no modal | Visitante, Usuário | [RF24](rf/RF24-visualizar-post.md) | `GET /api/v1/posts/{id}` | ✅ |
 | Ver perfil e feed do autor | Visitante, Usuário | [RF25](rf/RF25-perfil-publico-autor.md) | `GET /api/v1/users/{id}/profile`, `/posts` | ✅ |
 | Curtir, comentar, apagar, compartilhar, salvar | Usuário ativo, Dono do post | [RF26](rf/RF26-interacoes-post.md) | `PUT/DELETE …/like` e `…/save`, `GET/POST …/comments`, `DELETE …/comments/{id}`, `POST …/shares` | ✅ |
-| Publicar, editar, arquivar, restaurar e apagar post | Usuário ativo (instituição e banco com selo) | [RF29](rf/RF29-publicar-post.md) | `POST /api/v1/posts`, `PATCH`/`DELETE /api/v1/posts/{id}`, `…/archive`, `…/restore` | ✅ texto · ⏳ mídia (OS-23 parte 2) |
+| Publicar, editar, arquivar, restaurar e apagar post | Usuário ativo (instituição e banco com selo) | [RF29](rf/RF29-publicar-post.md) | `POST /api/v1/media/uploads`, `POST /api/v1/posts`, `PATCH`/`DELETE /api/v1/posts/{id}`, `…/archive`, `…/restore` | ✅ texto e foto · ⏳ vídeo e áudio |
 | Moldura do post (Background Studio, Aura Plus) | Autor, Leitor, Moderação | [RF28](rf/RF28-moldura-post.md) | `GET /api/v1/backgrounds/catalog`, `/recommendations`, `background` no post | ✅ API e validação · protótipo ✅ · ⏳ arte própria e app |
 | Navegar nos feeds com filtros | Visitante, Usuário | — | `FeedController` | ⏳ |
 | Publicar alerta · vaga | Fonte oficial · Instituição | — | Alert Feed | ⏳ |

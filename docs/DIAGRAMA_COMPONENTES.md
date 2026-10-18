@@ -32,7 +32,7 @@ flowchart TB
             PROFC["UserProfileController<br/>(perfil público · feed do autor)"]
             VIEWER["ViewerResolver<br/>(OrangePrincipal da sessão)"]
             FEEDC["FeedController<br/>(profile · post · audio · alert)"]:::planned
-            MEDIAC["MediaController<br/>(URLs pré-assinadas)"]:::planned
+            MEDIAC["MediaUploadController<br/>(URL pré-assinada da foto · RF29)"]
             PRIVC["PrivacyController<br/>(exportar · consentimentos)"]:::planned
             VELC["VelionIntegrationController"]:::planned
         end
@@ -50,7 +50,7 @@ flowchart TB
             POSTS["PostPublishingService<br/>(RF29 · publicar · editar · arquivar)"]
             BGS["BackgroundService · BackgroundCatalog ·<br/>BackgroundValidator · SeasonalCalendar<br/>(RF28 · moldura do post)"]
             TRENDS["TrendingService"]:::planned
-            MEDIAS["MediaStorageService"]:::planned
+            MEDIAS["PostMediaService · ImageSanitizer ·<br/>MediaJanitor<br/>(RF29 · foto sem EXIF/GPS)"]
             LGPDS["LgpdService<br/>(portabilidade)"]:::planned
             POINTS["VelionPointsService"]:::planned
             EVENTS["DomainEventPublisher"]:::planned
@@ -65,7 +65,7 @@ flowchart TB
             TRENDR["TrendingScoreRepository<br/>(StringRedisTemplate · ZSET)"]
             SESSR["Spring Session<br/>(Valkey · indexado)"]
             CONSR["ConsentEventRepository<br/>(hoje JDBC no cadastro)"]:::planned
-            S3A["S3StorageAdapter<br/>(AWS SDK v2)"]:::planned
+            S3A["S3MediaStorage<br/>(AWS SDK v2 · MediaStorage)"]
         end
     end
 
@@ -97,10 +97,10 @@ flowchart TB
     JOB --> USERS
 
     AUTHS --> USERR & ACCR & SESSR & RATE & NOTIF
-    USERS --> USERR & ACCR & CONSR & SESSR & NOTIF & ERASER
+    USERS --> USERR & ACCR & CONSR & SESSR & NOTIF & ERASER & MEDIAS
     FEEDS --> TIMER & TRENDR & USERR
-    POSTS --> POSTR & USERR & BGS & POSTQ
-    POSTS -.->|alvo: mídia, ranking e timeline| TIMER & TRENDS & EVENTS & MEDIAS
+    POSTS --> POSTR & USERR & BGS & POSTQ & MEDIAS
+    POSTS -.->|alvo: ranking e timeline| TIMER & TRENDS & EVENTS
     TRENDS --> TRENDR
     MEDIAS --> S3A
     LGPDS --> USERR & CONSR & TIMER & S3A
@@ -126,7 +126,7 @@ flowchart TB
 | Controllers | `com.orangesocial.api` | DTOs de entrada/saída, validação Bean Validation, códigos HTTP |
 | Services | `com.orangesocial.application` | Casos de uso, transações (`@Transactional` só no PostgreSQL), orquestração entre armazenamentos |
 | Domínio | `com.orangesocial.domain.model` | Entidades, enums (`UserCategoryEnum`, `AccountStatus`, `FeedType`), regras de transição |
-| Infraestrutura | `com.orangesocial.infrastructure.*` | Adaptadores PostgreSQL (`persistence.postgres`), Cassandra (`persistence.cassandra`), Valkey (`cache.redis`), S3 |
+| Infraestrutura | `com.orangesocial.infrastructure.*` | Adaptadores PostgreSQL (`persistence.postgres`), Cassandra (`persistence.cassandra`), Valkey (`cache.redis`), S3 (`storage`) |
 
 ## Consistência entre armazenamentos
 
@@ -134,7 +134,10 @@ flowchart TB
 - A gravação no PostgreSQL acontece dentro da transação; Cassandra e Valkey são atualizados **após o commit**
   (`@TransactionalEventListener(phase = AFTER_COMMIT)`), com retentativa idempotente
   (o `post.id` é um UUID v7 gerado uma única vez).
-- Mídia é enviada **antes** da publicação (URL pré-assinada); o post só referencia a chave do objeto.
+- Mídia é enviada **antes** da publicação (URL pré-assinada, direto ao bucket); o post só referencia a chave do objeto.
+  Ao publicar, a API limpa a foto (sem EXIF/GPS) e grava a versão pública; o original sai **depois do commit** e a
+  versão limpa sai se a transação voltar atrás (`MediaJanitor`). Apagar o post ou eliminar a conta (RF23) apaga a
+  foto do bucket da mesma forma.
 - **Contadores de interação** (`like_count`, `comment_count`, `share_count`) vivem na linha do `post` e mudam
   na mesma transação da reação/comentário/compartilhamento, só quando a linha de associação realmente entrou
   ou saiu (`ON CONFLICT DO NOTHING`). O JPA nunca os grava (`insertable/updatable = false`).

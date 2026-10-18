@@ -176,6 +176,8 @@ sequenceDiagram
 | `/api/v1/me/**` (perfil, preferências, sessões, 2FA, excluir) | 401 | ✅ | ✅ |
 | Curtir, comentar, compartilhar, salvar | 401 | 403 | ✅ |
 | Publicar, editar, arquivar, apagar post ([RF29](RF29-publicar-post.md)) | 401 | 403 | ✅ (instituição e banco só com selo conferido) |
+| `POST /api/v1/media/uploads` (URL pré-assinada da foto · [RF29](RF29-publicar-post.md)) | 401 | 403 | ✅ |
+| `PUT` na URL pré-assinada (direto no bucket, fora da API) | 403 do bucket | 403 do bucket | ✅ com a assinatura recebida: até 15 min, mesmo tipo e tamanho |
 
 ## Rastreabilidade
 

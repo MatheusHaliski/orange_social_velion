@@ -56,9 +56,9 @@ src/main/java/com/orangesocial/
 | `PUT`/`DELETE /api/v1/posts/{id}/like` · `…/save` | RF26 | Curtir e salvar, idempotentes |
 | `GET`/`POST /api/v1/posts/{id}/comments` · `DELETE …/comments/{cid}` | RF26 | Caixa de mensagens do post |
 | `POST /api/v1/posts/{id}/shares` `{channel}` | RF26 | Registra o compartilhamento e devolve link e total |
-| `POST /api/v1/posts` · `PATCH`/`DELETE /api/v1/posts/{id}` · `…/archive` · `…/restore` | RF29 | Publicar (texto), editar, arquivar, restaurar e apagar o próprio post, com a moldura (`background`) |
+| `POST /api/v1/posts` · `PATCH`/`DELETE /api/v1/posts/{id}` · `…/archive` · `…/restore` | RF29 | Publicar (texto ou foto), editar, arquivar, restaurar e apagar o próprio post, com a moldura (`background`) |
+| `POST /api/v1/media/uploads` `{kind, contentType, sizeBytes}` | RF29 | URL pré-assinada (15 min) para enviar a foto direto ao bucket; ao publicar, a API tira EXIF/GPS |
 | `GET /api/v1/backgrounds/catalog` · `GET /api/v1/backgrounds/recommendations?category=` | RF28 | Catálogo público da moldura (ETag, cartela do dia) e direção recomendada |
-
 | `GET /api/v1/auth/csrf` · `POST /api/v1/auth/register` · `POST /api/v1/auth/login` · `…/login/2fa` · `…/reactivate` · `…/logout` · `GET /api/v1/auth/session` | RF1, RF27 | Cadastro com tipo de usuário e aceite dos Termos da Velion; login em etapas (senha → 2FA → reativar) |
 | `GET/PATCH /api/v1/me/profile` · `GET/PATCH /api/v1/me/preferences` · `POST /api/v1/me/verify-email` | RF1, RF2 | Perfil, configurações (tema, fundo do app, privacidade, notificações) e verificação de e-mail |
 | `POST /api/v1/me/password` · `GET/DELETE /api/v1/me/sessions` · `/api/v1/me/mfa/**` | RF27 | Senha, sessões ativas e 2FA (TOTP + 10 códigos de recuperação) |
@@ -72,21 +72,23 @@ Erros em Problem Details (RFC 9457) com mensagem em pt-BR. Sessão opaca no Valk
 ## Ambiente local
 
 ```bash
-docker compose up -d                  # PostgreSQL+PostGIS :5432 · Valkey :6379 · Garage (S3) :3900
+docker compose up -d                  # PostgreSQL+PostGIS :5432 · Valkey :6379 · Garage (S3 :3900, leitura :3902)
 docker compose --profile full up -d   # + Cassandra 5 :9042 (aplica cassandra/schema.cql)
-mvn spring-boot:run                   # perfil dev; Flyway aplica db/migration/V1..V3
+mvn spring-boot:run                   # perfil dev; Flyway aplica db/migration/V1..V4
                                       # o código de verificação de e-mail aparece no log (só em dev)
 ```
 
 Fora do perfil `dev`, defina `ORANGE_APP_SECRET` (Base64, 32+ bytes — ex.: `openssl rand -base64 32`).
-Credenciais de desenvolvimento: PostgreSQL `orange`/`orange`; Garage access key `GK0000000000000000orangedev`
-(secret em `infra/garage/init.sh`), bucket `orange-social-media`.
+Credenciais de desenvolvimento: PostgreSQL `orange`/`orange`; Garage com a chave pública de dev do
+`application-dev.yml` (criada por `infra/garage/init.sh`, só vale na sua máquina), bucket `orange-social-media`.
+Fotos publicadas abrem em `http://orange-social-media.web.garage.localhost:3902/<chave>` (o papel da CDN em dev).
+Fora do `dev`, o S3 usa `S3_ACCESS_KEY`/`S3_SECRET_KEY` ou, vazias, a cadeia padrão de credenciais da AWS.
 
 ## Build e testes
 
 ```bash
 mvn test                        # unitários (sem Docker)
-mvn verify                      # + testes de integração *IT com Testcontainers (PostGIS, Valkey, Cassandra 5)
+mvn verify                      # + testes de integração *IT com Testcontainers (PostGIS, Valkey, Cassandra 5, Garage)
 python3 scripts/wcag_contrast.py
 ```
 

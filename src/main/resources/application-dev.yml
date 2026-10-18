@@ -11,3 +11,7 @@ server:
 orange-social:
   notifications:
     log-codes: true
+  storage:
+    # chave pública do Garage local (criada por infra/garage/init.sh); só vale na sua máquina
+    access-key: ${S3_ACCESS_KEY:GK6f72616e6765646576000000}
+    secret-key: ${S3_SECRET_KEY:6f72616e67652d736f6369616c2d6465762d6f6e6c7900000000000000000000}

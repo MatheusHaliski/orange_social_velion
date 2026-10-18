@@ -1,5 +1,7 @@
 package com.orangesocial.api;
 
+import com.orangesocial.application.account.AccountService;
+import com.orangesocial.application.media.MediaStorage;
 import com.orangesocial.domain.model.CategoryVerification;
 import com.orangesocial.domain.model.UserCategoryEnum;
 import com.orangesocial.domain.model.UserControlList;
@@ -7,6 +9,7 @@ import com.orangesocial.infrastructure.persistence.postgres.UserControlListRepos
 import com.orangesocial.support.ApiClient;
 import com.orangesocial.support.CapturingNotifier;
 import com.orangesocial.support.PolyglotContainers;
+import com.orangesocial.support.TestImages;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,10 +26,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -36,7 +43,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 /**
  * Ponta a ponta: publicar post de texto (RF29) com moldura (RF28), ler a moldura resolvida no detalhe e no feed do
- * autor, editar, arquivar, restaurar, apagar e o catálogo público com ETag.
+ * autor, editar, arquivar, restaurar, apagar, o catálogo público com ETag e a foto enviada por URL pré-assinada ao
+ * Garage, publicada sem EXIF/GPS.
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
@@ -62,6 +70,12 @@ class PostPublishingApiIT {
 
     @Autowired
     StringRedisTemplate redis;
+
+    @Autowired
+    MediaStorage storage;
+
+    @Autowired
+    AccountService accounts;
 
     final Map<Long, ApiClient> browsers = new HashMap<>();
     UserControlList author;
@@ -197,7 +211,114 @@ class PostPublishingApiIT {
         assertThat((Map<String, Object>) recs.getBody().getFirst()).containsEntry("auraId", "eclipse").containsEntry("materialId", "vidro");
     }
 
+    @Test
+    void photoGoesStraightToTheBucketAndIsPublishedWithoutExif() throws Exception {
+        byte[] photo = TestImages.jpegWithExif(400, 200, 6);
+        Map<String, Object> ticket = send(HttpMethod.POST, "/api/v1/media/uploads", author,
+                Map.of("kind", "IMAGE", "contentType", "image/jpeg", "sizeBytes", photo.length)).getBody();
+        String uploadKey = (String) ticket.get("objectKey");
+        assertThat(uploadKey).startsWith("uploads/" + author.getId() + "/").endsWith(".jpg");
+        assertThat(ticket).containsEntry("method", "PUT").containsKey("expiresAt");
+        assertThat(putToBucket(ticket, photo)).isEqualTo(200);
+
+        // a chave é de Ana: outra conta não publica com ela (mesma resposta de "não existe")
+        ResponseEntity<Map> stolen = send(HttpMethod.POST, "/api/v1/posts", other,
+                Map.of("title", "Peguei", "mediaType", "IMAGE", "mediaObjectKey", uploadKey));
+        assertThat(stolen.getStatusCode().value()).isEqualTo(422);
+        assertThat(list(stolen.getBody(), "errors").toString()).contains("Envie a foto de novo");
+
+        ResponseEntity<Map> created = send(HttpMethod.POST, "/api/v1/posts", author,
+                Map.of("title", "Pôr do sol", "mediaType", "IMAGE", "mediaObjectKey", uploadKey));
+        assertThat(created.getStatusCode().value()).isEqualTo(201);
+        assertThat(created.getBody()).containsEntry("mediaType", "IMAGE");
+        String id = (String) created.getBody().get("id");
+        String publicKey = jdbc.queryForObject("SELECT media_object_key FROM post WHERE id = ?::uuid", String.class, id);
+        assertThat(publicKey).startsWith("posts/").endsWith(".jpg");
+        assertThat((String) created.getBody().get("mediaUrl")).endsWith("/" + publicKey);
+
+        // o original sai do bucket; a versão pública não tem EXIF e já está "em pé"
+        assertThat(storage.head(uploadKey)).isEmpty();
+        byte[] published = storage.read(publicKey);
+        String raw = new String(published, StandardCharsets.ISO_8859_1);
+        assertThat(raw).doesNotContain("Exif").doesNotContain("GPS");
+        BufferedImage img = ImageIO.read(new ByteArrayInputStream(published));
+        assertThat(img.getWidth()).isEqualTo(200);
+        assertThat(img.getHeight()).isEqualTo(400);
+        assertThat(storage.head(publicKey)).get().extracting(MediaStorage.StoredObject::contentType).isEqualTo("image/jpeg");
+
+        // a chave já foi usada
+        assertThat(send(HttpMethod.POST, "/api/v1/posts", author,
+                Map.of("title", "De novo", "mediaType", "IMAGE", "mediaObjectKey", uploadKey)).getStatusCode().value())
+                .isEqualTo(422);
+
+        // apagar o post apaga a foto do bucket
+        assertThat(send(HttpMethod.DELETE, "/api/v1/posts/" + id, author, null).getStatusCode().value()).isEqualTo(204);
+        assertThat(storage.head(publicKey)).isEmpty();
+    }
+
+    @Test
+    void uploadRulesSignedSizeAndFilesThatAreNotPhotos() throws Exception {
+        assertThat(send(HttpMethod.POST, "/api/v1/media/uploads", null,
+                Map.of("kind", "IMAGE", "contentType", "image/png", "sizeBytes", 10)).getStatusCode().value()).isEqualTo(401);
+        assertThat(send(HttpMethod.POST, "/api/v1/media/uploads", pending,
+                Map.of("kind", "IMAGE", "contentType", "image/png", "sizeBytes", 10)).getStatusCode().value()).isEqualTo(403);
+        ResponseEntity<Map> bad = send(HttpMethod.POST, "/api/v1/media/uploads", author,
+                Map.of("kind", "IMAGE", "contentType", "image/gif", "sizeBytes", 20 * 1024 * 1024));
+        assertThat(bad.getStatusCode().value()).isEqualTo(422);
+        assertThat(list(bad.getBody(), "errors").toString()).contains("JPEG ou PNG").contains("10 MB");
+        assertThat(send(HttpMethod.POST, "/api/v1/media/uploads", author,
+                Map.of("kind", "VIDEO", "contentType", "video/mp4", "sizeBytes", 1000)).getStatusCode().value()).isEqualTo(422);
+
+        // o tamanho declarado vai na assinatura: mandar outro arquivo é recusado pelo bucket
+        byte[] fake = "não sou uma foto".getBytes(StandardCharsets.UTF_8);
+        Map<String, Object> ticket = send(HttpMethod.POST, "/api/v1/media/uploads", author,
+                Map.of("kind", "IMAGE", "contentType", "image/png", "sizeBytes", fake.length)).getBody();
+        assertThat(putToBucket(ticket, TestImages.png(32, 32, false))).isEqualTo(403);
+        assertThat(putToBucket(ticket, fake)).isEqualTo(200);
+
+        ResponseEntity<Map> notPhoto = send(HttpMethod.POST, "/api/v1/posts", author,
+                Map.of("title", "Foto?", "mediaType", "IMAGE", "mediaObjectKey", ticket.get("objectKey")));
+        assertThat(notPhoto.getStatusCode().value()).isEqualTo(422);
+        assertThat(list(notPhoto.getBody(), "errors").toString()).contains("não é uma foto");
+        assertThat(send(HttpMethod.POST, "/api/v1/posts", author,
+                Map.of("title", "Texto", "mediaObjectKey", ticket.get("objectKey"))).getStatusCode().value()).isEqualTo(422);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM post", Integer.class)).isZero();
+    }
+
+    @Test
+    void accountEliminationDeletesThePhotosFromTheBucket() throws Exception {
+        byte[] photo = TestImages.png(48, 48, true);
+        Map<String, Object> ticket = send(HttpMethod.POST, "/api/v1/media/uploads", author,
+                Map.of("kind", "IMAGE", "contentType", "image/png", "sizeBytes", photo.length)).getBody();
+        assertThat(putToBucket(ticket, photo)).isEqualTo(200);
+        String id = (String) send(HttpMethod.POST, "/api/v1/posts", author, Map.of("title", "Vitral",
+                "mediaType", "IMAGE", "mediaObjectKey", ticket.get("objectKey"))).getBody().get("id");
+        String publicKey = jdbc.queryForObject("SELECT media_object_key FROM post WHERE id = ?::uuid", String.class, id);
+        assertThat(publicKey).endsWith(".png");
+        assertThat(storage.head(publicKey)).isPresent();
+
+        // RF23: carência vencida → a saga apaga o conteúdo e, depois do commit, as fotos do bucket
+        jdbc.update("UPDATE \"VSusercontrolist\" SET account_status = 'PENDING_DELETION', "
+                + "deletion_scheduled_for = now() - interval '1 minute' WHERE id = ?", author.getId());
+        accounts.eliminate(author.getId());
+        assertThat(jdbc.queryForObject("SELECT media_object_key FROM post WHERE id = ?::uuid", String.class, id)).isNull();
+        assertThat(storage.head(publicKey)).isEmpty();
+    }
+
     // ------------------------------------------------------------ apoio
+
+    /** O que o app faz com o tíquete: PUT direto no bucket, com os cabeçalhos assinados. */
+    @SuppressWarnings("unchecked")
+    private static int putToBucket(Map<String, Object> ticket, byte[] bytes) throws Exception {
+        HttpRequest.Builder put = HttpRequest.newBuilder(URI.create((String) ticket.get("uploadUrl")))
+                .PUT(HttpRequest.BodyPublishers.ofByteArray(bytes));
+        ((Map<String, String>) ticket.get("headers")).forEach((name, value) -> {
+            if (!name.equalsIgnoreCase("content-length")) {         // o cliente HTTP calcula sozinho
+                put.header(name, value);
+            }
+        });
+        return HttpClient.newHttpClient().send(put.build(), HttpResponse.BodyHandlers.discarding()).statusCode();
+    }
 
     private UserControlList active(String name, String email, UserCategoryEnum category, LocalDate birth) {
         UserControlList user = new UserControlList(name, email, passwords.encode(PASSWORD), category);
