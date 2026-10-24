@@ -167,6 +167,7 @@ Erros em Problem Details (RFC 9457) com `detail` em pt-BR. Identidade: a sessão
 | Domínio | `Post` (`isVisibleTo`, `acceptsInteractions`, contadores somente leitura), `PostStatus`, `AgeRating`, `MediaType`, `UuidV7` | ✅ |
 | Persistência | `V2__posts_interactions.sql` (`post`), `PostRepository` | ✅ |
 | Aplicação / API | `PostQueryService.getPost`, `GET /api/v1/posts/{id}`, `ApiExceptionHandler` | ✅ |
+| Erros compartilhados | `ApiExceptionHandler` também traduz os erros do envio de foto (`MediaExceptions`: `403` "Sem permissão" e `422` "Revise a foto" com `errors[]`), usados pela foto do post ([RF29](RF29-publicar-post.md)) e do perfil ([RF2](RF02-editar-perfil.md)); a leitura do post não muda | ✅ |
 | Testes | `PostDomainTest`, `PostApiIT.anonymousVisitorOpensFullPostWithAuthorDateAndCounts`, `PostApiIT.draftOfSomeoneElseRemovedPostAndSuspendedAuthorAnswer404` | ✅ |
 | Tela | Protótipo: modal [09-post-modal](../../design/prototype/screens/09-post-modal.png); card com `<time>` e tooltip em [01-post-feed](../../design/prototype/screens/01-post-feed.png) | ✅ protótipo |
 | App | modal em Next.js/Expo, rota `/p/{id}` | ⏳ OS-39 |
