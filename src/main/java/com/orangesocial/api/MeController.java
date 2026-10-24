@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
@@ -86,6 +87,20 @@ public class MeController {
     @PatchMapping("/profile")
     public ProfileView updateProfile(@RequestBody ProfilePatch patch) {
         return profiles.update(viewer.requireViewer(), patch);
+    }
+
+    public record PhotoRequest(String objectKey) {
+    }
+
+    /** Foto de perfil (OS-18): chave do {@code POST /api/v1/media/uploads}; recorte quadrado de 512 px sem EXIF/GPS. */
+    @PutMapping("/photo")
+    public ProfileView setPhoto(@RequestBody PhotoRequest body) {
+        return profiles.setPhoto(viewer.requireViewer(), body.objectKey());
+    }
+
+    @DeleteMapping("/photo")
+    public ProfileView removePhoto() {
+        return profiles.removePhoto(viewer.requireViewer());
     }
 
     @GetMapping("/preferences")

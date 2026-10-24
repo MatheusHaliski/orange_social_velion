@@ -44,7 +44,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Ponta a ponta: publicar post de texto (RF29) com moldura (RF28), ler a moldura resolvida no detalhe e no feed do
  * autor, editar, arquivar, restaurar, apagar, o catálogo público com ETag e a foto enviada por URL pré-assinada ao
- * Garage, publicada sem EXIF/GPS.
+ * Garage, publicada sem EXIF/GPS — no post (RF29) e no perfil (RF2 · OS-18).
  */
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @ActiveProfiles("it")
@@ -286,6 +286,48 @@ class PostPublishingApiIT {
     }
 
     @Test
+    void profilePhotoIsASquareWithoutExifAndTheOldOneLeavesTheBucket() throws Exception {
+        String first = uploadPhoto(author, TestImages.jpegWithExif(1600, 800, 6), "image/jpeg");
+        ResponseEntity<Map> set = send(HttpMethod.PUT, "/api/v1/me/photo", author, Map.of("objectKey", first));
+        assertThat(set.getStatusCode().value()).isEqualTo(200);
+        String avatarKey = (String) set.getBody().get("avatarObjectKey");
+        assertThat(avatarKey).startsWith("avatars/").endsWith(".jpg");
+        assertThat((String) set.getBody().get("avatarUrl")).endsWith("/" + avatarKey);
+        assertThat(storage.head(first)).isEmpty();
+
+        // recorte central quadrado de 512 px, já "em pé" (Orientation 6: a metade vermelha sobe) e sem EXIF
+        byte[] avatar = storage.read(avatarKey);
+        assertThat(new String(avatar, StandardCharsets.ISO_8859_1)).doesNotContain("Exif").doesNotContain("GPS");
+        BufferedImage img = ImageIO.read(new ByteArrayInputStream(avatar));
+        assertThat(img.getWidth()).isEqualTo(512);
+        assertThat(img.getHeight()).isEqualTo(512);
+        assertThat((img.getRGB(256, 40) >> 16) & 0xFF).isGreaterThan(200);
+        assertThat(img.getRGB(256, 470) & 0xFF).isGreaterThan(200);
+
+        // a foto aparece como avatar do autor no post
+        String postId = (String) send(HttpMethod.POST, "/api/v1/posts", author, Map.of("title", "Com rosto"))
+                .getBody().get("id");
+        assertThat((String) map(send(HttpMethod.GET, "/api/v1/posts/" + postId, null, null).getBody(), "author")
+                .get("avatarUrl")).endsWith("/" + avatarKey);
+
+        // trocar a foto apaga a anterior; chave alheia não serve
+        assertThat(send(HttpMethod.PUT, "/api/v1/me/photo", other, Map.of("objectKey",
+                uploadPhoto(author, TestImages.png(64, 64, false), "image/png"))).getStatusCode().value()).isEqualTo(422);
+        String second = uploadPhoto(author, TestImages.png(64, 64, true), "image/png");
+        String newKey = (String) send(HttpMethod.PUT, "/api/v1/me/photo", author, Map.of("objectKey", second))
+                .getBody().get("avatarObjectKey");
+        assertThat(newKey).startsWith("avatars/").endsWith(".png");
+        assertThat(storage.head(avatarKey)).isEmpty();
+
+        Map<String, Object> removed = send(HttpMethod.DELETE, "/api/v1/me/photo", author, null).getBody();
+        assertThat(removed.get("avatarObjectKey")).isNull();
+        assertThat(removed.get("avatarUrl")).isNull();
+        assertThat(storage.head(newKey)).isEmpty();
+        assertThat(send(HttpMethod.PUT, "/api/v1/me/photo", null, Map.of("objectKey", second)).getStatusCode().value())
+                .isEqualTo(401);
+    }
+
+    @Test
     void accountEliminationDeletesThePhotosFromTheBucket() throws Exception {
         byte[] photo = TestImages.png(48, 48, true);
         Map<String, Object> ticket = send(HttpMethod.POST, "/api/v1/media/uploads", author,
@@ -296,6 +338,9 @@ class PostPublishingApiIT {
         String publicKey = jdbc.queryForObject("SELECT media_object_key FROM post WHERE id = ?::uuid", String.class, id);
         assertThat(publicKey).endsWith(".png");
         assertThat(storage.head(publicKey)).isPresent();
+        String avatarKey = (String) send(HttpMethod.PUT, "/api/v1/me/photo", author, Map.of("objectKey",
+                uploadPhoto(author, TestImages.png(64, 64, false), "image/png"))).getBody().get("avatarObjectKey");
+        assertThat(storage.head(avatarKey)).isPresent();
 
         // RF23: carência vencida → a saga apaga o conteúdo e, depois do commit, as fotos do bucket
         jdbc.update("UPDATE \"VSusercontrolist\" SET account_status = 'PENDING_DELETION', "
@@ -303,9 +348,18 @@ class PostPublishingApiIT {
         accounts.eliminate(author.getId());
         assertThat(jdbc.queryForObject("SELECT media_object_key FROM post WHERE id = ?::uuid", String.class, id)).isNull();
         assertThat(storage.head(publicKey)).isEmpty();
+        assertThat(storage.head(avatarKey)).isEmpty();
     }
 
     // ------------------------------------------------------------ apoio
+
+    /** Pede o tíquete e envia o arquivo; devolve a chave em {@code uploads/}. */
+    private String uploadPhoto(UserControlList who, byte[] bytes, String contentType) throws Exception {
+        Map<String, Object> ticket = send(HttpMethod.POST, "/api/v1/media/uploads", who,
+                Map.of("kind", "IMAGE", "contentType", contentType, "sizeBytes", bytes.length)).getBody();
+        assertThat(putToBucket(ticket, bytes)).isEqualTo(200);
+        return (String) ticket.get("objectKey");
+    }
 
     /** O que o app faz com o tíquete: PUT direto no bucket, com os cabeçalhos assinados. */
     @SuppressWarnings("unchecked")

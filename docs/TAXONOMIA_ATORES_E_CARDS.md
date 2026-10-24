@@ -287,7 +287,7 @@ flowchart LR
 | `bio` (≤ 150) | perfil público | opcional | público | comum | informado | titular | texto |
 | `pronouns` (≤ 4, lista) | perfil público | opcional | configurável | comum | informado | titular | texto |
 | `links` (≤ 5, `https`) | perfil público | opcional | público | comum | informado | titular | texto |
-| `photoObjectKey` | perfil público | opcional | público | comum (biometria só com `FACIAL_RECOGNITION`) | informado | titular | chave S3 |
+| `photoObjectKey` | perfil público | opcional | público | comum (biometria só com `FACIAL_RECOGNITION`) | informado | titular | chave S3 da versão limpa em `avatars/` (quadrado 512 px, sem EXIF/GPS · `PUT /api/v1/me/photo`) |
 | `citizenship` | identidade | opcional | só eu | comum | informado | titular | texto |
 | `countryOfResidence`, `stateOfResidence`, `cityOfResidence` | localização | opcional | configurável | comum | informado | titular | texto |
 | `address` | localização | opcional | só eu | comum | informado | titular | texto |

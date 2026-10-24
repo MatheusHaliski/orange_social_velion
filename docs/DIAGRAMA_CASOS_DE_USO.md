@@ -152,6 +152,7 @@ flowchart LR
     MEN["Menor de 16"]:::actor
 
     PERF(["Editar perfil ✅"])
+    FOTO(["Trocar ou remover a foto de perfil ✅<br/>quadrado 512 px · sem EXIF/GPS"])
     PREF(["Ajustar preferências<br/>tema · fundo · idioma · fonte ✅"])
     PRIV(["Ajustar privacidade e bem-estar ✅"])
     CONS(["Consentir ou revogar finalidade 🟡"])
@@ -173,7 +174,7 @@ flowchart LR
     ENC["Encarregado (DPO)"]:::actor
     ANPD["ANPD"]:::actor
 
-    TIT --- PERF & PREF & PRIV & CONS & EXP & EXC & REAT
+    TIT --- PERF & FOTO & PREF & PRIV & CONS & EXP & EXC & REAT
     MEN --- PRIV
     SELO -. «extend» conta com selo .-> PERF
     TRAV -. «extend» menor de 16 .-> PRIV
@@ -336,6 +337,7 @@ o fluxo de publicação ainda não.
 | Trocar senha | Usuário | RF27 | `POST /api/v1/me/password` | ✅ |
 | Encerrar sessão por tempo | Expiração de sessão | RF27 | Spring Session TTL + `AbsoluteSessionTimeoutFilter` | ✅ |
 | Editar perfil | Titular | [RF2](rf/RF02-editar-perfil.md) | `PATCH /api/v1/me/profile` | ✅ |
+| Trocar ou remover a foto de perfil | Titular (conta ativa) | [RF2](rf/RF02-editar-perfil.md) | `POST /api/v1/media/uploads`, `PUT`/`DELETE /api/v1/me/photo` | ✅ |
 | Ajustar preferências e privacidade | Titular, Menor de 16 | RF2 | `PATCH /api/v1/me/preferences` | ✅ |
 | Consentir ou revogar | Titular | [RF3](rf/RF03-consentimento-privacidade.md) | `consent_event` | 🟡 registro no cadastro; tela de troca ⏳ |
 | Excluir conta · reativar | Titular | [RF23](rf/RF23-direitos-titular-lgpd.md) | `POST /api/v1/me/deletion`, `POST /api/v1/auth/reactivate` | ✅ |

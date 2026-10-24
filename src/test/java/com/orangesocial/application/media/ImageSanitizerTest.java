@@ -76,6 +76,24 @@ class ImageSanitizerTest {
     }
 
     @Test
+    void avatarIsTheCenterSquareAt512Px() throws IOException {
+        // 1600 × 800 → quadrado central de 800 px (metade vermelha à esquerda) → 512 px; Orientation 6 sobe o vermelho
+        CleanImage avatar = ImageSanitizer.sanitize(TestImages.jpegWithExif(1600, 800, 6), ImageSanitizer.Fit.AVATAR);
+        assertThat(avatar.width()).isEqualTo(ImageSanitizer.AVATAR_SIDE);
+        assertThat(avatar.height()).isEqualTo(ImageSanitizer.AVATAR_SIDE);
+        BufferedImage img = ImageIO.read(new ByteArrayInputStream(avatar.bytes()));
+        assertThat(red(img, 256, 40)).isGreaterThan(200);
+        assertThat(img.getRGB(256, 470) & 0xFF).isGreaterThan(200);
+        assertThat(contains(avatar.bytes(), TestImages.EXIF_SECRET)).isFalse();
+
+        // menor que 512: só recorta, não amplia
+        CleanImage small = ImageSanitizer.sanitize(TestImages.png(300, 200, true), ImageSanitizer.Fit.AVATAR);
+        assertThat(small.width()).isEqualTo(200);
+        assertThat(small.height()).isEqualTo(200);
+        assertThat(small.contentType()).isEqualTo("image/png");
+    }
+
+    @Test
     void refusesWhatIsNotJpegOrPngAndHugeImagesBeforeDecoding() throws IOException {
         assertThatThrownBy(() -> ImageSanitizer.sanitize("<?php echo 1; ?>".getBytes(StandardCharsets.UTF_8)))
                 .isInstanceOf(ImageSanitizer.Rejected.class).hasMessageContaining("JPEG ou PNG");

@@ -14,11 +14,12 @@
 | Login com 2FA · ativar 2FA | [RF27](rf/RF27-autenticacao-sessao.md#sequência--login-com-2fa) |
 | Publicar post de texto com moldura | [RF29](rf/RF29-publicar-post.md#sequência--publicar) · [RF28](rf/RF28-moldura-post.md#sequência--publicar-com-moldura-e-ver-no-feed) |
 | Publicar post com foto (URL pré-assinada, foto sem EXIF/GPS) | [RF29 · Sequência com foto](rf/RF29-publicar-post.md#sequência--publicar-com-foto) |
+| Trocar a foto de perfil (quadrado de 512 px, a antiga sai do bucket) | [RF2 · Sequência](rf/RF02-editar-perfil.md#sequência--trocar-a-foto-de-perfil) |
 
 ## Publicação no Audio Feed (desenho alvo · ⏳ OS-23)
 
 Ainda não implementado: áudio, `TrendingService` e o fan-out são o desenho alvo. O `PostPublishingService` e o envio
-pré-assinado (`MediaUploadController` · `PostMediaService`) já existem para texto e foto ([RF29](rf/RF29-publicar-post.md));
+pré-assinado (`MediaUploadController` · `MediaUploads`) já existem para texto, foto do post e foto de perfil ([RF29](rf/RF29-publicar-post.md));
 o áudio vai reaproveitar o mesmo envio. A autenticação já segue o que existe (RF27): sessão opaca no Valkey e `X-XSRF-TOKEN` em toda escrita —
 nunca JWT no app.
 
@@ -31,7 +32,7 @@ sequenceDiagram
     actor U as Usuário (App)
     participant SEC as SecurityFilterChain (sessão + CSRF)
     participant MC as MediaUploadController
-    participant MS as PostMediaService
+    participant MS as MediaUploads
     participant S3 as AWS S3
     participant PC as PostController
     participant PS as PostPublishingService

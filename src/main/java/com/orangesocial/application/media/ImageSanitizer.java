@@ -29,7 +29,8 @@ import java.util.Iterator;
 import java.util.Locale;
 
 /**
- * Limpa a foto enviada antes de ela virar pública (RF29 · LGPD Art. 6º, III: só o necessário).
+ * Limpa a foto enviada antes de ela virar pública (foto do post RF29, foto de perfil RF2 · LGPD Art. 6º, III: só o
+ * necessário).
  *
  * <ul>
  *   <li>o formato vem dos bytes, não do {@code Content-Type} declarado: só JPEG e PNG;</li>
@@ -37,12 +38,15 @@ import java.util.Locale;
  *   <li>a orientação do EXIF é aplicada aos pixels (a foto do celular não fica deitada);</li>
  *   <li>a imagem é redesenhada e gravada de novo sem nenhum metadado: some EXIF, GPS, modelo do aparelho,
  *       miniatura embutida e comentários;</li>
- *   <li>lado maior até {@value #MAX_SIDE} px; com transparência sai PNG, sem, JPEG de qualidade 0,85.</li>
+ *   <li>tamanho conforme o uso ({@link Fit}): foto do post com lado maior até {@value #MAX_SIDE} px; foto de perfil
+ *       recortada em quadrado no centro, com {@value #AVATAR_SIDE} px;</li>
+ *   <li>com transparência sai PNG, sem, JPEG de qualidade 0,85.</li>
  * </ul>
  */
 public final class ImageSanitizer {
 
     public static final int MAX_SIDE = 2048;
+    public static final int AVATAR_SIDE = 512;
     /** Acima disso nem decodifica: 80 MP já cobre câmeras de celular de 48/50 MP com folga. */
     static final long MAX_PIXELS = 80_000_000L;
     static final int MAX_DIMENSION = 20_000;
@@ -50,6 +54,20 @@ public final class ImageSanitizer {
     private static final int APP1 = 0xE1;
 
     private ImageSanitizer() {
+    }
+
+    /** Para onde vai a foto: define o tamanho final e se ela vira um quadrado. */
+    public enum Fit {
+        POST(MAX_SIDE, false),
+        AVATAR(AVATAR_SIDE, true);
+
+        final int side;
+        final boolean square;
+
+        Fit(int side, boolean square) {
+            this.side = side;
+            this.square = square;
+        }
     }
 
     public record CleanImage(byte[] bytes, String contentType, String extension, int width, int height) {
@@ -63,6 +81,10 @@ public final class ImageSanitizer {
     }
 
     public static CleanImage sanitize(byte[] input) {
+        return sanitize(input, Fit.POST);
+    }
+
+    public static CleanImage sanitize(byte[] input, Fit fit) {
         // cache só em memória: o original (com GPS) nunca vai para um arquivo temporário no disco
         try (ImageInputStream in = new MemoryCacheImageInputStream(new ByteArrayInputStream(input))) {
             Iterator<ImageReader> readers = ImageIO.getImageReaders(in);
@@ -86,12 +108,14 @@ public final class ImageSanitizer {
                 int orientation = format.equals("jpeg") ? exifOrientation(reader.getImageMetadata(0)) : 1;
                 ImageReadParam param = reader.getDefaultReadParam();
                 // fotos enormes já saem do decodificador reduzidas (memória proporcional à saída, não ao original)
-                int step = Math.max(1, Math.max(width, height) / MAX_SIDE);
+                int step = Math.max(1, (fit.square ? Math.min(width, height) : Math.max(width, height)) / fit.side);
                 if (step > 1) {
                     param.setSourceSubsampling(step, step, 0, 0);
                 }
                 BufferedImage decoded = reader.read(0, param);
-                return encode(orient(fit(decoded), orientation));
+                // o recorte central é o mesmo em qualquer orientação: recorta e reduz antes de girar (menos pixels)
+                BufferedImage framed = fit.square ? centerSquare(decoded) : decoded;
+                return encode(orient(fit(framed, fit.side), orientation));
             } finally {
                 reader.dispose();
             }
@@ -105,10 +129,10 @@ public final class ImageSanitizer {
     // ------------------------------------------------------------ pixels
 
     /** Redesenha numa imagem nova (sempre, mesmo sem reduzir) e reduz em passos de metade para não serrilhar. */
-    static BufferedImage fit(BufferedImage src) {
+    static BufferedImage fit(BufferedImage src, int maxSide) {
         boolean alpha = src.getColorModel().hasAlpha();
         int type = alpha ? BufferedImage.TYPE_INT_ARGB : BufferedImage.TYPE_INT_RGB;
-        double scale = Math.min(1.0, (double) MAX_SIDE / Math.max(src.getWidth(), src.getHeight()));
+        double scale = Math.min(1.0, (double) maxSide / Math.max(src.getWidth(), src.getHeight()));
         int targetW = Math.max(1, (int) Math.round(src.getWidth() * scale));
         int targetH = Math.max(1, (int) Math.round(src.getHeight() * scale));
         BufferedImage current = src;
@@ -127,6 +151,11 @@ public final class ImageSanitizer {
             current = next;
         } while (current.getWidth() != targetW || current.getHeight() != targetH);
         return current;
+    }
+
+    static BufferedImage centerSquare(BufferedImage src) {
+        int side = Math.min(src.getWidth(), src.getHeight());
+        return src.getSubimage((src.getWidth() - side) / 2, (src.getHeight() - side) / 2, side, side);
     }
 
     /** Orientação EXIF 1–8 aplicada aos pixels; de 5 a 8 largura e altura trocam. */

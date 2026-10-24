@@ -24,7 +24,7 @@ flowchart TB
 
         subgraph Controllers["Controllers (REST /api/v1)"]
             AUTHC["AuthController<br/>(cadastro · login · 2FA · reativar · sair)"]
-            USERC["MeController<br/>(perfil · preferências · sessões · 2FA · excluir)"]
+            USERC["MeController<br/>(perfil · foto · preferências · sessões · 2FA · excluir)"]
             LEGALC["LegalController<br/>(Termos de Uso vigentes)"]
             POSTC["PostController<br/>(detalhe · curtir · comentar · compartilhar · salvar)"]
             PUBC["PostPublishingController<br/>(criar · editar · arquivar · restaurar · apagar)"]
@@ -32,7 +32,7 @@ flowchart TB
             PROFC["UserProfileController<br/>(perfil público · feed do autor)"]
             VIEWER["ViewerResolver<br/>(OrangePrincipal da sessão)"]
             FEEDC["FeedController<br/>(profile · post · audio · alert)"]:::planned
-            MEDIAC["MediaUploadController<br/>(URL pré-assinada da foto · RF29)"]
+            MEDIAC["MediaUploadController<br/>(URL pré-assinada da foto · RF29 · RF2)"]
             PRIVC["PrivacyController<br/>(exportar · consentimentos)"]:::planned
             VELC["VelionIntegrationController"]:::planned
         end
@@ -50,7 +50,7 @@ flowchart TB
             POSTS["PostPublishingService<br/>(RF29 · publicar · editar · arquivar)"]
             BGS["BackgroundService · BackgroundCatalog ·<br/>BackgroundValidator · SeasonalCalendar<br/>(RF28 · moldura do post)"]
             TRENDS["TrendingService"]:::planned
-            MEDIAS["PostMediaService · ImageSanitizer ·<br/>MediaJanitor<br/>(RF29 · foto sem EXIF/GPS)"]
+            MEDIAS["MediaUploads · ImageSanitizer ·<br/>MediaJanitor<br/>(RF29 post · RF2 perfil · sem EXIF/GPS)"]
             LGPDS["LgpdService<br/>(portabilidade)"]:::planned
             POINTS["VelionPointsService"]:::planned
             EVENTS["DomainEventPublisher"]:::planned

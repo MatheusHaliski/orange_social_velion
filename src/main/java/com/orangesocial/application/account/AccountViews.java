@@ -67,7 +67,7 @@ public final class AccountViews {
                               List<String> pronouns, List<String> links, String countryOfResidence,
                               String stateOfResidence, String cityOfResidence, CategoryView category,
                               CategoryVerification categoryVerification, Map<String, Object> typeDetails,
-                              String avatarObjectKey) {
+                              String avatarObjectKey, String avatarUrl) {
     }
 
     public record PreferencesView(UserPreference.Theme theme, UserPreference.AppBackground appBackground,

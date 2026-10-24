@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -104,14 +105,17 @@ public class AccountService {
             return;
         }
         PostContentEraser.ErasureReport report = eraser.eraseContentOf(userId);
+        String photoKey = user.getPhotoObjectKey();
         mfa.deleteById(userId);
         recovery.deleteAllOf(userId);
         preferences.deleteById(userId);
         user.anonymizeForLgpdDeletion(passwords.encode(UUID.randomUUID().toString()));
         users.save(user);
         sessions.revokeAll(userId, null);
-        // fotos dos posts saem do bucket só depois do commit (o banco já não aponta para elas)
-        media.deleteAfterCommit(report.mediaKeysToDelete());
+        // fotos dos posts e a de perfil saem do bucket só depois do commit (o banco já não aponta para elas)
+        List<String> objects = new ArrayList<>(report.mediaKeysToDelete());
+        objects.add(photoKey);
+        media.deleteAfterCommit(objects);
         // Próximos passos da saga (OS-44): timeline no Cassandra, DEK.
         log.info("Conta {} eliminada: {} posts, {} comentários, {} mídias para apagar",
                 userId, report.postsRemoved(), report.commentsRemoved(), report.mediaKeysToDelete().size());

@@ -7,7 +7,6 @@ cards: [OS-23]
 paths:
   - src/main/java/com/orangesocial/application/post/PostPublishingService.java
   - src/main/java/com/orangesocial/api/PostPublishingController.java
-  - src/main/java/com/orangesocial/application/post/PostMediaService.java
   - src/main/java/com/orangesocial/api/MediaUploadController.java
   - src/main/java/com/orangesocial/application/media/**
   - src/main/java/com/orangesocial/infrastructure/storage/**
@@ -127,7 +126,7 @@ sequenceDiagram
     autonumber
     actor A as Autor (app)
     participant MC as MediaUploadController
-    participant PM as PostMediaService
+    participant PM as MediaUploads
     participant S3 as Bucket S3
     participant S as PostPublishingService
     participant IS as ImageSanitizer
@@ -142,7 +141,7 @@ sequenceDiagram
     S3-->>A: 200
     A->>S: POST /api/v1/posts {mediaType: IMAGE, mediaObjectKey, title, ...}
     S->>S: valida o post inteiro (campos + moldura)
-    S->>PM: attachImage(autor, chave)
+    S->>PM: claimImage(autor, chave, POST)
     PM->>PM: chave é do autor?
     PM->>S3: HEAD (existe? tamanho?)
     alt chave alheia, ausente ou expirada
@@ -193,7 +192,7 @@ stateDiagram-v2
     Assinado --> [*] : URL expira sem envio
     Enviado --> Publicado : POST /api/v1/posts aceita a foto<br/>versão limpa em posts/ · original apagado
     Enviado --> Enviado : publicação recusada (422)
-    Enviado --> Expirado : sem publicação (regra do bucket ⏳)
+    Enviado --> Expirado : sem publicação em 1 dia (lifecycle do bucket)
     Publicado --> Apagado : DELETE do post ou eliminação da conta (RF23)
     Expirado --> [*]
     Apagado --> [*]
@@ -236,12 +235,13 @@ flowchart TD
 | Domínio | `Post.publish/archive/remove` e transições de `PostStatus` (já existiam); `remove()` agora apaga também a moldura | ✅ |
 | Erros | `PostExceptions.Invalid` (422 com `errors`) e `PostExceptions.Conflict` (409) no `ApiExceptionHandler` | ✅ |
 | Testes | `PostPublishingApiIT`: publicar com moldura, 422 com tudo junto, quem pode publicar (pendente, selo, menor), editar, arquivar, restaurar, apagar e foto (abaixo) | ✅ |
-| Foto · envio | `MediaUploadController` (`POST /api/v1/media/uploads`), `PostMediaService.requestUpload`, `MediaStorage`/`S3MediaStorage` (AWS SDK v2, endereço por caminho, `presign-endpoint`) | ✅ |
-| Foto · publicação | `PostMediaService.attachImage` (dono, `HEAD`, tamanho), `ImageSanitizer` (formato pelos bytes, limite de pixels antes de decodificar, orientação EXIF, sem metadados, até 2.048 px), `MediaJanitor` (apaga o original depois do commit e a versão limpa no rollback) | ✅ |
+| Foto · envio | `MediaUploadController` (`POST /api/v1/media/uploads`), `MediaUploads.requestUpload` (o mesmo envio serve à foto de perfil, [RF2](RF02-editar-perfil.md)), `MediaStorage`/`S3MediaStorage` (AWS SDK v2, endereço por caminho, `presign-endpoint`) | ✅ |
+| Foto · publicação | `MediaUploads.claimImage(…, Fit.POST)` (dono, `HEAD`, tamanho; erro vira `422` do post), `ImageSanitizer` (formato pelos bytes, limite de pixels antes de decodificar, orientação EXIF, sem metadados, até 2.048 px), `MediaJanitor` (apaga o original depois do commit e a versão limpa no rollback) | ✅ |
 | Foto · ao apagar | `PostPublishingService.remove` apaga a foto do bucket depois do commit; a eliminação da conta faz o mesmo com todas as fotos ([RF23](RF23-direitos-titular-lgpd.md)) | ✅ |
 | Foto · testes | `ImageSanitizerTest` (EXIF/GPS some, 8 orientações, redução, PNG com transparência, "bomba" e arquivo falso); `PostPublishingApiIT` com Garage real: envio pré-assinado, chave alheia, tamanho fora da assinatura, arquivo que não é foto, apagar | ✅ |
 | Ambiente | Garage no Compose e nos testes (`support/GarageContainer`), iniciado pela Admin API v2 (`infra/garage/init.sh`); leitura pública em `:3902` no papel da CDN | ✅ |
-| Foto · próximos | AVIF/WebP e miniaturas (imgproxy, ADR-05), moderação antes de publicar, regra de expiração de 24 h em `uploads/` e CORS do bucket para o cliente web | ⏳ |
+| Bucket em dev | `infra/garage/init.sh`: envios em `uploads/` expiram em 1 dia (lifecycle) e o CORS libera `PUT`/`GET` da origem web (`WEB_ORIGIN`) | ✅ |
+| Foto · próximos | AVIF/WebP e miniaturas (imgproxy, ADR-05), moderação antes de publicar, as mesmas regras de bucket na produção (infraestrutura como código) | ⏳ |
 | Vídeo | Processamento que tira metadados e gera o pôster | ⏳ |
 | Áudio e alerta | Audio Feed (OS-24) e Alert Feed só para fontes verificadas (OS-25) | ⏳ |
 | Rascunho | Criar `DRAFT` e publicar depois, com o feed do autor ordenado pela data de publicação | ⏳ |

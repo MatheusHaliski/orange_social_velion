@@ -71,7 +71,7 @@ Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 | OS-15 | Seleção encadeada typeofcommunity → selectcountry → selectcity | 🟢 🟠 | 5 | Listas filtradas pelo item anterior; grava `Listofcommunitiesofinterest` |
 | OS-16 | Captura de GPS `LastSavedLocation` com consentimento | 🟢 🔴 | 3 | Sem consentimento não grava; JSONB `{lat,lng,timestamp}`; `last_saved_point` gerado pelo PostGIS |
 | OS-17 | Fluxo de cadastro por Usertype (6 categorias) | 🟢 🟠 | 5 | Campos específicos por categoria; VERMELHO/PRETO com verificação manual |
-| OS-18 | Upload de foto de perfil via URL pré-assinada S3 | 🟢 🔵 | 3 | Banco guarda só a chave do objeto; EXIF/GPS removidos. Reaproveita `MediaStorage` e `ImageSanitizer` do OS-23 |
+| OS-18 | Upload de foto de perfil via URL pré-assinada S3 | 🟢 🔵 | 3 | ✅ `PUT/DELETE /api/v1/me/photo` sobre o mesmo envio do OS-23 (`MediaUploads`): recorte quadrado de 512 px, sem EXIF/GPS, a foto anterior e a da conta eliminada saem do bucket; ⏳ tela de recorte no app |
 | OS-19 **(novo)** | Step-up de autenticação (`max_age`/`acr`) para Exportar e Excluir | 🟢 🔴 | 3 | Ações sensíveis exigem reautenticação recente |
 
 ### Backend & Persistência Poliglota (Backlog)

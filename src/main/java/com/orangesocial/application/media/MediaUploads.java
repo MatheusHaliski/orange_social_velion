@@ -1,13 +1,13 @@
-package com.orangesocial.application.post;
+package com.orangesocial.application.media;
 
-import com.orangesocial.application.media.ImageSanitizer;
 import com.orangesocial.application.media.ImageSanitizer.CleanImage;
-import com.orangesocial.application.media.MediaJanitor;
-import com.orangesocial.application.media.MediaStorage;
+import com.orangesocial.application.media.ImageSanitizer.Fit;
 import com.orangesocial.application.media.MediaStorage.PresignedUpload;
 import com.orangesocial.application.media.MediaStorage.StoredObject;
+import com.orangesocial.domain.model.AccountStatus;
 import com.orangesocial.domain.model.MediaType;
 import com.orangesocial.domain.model.UuidV7;
+import com.orangesocial.infrastructure.persistence.postgres.UserControlListRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -21,43 +21,44 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * Foto do post (RF29 · OS-23, 2ª parte) em dois tempos:
+ * Envio de foto em dois tempos, igual para a foto do post (RF29) e a foto de perfil (RF2):
  *
  * <ol>
- *   <li>{@link #requestUpload}: o autor pede uma URL pré-assinada e envia o arquivo direto ao bucket, em
- *       {@code uploads/{autor}/…}, área privada que expira;</li>
- *   <li>{@link #attachImage}: ao publicar, a API confere dono, existência, tipo e tamanho, limpa a foto
- *       ({@link ImageSanitizer}: sem EXIF/GPS) e grava a versão pública em {@code posts/…}. O original sai do bucket
- *       depois do commit; se a publicação falhar, a versão pública sai no rollback.</li>
+ *   <li>{@link #requestUpload}: o titular pede uma URL pré-assinada e envia o arquivo direto ao bucket, em
+ *       {@code uploads/{titular}/…}, área privada que expira;</li>
+ *   <li>{@link #claimImage}: quem vai usar a foto confere dono, existência e tamanho, limpa a foto
+ *       ({@link ImageSanitizer}: sem EXIF/GPS) e grava a versão pública ({@code posts/…} ou {@code avatars/…}).
+ *       O original sai do bucket depois do commit; se a transação voltar atrás, a versão pública sai também.</li>
  * </ol>
  */
 @Service
-public class PostMediaService {
+public class MediaUploads {
 
     public static final long MAX_IMAGE_BYTES = 10L * 1024 * 1024;
     static final Duration UPLOAD_TTL = Duration.ofMinutes(15);
     static final Map<String, String> IMAGE_TYPES = Map.of("image/jpeg", "jpg", "image/png", "png");
     private static final Pattern UPLOAD_KEY = Pattern.compile("^uploads/(\\d+)/[0-9a-f-]{36}\\.(jpg|png)$");
-    static final String UPLOAD_NOT_FOUND = "A foto não chegou ou o envio expirou. Envie a foto de novo.";
+    public static final String UPLOAD_NOT_FOUND = "A foto não chegou ou o envio expirou. Envie a foto de novo.";
 
-    /** O que o app precisa para enviar o arquivo e, depois, citar a chave no {@code POST /api/v1/posts}. */
+    /** O que o app precisa para enviar o arquivo e, depois, citar a chave onde a foto vai ser usada. */
     public record UploadTicket(String objectKey, String uploadUrl, String method, Map<String, String> headers,
                                Instant expiresAt, long maxBytes) {
     }
 
     private final MediaStorage storage;
     private final MediaJanitor janitor;
-    private final AuthorDirectory authors;
+    private final UserControlListRepository users;
 
-    public PostMediaService(MediaStorage storage, MediaJanitor janitor, AuthorDirectory authors) {
+    public MediaUploads(MediaStorage storage, MediaJanitor janitor, UserControlListRepository users) {
         this.storage = storage;
         this.janitor = janitor;
-        this.authors = authors;
+        this.users = users;
     }
 
     public UploadTicket requestUpload(long viewerId, MediaType kind, String contentType, Long sizeBytes) {
-        authors.find(viewerId).filter(AuthorDirectory::isPublic).orElseThrow(() -> new PostExceptions.Forbidden(
-                "Sua conta precisa estar ativa para enviar fotos. Confirme seu e-mail ou fale com o suporte."));
+        users.findById(viewerId).filter(u -> u.getAccountStatus() == AccountStatus.ACTIVE)
+                .orElseThrow(() -> new MediaExceptions.Forbidden(
+                        "Sua conta precisa estar ativa para enviar fotos. Confirme seu e-mail ou fale com o suporte."));
         List<String> errors = new ArrayList<>();
         if (kind == null || kind == MediaType.TEXT) {
             errors.add("Diga o tipo de mídia: IMAGE.");
@@ -75,7 +76,7 @@ public class PostMediaService {
             errors.add("A foto vai até 10 MB.");
         }
         if (!errors.isEmpty()) {
-            throw new PostExceptions.Invalid(errors);
+            throw new MediaExceptions.Invalid(errors);
         }
         String key = "uploads/" + viewerId + "/" + UuidV7.next() + "." + extension;
         PresignedUpload put = storage.presignPut(key, type, sizeBytes, UPLOAD_TTL);
@@ -83,40 +84,40 @@ public class PostMediaService {
     }
 
     /**
-     * Valida o envio do autor e grava a versão limpa; devolve a chave pública. Chave de outra pessoa, que não existe
-     * ou que expirou dão a mesma resposta, sem revelar qual.
+     * Valida o envio do titular e grava a versão limpa; devolve a chave pública. Chave de outra pessoa, que não existe,
+     * que expirou ou que já foi usada dão a mesma resposta, sem revelar qual.
      */
-    String attachImage(long authorId, String uploadKey) {
+    public String claimImage(long ownerId, String uploadKey, Fit fit) {
         Matcher m = uploadKey == null ? null : UPLOAD_KEY.matcher(uploadKey);
-        if (m == null || !m.matches() || Long.parseLong(m.group(1)) != authorId) {
-            throw invalid(UPLOAD_NOT_FOUND);
+        if (m == null || !m.matches() || Long.parseLong(m.group(1)) != ownerId) {
+            throw new MediaExceptions.Invalid(UPLOAD_NOT_FOUND);
         }
         Optional<StoredObject> head = storage.head(uploadKey);
         if (head.isEmpty()) {
-            throw invalid(UPLOAD_NOT_FOUND);
+            throw new MediaExceptions.Invalid(UPLOAD_NOT_FOUND);
         }
         if (head.get().sizeBytes() > MAX_IMAGE_BYTES) {
-            throw invalid("A foto vai até 10 MB.");
+            throw new MediaExceptions.Invalid("A foto vai até 10 MB.");
         }
         CleanImage clean;
         try {
-            clean = ImageSanitizer.sanitize(storage.read(uploadKey));
+            clean = ImageSanitizer.sanitize(storage.read(uploadKey), fit);
         } catch (ImageSanitizer.Rejected e) {
-            throw invalid(e.getMessage());
+            throw new MediaExceptions.Invalid(e.getMessage());
         }
-        String publicKey = "posts/" + UuidV7.next() + "." + clean.extension();
+        String prefix = switch (fit) {
+            case POST -> "posts/";
+            case AVATAR -> "avatars/";
+        };
+        String publicKey = prefix + UuidV7.next() + "." + clean.extension();
         storage.write(publicKey, clean.bytes(), clean.contentType());
         janitor.deleteOnRollback(publicKey);
         janitor.deleteAfterCommit(List.of(uploadKey));
         return publicKey;
     }
 
-    /** O banco deixou de apontar para a mídia (post apagado): o objeto sai do bucket depois do commit. */
-    void discard(String objectKey) {
+    /** O banco deixou de apontar para a foto (post apagado, foto trocada): o objeto sai do bucket depois do commit. */
+    public void discardAfterCommit(String objectKey) {
         janitor.deleteAfterCommit(objectKey == null ? List.of() : List.of(objectKey));
-    }
-
-    private static PostExceptions.Invalid invalid(String message) {
-        return new PostExceptions.Invalid(List.of(message));
     }
 }

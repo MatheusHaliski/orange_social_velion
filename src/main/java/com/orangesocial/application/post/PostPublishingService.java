@@ -2,6 +2,9 @@ package com.orangesocial.application.post;
 
 import com.orangesocial.application.account.AgePolicy;
 import com.orangesocial.application.background.BackgroundValidator;
+import com.orangesocial.application.media.ImageSanitizer;
+import com.orangesocial.application.media.MediaExceptions;
+import com.orangesocial.application.media.MediaUploads;
 import com.orangesocial.application.post.PostViews.PostDetailView;
 import com.orangesocial.domain.model.AgeRating;
 import com.orangesocial.domain.model.CategoryVerification;
@@ -26,7 +29,7 @@ import java.util.regex.Pattern;
 /**
  * Publicação de post pelo autor (RF29, OS-23: texto e foto no Post Feed) e a moldura escolhida no Background Studio
  * (RF28). Quem publica precisa de conta ativa; instituição e banco, do selo verificado. A foto chega antes por URL
- * pré-assinada e é limpa aqui ({@link PostMediaService}); vídeo e áudio ficam para as próximas etapas.
+ * pré-assinada e é limpa aqui ({@link MediaUploads}); vídeo e áudio ficam para as próximas etapas.
  */
 @Service
 @Transactional
@@ -49,10 +52,10 @@ public class PostPublishingService {
     private final AgePolicy ages;
     private final BackgroundValidator backgrounds;
     private final PostQueryService queries;
-    private final PostMediaService media;
+    private final MediaUploads media;
 
     public PostPublishingService(PostRepository posts, AuthorDirectory authors, AgePolicy ages,
-                                 BackgroundValidator backgrounds, PostQueryService queries, PostMediaService media) {
+                                 BackgroundValidator backgrounds, PostQueryService queries, MediaUploads media) {
         this.posts = posts;
         this.authors = authors;
         this.ages = ages;
@@ -96,7 +99,7 @@ public class PostPublishingService {
             throw new PostExceptions.Invalid(errors);
         }
         // a foto só é processada quando o resto do post já passou: limpar imagem custa mais que validar texto
-        String mediaKey = mediaType == MediaType.IMAGE ? media.attachImage(author.getId(), uploadKey) : null;
+        String mediaKey = mediaType == MediaType.IMAGE ? claimPhoto(author.getId(), uploadKey) : null;
         Post post = new Post(author, feed, mediaType, f.title());
         apply(post, f);
         post.setMediaObjectKey(mediaKey);
@@ -166,7 +169,7 @@ public class PostPublishingService {
         String mediaKey = post.getMediaObjectKey();
         post.remove();
         posts.saveAndFlush(post);
-        media.discard(mediaKey);
+        media.discardAfterCommit(mediaKey);
     }
 
     // ------------------------------------------------------------ regras
@@ -217,6 +220,14 @@ public class PostPublishingService {
         if ((f.rating() == AgeRating.AGE_18 || f.rating() == AgeRating.SENSITIVE)
                 && !ages.adult(author.getUserDateOfBirth())) {
             errors.add("Menores de 18 anos não publicam conteúdo 18+ ou sensível.");
+        }
+    }
+
+    private String claimPhoto(long authorId, String uploadKey) {
+        try {
+            return media.claimImage(authorId, uploadKey, ImageSanitizer.Fit.POST);
+        } catch (MediaExceptions.Invalid e) {
+            throw new PostExceptions.Invalid(e.errors());
         }
     }
 

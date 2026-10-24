@@ -139,7 +139,9 @@ dentro da assinatura). A limpeza da foto roda **na própria API, na publicação
 bytes, limite de pixels lido do cabeçalho antes de decodificar, orientação EXIF aplicada e regravação sem metadados
 (JPEG 0,85 ou PNG, até 2.048 px). Escolha consciente para não trazer dependência nativa agora; a fila
 `media.uploaded`, libvips/imgproxy (AVIF/WebP, miniaturas 150/480/1080) e a moderação antes de publicar continuam
-sendo o alvo (⏳). Em dev e nos testes, Garage iniciado pela Admin API v2 (a imagem não tem shell).
+sendo o alvo (⏳). Em dev e nos testes, Garage iniciado pela Admin API v2 (a imagem não tem shell); o `init.sh` também
+aplica as regras do bucket pela API S3: `uploads/` expira em 1 dia e o CORS libera `PUT`/`GET` da origem web. A foto de
+perfil (OS-18) usa o mesmo envio, com recorte quadrado de 512 px.
 
 Fontes: [InfoQ: alternativas ao MinIO](https://infoq.com/news/2025/12/minio-s3-api-alternatives/) ·
 [MinIO remove console](https://blocksandfiles.com/2025/06/19/minio-removes-management-features-from-basic-community-edition-object-storage-code/) ·

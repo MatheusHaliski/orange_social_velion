@@ -2,6 +2,10 @@ package com.orangesocial.application.account;
 
 import com.orangesocial.application.account.AccountViews.CategoryView;
 import com.orangesocial.application.account.AccountViews.ProfileView;
+import com.orangesocial.application.media.ImageSanitizer;
+import com.orangesocial.application.media.MediaExceptions;
+import com.orangesocial.application.media.MediaUploads;
+import com.orangesocial.application.post.PublicLinks;
 import com.orangesocial.domain.model.CategoryVerification;
 import com.orangesocial.domain.model.UserControlList;
 import com.orangesocial.infrastructure.persistence.postgres.UserControlListRepository;
@@ -27,9 +31,13 @@ public class ProfileService {
     private static final Pattern PHONE = Pattern.compile("^\\+[1-9]\\d{7,14}$");
 
     private final UserControlListRepository users;
+    private final MediaUploads media;
+    private final PublicLinks links;
 
-    public ProfileService(UserControlListRepository users) {
+    public ProfileService(UserControlListRepository users, MediaUploads media, PublicLinks links) {
         this.users = users;
+        this.media = media;
+        this.links = links;
     }
 
     public record ProfilePatch(String name, String handle, String bio, List<String> pronouns, List<String> links,
@@ -133,11 +141,39 @@ public class ProfileService {
         return view(users.save(u));
     }
 
-    static ProfileView view(UserControlList u) {
+    /**
+     * Foto de perfil (OS-18): a chave vem do {@code POST /api/v1/media/uploads}; a foto é recortada em quadrado, fica
+     * com 512 px e sai sem EXIF/GPS. A foto anterior sai do bucket depois do commit.
+     */
+    @Transactional
+    public ProfileView setPhoto(long userId, String uploadKey) {
+        UserControlList u = users.findById(userId).orElseThrow();
+        String publicKey;
+        try {
+            publicKey = media.claimImage(userId, uploadKey == null ? null : uploadKey.strip(), ImageSanitizer.Fit.AVATAR);
+        } catch (MediaExceptions.Invalid e) {
+            throw new AccountExceptions.Invalid(e.errors());
+        }
+        media.discardAfterCommit(u.getPhotoObjectKey());
+        u.setPhotoObjectKey(publicKey);
+        return view(users.save(u));
+    }
+
+    /** Sem foto: o app mostra as iniciais. O objeto sai do bucket depois do commit. */
+    @Transactional
+    public ProfileView removePhoto(long userId) {
+        UserControlList u = users.findById(userId).orElseThrow();
+        media.discardAfterCommit(u.getPhotoObjectKey());
+        u.setPhotoObjectKey(null);
+        return view(users.save(u));
+    }
+
+    ProfileView view(UserControlList u) {
         return new ProfileView(u.getId(), u.getName(), u.getHandle(), u.getEmail(), u.getRecoveryEmail(),
                 u.getCellphoneNumber(), u.getUserDateOfBirth(), u.getGender(), u.getBio(), u.getPronouns(),
                 u.getLinks(), u.getCountryOfResidence(), u.getStateOfResidence(), u.getCityOfResidence(),
-                CategoryView.of(u.getUserType()), u.getCategoryVerification(), u.getTypeDetails(), u.getPhotoObjectKey());
+                CategoryView.of(u.getUserType()), u.getCategoryVerification(), u.getTypeDetails(), u.getPhotoObjectKey(),
+                links.mediaUrl(u.getPhotoObjectKey()));
     }
 
     private static String blankToNull(String s) {

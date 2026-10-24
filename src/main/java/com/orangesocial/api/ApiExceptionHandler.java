@@ -1,6 +1,7 @@
 package com.orangesocial.api;
 
 import com.orangesocial.application.account.AccountExceptions;
+import com.orangesocial.application.media.MediaExceptions;
 import com.orangesocial.application.post.PostExceptions;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
@@ -47,6 +48,20 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
     @ExceptionHandler(PostExceptions.InteractionsClosed.class)
     ProblemDetail closed(PostExceptions.InteractionsClosed e) {
         return problem(HttpStatus.CONFLICT, "Interações encerradas", e.getMessage());
+    }
+
+    // ------------------------------------------------------------ envio de foto (RF29, RF2)
+
+    @ExceptionHandler(MediaExceptions.Forbidden.class)
+    ProblemDetail mediaForbidden(MediaExceptions.Forbidden e) {
+        return problem(HttpStatus.FORBIDDEN, "Sem permissão", e.getMessage());
+    }
+
+    @ExceptionHandler(MediaExceptions.Invalid.class)
+    ProblemDetail mediaInvalid(MediaExceptions.Invalid e) {
+        ProblemDetail p = problem(HttpStatus.UNPROCESSABLE_CONTENT, "Revise a foto", e.getMessage());
+        p.setProperty("errors", e.errors());
+        return p;
     }
 
     // ------------------------------------------------------------ conta e autenticação (RF1, RF27)
