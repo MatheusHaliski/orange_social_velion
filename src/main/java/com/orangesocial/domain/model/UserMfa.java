@@ -23,7 +23,7 @@ public class UserMfa {
     @Column(name = "enabled_at", nullable = false, updatable = false)
     private Instant enabledAt;
 
-    /** Último passo de 30 s aceito: o mesmo código não vale duas vezes (anti-replay). */
+    /** Último passo de 30 s aceito: o mesmo código não vale duas vezes (anti-replay, atômico em UserMfaRepository). */
     @Column(name = "last_used_step", nullable = false)
     private long lastUsedStep;
 
@@ -39,15 +39,6 @@ public class UserMfa {
     @PrePersist
     void onCreate() {
         enabledAt = Instant.now();
-    }
-
-    /** Aceita o passo só se for posterior ao último usado. */
-    public boolean consumeStep(long step) {
-        if (step <= lastUsedStep) {
-            return false;
-        }
-        lastUsedStep = step;
-        return true;
     }
 
     public Long getUserId() {

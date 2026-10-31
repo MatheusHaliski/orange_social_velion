@@ -219,6 +219,31 @@ class AuthApiIT {
         assertThat(third.get("/api/v1/me/mfa").getBody()).containsEntry("recoveryCodesLeft", 9);
     }
 
+    @Test
+    @SuppressWarnings("unchecked")
+    void secondFactorIsSingleUseUnderConcurrencyAndSetupNeverOverwritesAnActiveFactor() throws Exception {
+        register("dora@example.com", "dora");
+        ApiClient a = new ApiClient(port);
+        a.login("dora@example.com", PASSWORD);
+        ApiClient b = new ApiClient(port);
+        b.login("dora@example.com", PASSWORD);
+
+        // duas configurações abertas ao mesmo tempo: a segunda confirmação não troca o fator que a primeira ligou
+        byte[] secretA = Totp.fromBase32((String) a.post("/api/v1/me/mfa/totp", Map.of("password", PASSWORD)).getBody().get("secret"));
+        byte[] secretB = Totp.fromBase32((String) b.post("/api/v1/me/mfa/totp", Map.of("password", PASSWORD)).getBody().get("secret"));
+        long step = Totp.stepAt(Instant.now());
+        List<String> recovery = (List<String>) a.post("/api/v1/me/mfa/totp/confirm",
+                Map.of("code", Totp.code(secretA, step, 6))).getBody().get("codes");
+        assertThat(b.post("/api/v1/me/mfa/totp/confirm", Map.of("code", Totp.code(secretB, step, 6)))
+                .getStatusCode().value()).isEqualTo(409);
+
+        // o mesmo código TOTP (ou de recuperação) mandado por 8 logins ao mesmo tempo autentica só um
+        String totp = Totp.code(secretA, step + 1, 6);
+        assertThat(concurrentSecondFactor(totp, 8)).isEqualTo(1);
+        assertThat(concurrentSecondFactor(recovery.getFirst(), 8)).isEqualTo(1);
+        assertThat(a.get("/api/v1/me/mfa").getBody()).containsEntry("recoveryCodesLeft", 9);
+    }
+
     // ------------------------------------------------------------ sessões ativas
 
     @Test
@@ -325,6 +350,32 @@ class AuthApiIT {
     }
 
     // ------------------------------------------------------------ apoio
+
+    /** Abre {@code n} logins na etapa do 2FA e manda o mesmo código em todos ao mesmo tempo; devolve quantos entraram. */
+    private int concurrentSecondFactor(String code, int n) throws Exception {
+        List<ApiClient> clients = new java.util.ArrayList<>();
+        for (int i = 0; i < n; i++) {
+            ApiClient c = new ApiClient(port);
+            assertThat(c.login("dora@example.com", PASSWORD).getBody()).containsEntry("status", "MFA_REQUIRED");
+            clients.add(c);
+        }
+        java.util.concurrent.CountDownLatch start = new java.util.concurrent.CountDownLatch(1);
+        try (var pool = java.util.concurrent.Executors.newFixedThreadPool(n)) {
+            List<java.util.concurrent.Future<Integer>> results = new java.util.ArrayList<>();
+            for (ApiClient c : clients) {
+                results.add(pool.submit(() -> {
+                    start.await();
+                    return c.post("/api/v1/auth/login/2fa", Map.of("code", code)).getStatusCode().value();
+                }));
+            }
+            start.countDown();
+            int ok = 0;
+            for (var r : results) {
+                ok += r.get() == 200 ? 1 : 0;
+            }
+            return ok;
+        }
+    }
 
     private void register(String email, String handle) {
         ApiClient b = new ApiClient(port);

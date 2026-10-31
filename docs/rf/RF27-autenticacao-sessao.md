@@ -59,6 +59,10 @@ paths:
    - segredo de 160 bits cifrado com AES-256-GCM;
    - **10 códigos de recuperação** de uso único, guardados em Argon2id.
    - Ativar, regenerar e desativar exigem senha (+ código); cada mudança gera aviso por e-mail. **Sem SMS.**
+   - **Uso único atômico:** o passo do TOTP e o código de recuperação são consumidos por `UPDATE` condicional no
+     banco (`last_used_step < passo`; `used_at IS NULL`); com várias requisições ao mesmo tempo, só uma entra.
+   - **Nunca sobrescreve o fator ativo:** confirmar uma configuração quando o 2FA já foi ligado em outra sessão dá
+     `409` (`INSERT … ON CONFLICT DO NOTHING`), e o segredo que está valendo continua o mesmo.
 8. **Controle de acesso:**
    - leitura de posts, perfis e Termos é pública;
    - todo o resto exige sessão;
@@ -120,7 +124,11 @@ sequenceDiagram
         U->>APP: código de 6 dígitos (ou xxxxx-xxxxx)
         APP->>API: POST /api/v1/auth/login/2fa
         API->>A: completeMfa
-        A->>DB: decifra segredo · TOTP ±1 passo · passo > último usado?
+        A->>DB: decifra segredo · TOTP ±1 passo
+        A->>DB: UPDATE user_mfa SET last_used_step = passo WHERE last_used_step < passo
+        alt 0 linhas (código já usado, mesmo por outra requisição simultânea)
+            A-->>APP: 401
+        end
         A->>VK: changeSessionId · grava OrangePrincipal(id)
         A-->>APP: 200 {status: AUTHENTICATED, user}
     end
@@ -162,7 +170,11 @@ sequenceDiagram
     API-->>APP: {secret, otpauthUri} → QR code + chave para digitar
     U->>APP: código do app autenticador
     APP->>API: POST /api/v1/me/mfa/totp/confirm {code}
-    M->>DB: INSERT user_mfa (segredo AES-256-GCM) · 10 user_recovery_code (Argon2id)
+    M->>DB: INSERT user_mfa … ON CONFLICT (user_id) DO NOTHING (segredo AES-256-GCM)
+    alt 2FA já ligado por outra sessão
+        M-->>APP: 409 "O 2FA já está ativo"
+    end
+    M->>DB: 10 user_recovery_code (Argon2id)
     API-->>APP: 10 códigos xxxxx-xxxxx (mostrados uma vez)
     M-->>U: e-mail "2FA ativado"
 ```
@@ -186,8 +198,9 @@ sequenceDiagram
 |---|---|---|
 | Segurança | `SecurityConfig` (CSRF SPA, regras, cabeçalhos), `SessionService`, `AbsoluteSessionTimeoutFilter`, `LoginThrottle`, `PendingLogin`, `OrangePrincipal`, `ClientInfo`, `AppSecrets`, `SecretCipher`, `Totp`, `ProblemResponses` | ✅ |
 | Aplicação | `AuthService` (login em etapas), `MfaService`, `StepUp` (modo sudo), `AccountNotifier` | ✅ |
+| Concorrência do 2FA | `UserMfaRepository.consumeStep` / `enableIfAbsent` e `RecoveryCodeRepository.markUsed`: `UPDATE`/`INSERT` condicionais, 1 = aceito, 0 = já usado ou já ativo | ✅ |
 | Persistência | `user_mfa`, `user_recovery_code` (V3); sessões no Valkey `orange:session` | ✅ |
 | API | `/api/v1/auth/{csrf,session,register,login,login/2fa,reactivate,logout}`; `/api/v1/me/{password,sessions,mfa,…}` | ✅ |
-| Testes | `TotpTest` (vetores da RFC 6238, cifra, timeout absoluto); `AuthApiIT` (aba anônima, cookie, CSRF, limite, logout entre abas, 2FA com anti-replay e códigos de recuperação, sessões) | ✅ |
+| Testes | `TotpTest` (vetores da RFC 6238, cifra, timeout absoluto); `AuthApiIT` (aba anônima, cookie, CSRF, limite, logout entre abas, 2FA com anti-replay e códigos de recuperação, sessões; `secondFactorIsSingleUseUnderConcurrencyAndSetupNeverOverwritesAnActiveFactor`: 8 logins simultâneos com o mesmo código TOTP e de recuperação entram só uma vez, e duas configurações concorrentes dão 409 na segunda) | ✅ |
 | Pendências | passkeys/WebAuthn; "lembrar este navegador por 30 dias"; e-mail transacional (OS-12); CAPTCHA após 20 falhas/24 h; SSO Velion via Keycloak (OS-13) | ⏳ OS-61, OS-62 |
 | Tela | Protótipo: [13-login](../../design/prototype/screens/13-login.png) sobre o mosaico com o logo oficial, [16-login-2fa](../../design/prototype/screens/16-login-2fa.png), [17-seguranca](../../design/prototype/screens/17-seguranca.png) (2FA ativada, sessões por aparelho, "Sair" em cada uma, "Sair de todos os outros", "Sair desta conta" avisando as outras abas via `BroadcastChannel`) | ✅ protótipo |

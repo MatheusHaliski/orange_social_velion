@@ -115,14 +115,13 @@ classDiagram
     class UserMfa {
         <<Entity · PostgreSQL user_mfa>>
         -byte[] totpSecret «AES-256-GCM»
-        -long lastUsedStep «anti-replay»
-        +consumeStep(long) boolean
+        -long lastUsedStep «anti-replay atômico: UPDATE condicional no repositório»
     }
 
     class RecoveryCode {
         <<Entity · PostgreSQL user_recovery_code>>
         -String codeHash «Argon2id»
-        -Instant usedAt
+        -Instant usedAt «uso único: UPDATE … WHERE used_at IS NULL»
     }
 
     class GeoLocation {
