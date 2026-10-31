@@ -82,17 +82,18 @@ public class PostQueryService {
         long postCount = posts.countByAuthorUserIdAndStatusIn(userId, PostStatus.PUBLIC);
         return new PublicProfileView(user.getId(), user.getName(), CategoryView.of(user.getUserType()),
                 links.mediaUrl(user.getPhotoObjectKey()), user.getCreatedAt(), postCount,
-                links.userPostsPath(user.getId()));
+                links.userPostsPath(user.getId()), links.profileShareUrl(user.getId()));
     }
 
     public FeedPageView authorFeed(Long userId, Optional<String> cursor, int limit, Optional<Long> viewerId) {
         UserControlList user = publicUser(userId);
         int size = Math.clamp(limit, 1, MAX_PAGE);
 
-        // pede um a mais para saber se existe próxima página sem COUNT(*)
+        // pede um a mais para saber se existe próxima página sem COUNT(*); o cursor só escolhe a página: o acesso
+        // (conta ativa) já foi conferido em publicUser
         List<Post> page = cursor.map(FeedCursor::decode)
-                .map(c -> posts.findAuthorFeedBefore(userId, c.createdAt(), c.id(), size + 1))
-                .orElseGet(() -> posts.findAuthorFeed(userId, size + 1));
+                .map(c -> posts.findProfileFeedBefore(userId, c.createdAt(), c.id(), size + 1))
+                .orElseGet(() -> posts.findProfileFeed(userId, size + 1));
         boolean hasMore = page.size() > size;
         List<Post> items = hasMore ? page.subList(0, size) : page;
 

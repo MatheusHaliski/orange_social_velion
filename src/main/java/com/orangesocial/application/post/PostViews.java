@@ -70,7 +70,7 @@ public final class PostViews {
      * cidade, e-mail, telefone e demais campos do cadastro nunca saem aqui.
      */
     public record PublicProfileView(Long id, String name, CategoryView category, String avatarUrl,
-                                    Instant memberSince, long postCount, String postsPath) {
+                                    Instant memberSince, long postCount, String postsPath, String shareUrl) {
     }
 
     public record CommentView(Long id, AuthorView author, String body, Instant createdAt, boolean canDelete) {

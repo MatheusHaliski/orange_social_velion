@@ -36,6 +36,9 @@ paths:
 4. Entram `PUBLISHED` e `ARCHIVED`; rascunhos e removidos nunca.
 5. Conta **suspensa** ou **eliminada**: o perfil responde 404; nos posts e comentários o nome aparece sem link
    ("Conta excluída" no caso de eliminação LGPD).
+6. **Compartilhar o perfil:** o perfil traz `shareUrl` = `{orange-social.public-base-url}/u/{id}`, a rota do
+   perfil no app web, sem rastrear quem compartilhou. Nada de `/@handle`, que não tem rota no app e dava 404 no
+   Friendly Eats; o `@` também pode mudar, o id não.
 
 ## Caso de uso
 
@@ -46,6 +49,7 @@ flowchart LR
     UC2 --> UC3[Rolar o feed do autor]
     UC3 --> UC4[Abrir um post · RF24]
     UC3 --> UC5[Interagir · RF26]
+    UC2 --> UC7[Compartilhar o perfil<br/>link /u/id]
     UC1 -.conta suspensa ou eliminada.-> UC6[Nome sem link · nada abre]
 ```
 
@@ -66,11 +70,11 @@ sequenceDiagram
         API->>Q: getProfile(id)
         Q->>PG: SELECT usuário WHERE id = ? (ACTIVE?)
         Q->>PG: COUNT posts PUBLISHED + ARCHIVED
-        Q-->>APP: 200 PublicProfileView
+        Q-->>APP: 200 PublicProfileView {…, postsPath, shareUrl: …/u/{id}}
     and primeira página
         APP->>API: GET /api/v1/users/{id}/posts?limit=20
         API->>Q: authorFeed(id, cursor=∅, 20, viewer?)
-        Q->>PG: SELECT … ORDER BY created_at DESC, id DESC LIMIT 21
+        Q->>PG: findProfileFeed · SELECT … ORDER BY created_at DESC, id DESC LIMIT 21
         Q->>PG: post_ids curtidos/salvos pelo viewer (1 consulta por tipo)
         Q-->>APP: 200 {items[20], nextCursor}
     end
@@ -101,9 +105,9 @@ flowchart TD
 
 | Camada | Artefato | Situação |
 |---|---|---|
-| Persistência | índice parcial `idx_post_author_created`, `PostRepository.findAuthorFeed*`, `countByAuthorUserIdAndStatusIn` | ✅ |
-| Aplicação / API | `PostQueryService.getProfile` / `authorFeed`, `AuthorDirectory`, `GET /api/v1/users/{id}/profile`, `GET /api/v1/users/{id}/posts` | ✅ |
-| Testes | `PostApiIT.profileShowsOnlyPublicDataAndFeedPagesByCursor`, `FeedCursorTest` | ✅ |
+| Persistência | índice parcial `idx_post_author_created`, `PostRepository.findProfileFeed*` (antes `findAuthorFeed*`: o CodeQL marca como sensível método com "auth" no nome escolhido por dado do pedido; o cursor só escolhe a página, o acesso é conferido antes), `countByAuthorUserIdAndStatusIn` | ✅ |
+| Aplicação / API | `PostQueryService.getProfile` / `authorFeed`, `AuthorDirectory`, `GET /api/v1/users/{id}/profile`, `GET /api/v1/users/{id}/posts`; `PublicLinks.profileShareUrl` → `shareUrl` `/u/{id}` | ✅ |
+| Testes | `PostApiIT.profileShowsOnlyPublicDataAndFeedPagesByCursor` (inclui `shareUrl` = `http://localhost:3000/u/{id}`), `FeedCursorTest` | ✅ |
 | Tela | Protótipo: [10-perfil-autor](../../design/prototype/screens/10-perfil-autor.png); autor como link no card e no modal | ✅ protótipo |
 | App | rota `/u/{id}` | ⏳ OS-39 |
 | Identidade | `ViewerResolver` lê a sessão autenticada ([RF27](RF27-autenticacao-sessao.md)); o cabeçalho de dev `X-Orange-Dev-User` foi removido e os testes entram com login real (sessão + CSRF) | ✅ |

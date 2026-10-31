@@ -23,6 +23,11 @@ public class PublicLinks {
         return publicBaseUrl + "/p/" + postId;
     }
 
+    /** Link do perfil que vai para fora do app: a rota {@code /u/{id}} do app web, também sem rastreamento. */
+    public String profileShareUrl(long userId) {
+        return publicBaseUrl + "/u/" + userId;
+    }
+
     public String postPath(UUID postId) {
         return "/api/v1/posts/" + postId;
     }

@@ -156,6 +156,7 @@ class PostApiIT {
         assertThat(profile).containsEntry("name", "techblog.br")
                 .containsEntry("postCount", 3)
                 .containsEntry("postsPath", "/api/v1/users/" + author.getId() + "/posts")
+                .containsEntry("shareUrl", "http://localhost:3000/u/" + author.getId())   // rota do app web
                 .doesNotContainKeys("email", "cityOfResidence", "city", "cellphoneNumber");
 
         Map<String, Object> page1 = get("/api/v1/users/" + author.getId() + "/posts?limit=2", reader.getId()).getBody();
