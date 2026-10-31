@@ -20,6 +20,28 @@ updates:
         patterns: ["com.fasterxml.jackson*", "tools.jackson*"]
     labels: ["dependencies", "backend"]
 
+  # App web (frontend/, npm workspaces). Next e React andam juntos; Playwright fica fixado (Chromium do ambiente).
+  - package-ecosystem: npm
+    directory: "/frontend"
+    schedule:
+      interval: weekly
+      day: monday
+      time: "06:00"
+      timezone: America/Sao_Paulo
+    open-pull-requests-limit: 10
+    groups:
+      next-react:
+        patterns: ["next", "eslint-config-next", "react", "react-dom", "@types/react", "@types/react-dom"]
+      testes:
+        patterns: ["vitest", "@testing-library/*", "jsdom", "@axe-core/playwright"]
+      tailwind:
+        patterns: ["tailwindcss", "@tailwindcss/*"]
+    ignore:
+      - dependency-name: "@playwright/test"
+      - dependency-name: "playwright-core"
+      - dependency-name: "lucide-react"   # 0.460.0 fixado no DESIGN_SYSTEM.md §7
+    labels: ["dependencies", "frontend"]
+
   - package-ecosystem: github-actions
     directory: "/"
     schedule:
