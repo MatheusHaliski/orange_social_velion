@@ -37,7 +37,7 @@
         <bouncycastle.version>1.86</bouncycastle.version>
 
         <!-- API S3 (AWS S3 em produção, Garage em desenvolvimento): URLs pré-assinadas e mídia (RF29) -->
-        <awssdk.version>2.55.10</awssdk.version>
+        <awssdk.version>2.57.5</awssdk.version>
     </properties>
 
     <dependencies>
