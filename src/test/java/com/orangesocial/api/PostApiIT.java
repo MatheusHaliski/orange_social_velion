@@ -242,6 +242,36 @@ class PostApiIT {
                 .containsEntry("comments", 1);
     }
 
+    @Test
+    void removingTheSameCommentTwiceDecrementsTheCounterOnce() throws Exception {
+        String box = "/api/v1/posts/" + published.getId() + "/comments";
+        send(HttpMethod.POST, box, author.getId(), Map.of("body", "Eu começo: Java ou Python?"));
+        get("/api/v1/posts/" + published.getId(), reader.getId());   // abre a sessão das duas contas antes das threads
+        for (int round = 0; round < 5; round++) {
+            Number commentId = (Number) map(send(HttpMethod.POST, box, reader.getId(), Map.of("body", "Rodada " + round))
+                    .getBody(), "comment").get("id");
+            // quem escreveu e o dono do post apagam ao mesmo tempo: só uma exclusão vale
+            java.util.concurrent.CountDownLatch start = new java.util.concurrent.CountDownLatch(1);
+            List<Integer> statuses = new java.util.ArrayList<>();
+            try (var pool = java.util.concurrent.Executors.newFixedThreadPool(2)) {
+                List<java.util.concurrent.Future<Integer>> results = List.of(reader.getId(), author.getId()).stream()
+                        .map(who -> pool.submit(() -> {
+                            start.await();
+                            return send(HttpMethod.DELETE, box + "/" + commentId, who, null).getStatusCode().value();
+                        })).toList();
+                start.countDown();
+                for (java.util.concurrent.Future<Integer> r : results) {
+                    statuses.add(r.get());
+                }
+            }
+            assertThat(statuses).isSubsetOf(204, 404).containsOnlyOnce(204);
+            assertThat(map(get("/api/v1/posts/" + published.getId(), null).getBody(), "counts"))
+                    .containsEntry("comments", 1);
+        }
+        assertThat(jdbc.queryForObject("SELECT comment_count FROM post WHERE id = ?", Integer.class, published.getId()))
+                .isEqualTo(1);
+    }
+
     // ------------------------------------------------------------ RF26 · compartilhar
 
     @Test
