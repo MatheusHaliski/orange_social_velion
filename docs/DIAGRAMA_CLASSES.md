@@ -139,15 +139,27 @@ classDiagram
     }
 
     class ConsentEvent {
-        <<Entity · PostgreSQL>>
+        <<Tabela append-only consent_event · JDBC>>
         -Long id
         -ConsentPurpose purpose
         -String legalBasis
         -boolean granted
         -String policyVersion
-        -Instant grantedAt
-        -Instant revokedAt
-        +revoke() void
+        -String channel
+        -String ipHash «HMAC»
+        -Instant occurredAt
+    }
+
+    class ConsentPurpose {
+        <<enumeration · RF3>>
+        LOCATION_TRACKING
+        PERSONALIZED_FEED
+        SENSITIVE_PROFILE_DATA
+        FACIAL_RECOGNITION
+        MARKETING
+        THIRD_PARTY_SHARING
+        +getMinorRule() MinorRule
+        +isSensitive() boolean
     }
 
     class FeedType {
@@ -310,6 +322,7 @@ classDiagram
     VSusercontrolist "1" *-- "0..1" GeoLocation : lastSavedLocation
     VSusercontrolist "1" *-- "0..*" CommunityInterest : communities
     VSusercontrolist "1" *-- "0..*" ConsentEvent : consents
+    ConsentEvent --> ConsentPurpose : purpose
     VSusercontrolist "1" *-- "1..*" TermsAcceptance : aceita
     VSusercontrolist "1" *-- "1" UserPreference : configura
     VSusercontrolist "1" *-- "0..1" UserMfa : 2FA

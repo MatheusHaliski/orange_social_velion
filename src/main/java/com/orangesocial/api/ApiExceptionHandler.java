@@ -94,6 +94,11 @@ public class ApiExceptionHandler extends ResponseEntityExceptionHandler {
         return problem(HttpStatus.CONFLICT, "Conflito", e.getMessage());
     }
 
+    @ExceptionHandler(AccountExceptions.NotFound.class)
+    ProblemDetail accountNotFound(AccountExceptions.NotFound e) {
+        return problem(HttpStatus.NOT_FOUND, "Não encontrado", e.getMessage());
+    }
+
     /** 422 com todos os problemas de uma vez em {@code errors}, para o formulário marcar cada campo. */
     @ExceptionHandler(AccountExceptions.Invalid.class)
     ProblemDetail invalid(AccountExceptions.Invalid e) {

@@ -100,7 +100,7 @@ sequenceDiagram
             R-->>V: 409 (ApiExceptionHandler)
         end
         R->>DB: INSERT terms_acceptance (TERMS_OF_USE, 2026-10-17)
-        R->>DB: INSERT consent_event × 6 (granted = false)
+        R->>DB: INSERT consent_event × 6 (granted = false, via ConsentService.recordDefaults · RF3)
         R->>DB: INSERT user_preference (padrões · protetivos se menor de 16)
         R->>DB: COMMIT
         R->>VK: HSET auth:verify:{id} (HMAC do código, TTL 30 min)

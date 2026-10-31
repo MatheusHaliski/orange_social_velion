@@ -18,7 +18,7 @@ flowchart TB
         subgraph Security["Camada de Segurança & LGPD (RF27)"]
             SEC["SessionRepositoryFilter + SecurityConfig<br/>(sessão opaca no Valkey · CSRF SPA ·<br/>AbsoluteSessionTimeoutFilter)"]
             RATE["LoginThrottle<br/>(conta e IP · Valkey)"]
-            CONSENT["ConsentGuard<br/>(Art. 7º I / Art. 11)"]:::planned
+            CONSENT["ConsentGuard<br/>(Art. 7º I / Art. 11 · consumidores conferem ConsentService.granted)"]:::planned
             AUDIT["LgpdAuditInterceptor<br/>(Art. 37 – registro de operações)"]:::planned
         end
 
@@ -33,7 +33,8 @@ flowchart TB
             VIEWER["ViewerResolver<br/>(OrangePrincipal da sessão)"]
             FEEDC["FeedController<br/>(profile · post · audio · alert)"]:::planned
             MEDIAC["MediaUploadController<br/>(URL pré-assinada da foto · RF29 · RF2)"]
-            PRIVC["PrivacyController<br/>(exportar · consentimentos)"]:::planned
+            CONSC["ConsentController<br/>(GET/PUT /me/consents · RF3)"]
+            PRIVC["PrivacyController<br/>(exportar dados)"]:::planned
             VELC["VelionIntegrationController"]:::planned
         end
 
@@ -41,6 +42,7 @@ flowchart TB
             AUTHS["AuthService · MfaService · StepUp<br/>SessionService"]
             USERS["RegistrationService · ProfileService ·<br/>PreferencesService · AccountService ·<br/>EmailVerificationService"]
             LEGALS["LegalDocuments"]
+            CONSS["ConsentService · ConsentPurpose<br/>(RF3 · 6 finalidades · revogação imediata · trava por idade)"]
             NOTIF["AccountNotifier<br/>(hoje LoggingAccountNotifier)"]
             JOB["AccountDeletionJob<br/>(diário 03:15)"]
             POSTQ["PostQueryService<br/>(RF24 · RF25)"]
@@ -64,7 +66,7 @@ flowchart TB
             TIMER["PostTimelineRepository<br/>(Spring Data Cassandra)"]
             TRENDR["TrendingScoreRepository<br/>(StringRedisTemplate · ZSET)"]
             SESSR["Spring Session<br/>(Valkey · indexado)"]
-            CONSR["ConsentEventRepository<br/>(hoje JDBC no cadastro)"]:::planned
+            CONSR["consent_event · user_consent_current<br/>(JDBC no ConsentService · append-only)"]
             S3A["S3MediaStorage<br/>(AWS SDK v2 · MediaStorage)"]
         end
     end
@@ -78,8 +80,10 @@ flowchart TB
 
     WEB & MOBILE & VELION -->|HTTPS + cookie de sessão + X-XSRF-TOKEN| SEC
     SEC --> RATE --> CONSENT --> AUDIT
-    AUDIT --> AUTHC & USERC & LEGALC & POSTC & PUBC & BGC & PROFC & FEEDC & MEDIAC & PRIVC & VELC
-    POSTC & PROFC & USERC --> VIEWER
+    AUDIT --> AUTHC & USERC & LEGALC & POSTC & PUBC & BGC & PROFC & FEEDC & MEDIAC & CONSC & PRIVC & VELC
+    POSTC & PROFC & USERC & CONSC --> VIEWER
+    CONSC --> CONSS
+    CONSS --> USERR & CONSR
 
     AUTHC --> AUTHS & USERS
     USERC --> USERS & AUTHS
@@ -97,7 +101,7 @@ flowchart TB
     JOB --> USERS
 
     AUTHS --> USERR & ACCR & SESSR & RATE & NOTIF
-    USERS --> USERR & ACCR & CONSR & SESSR & NOTIF & ERASER & MEDIAS
+    USERS --> USERR & ACCR & CONSS & SESSR & NOTIF & ERASER & MEDIAS
     FEEDS --> TIMER & TRENDR & USERR
     POSTS --> POSTR & USERR & BGS & POSTQ & MEDIAS
     POSTS -.->|alvo: ranking e timeline| TIMER & TRENDS & EVENTS

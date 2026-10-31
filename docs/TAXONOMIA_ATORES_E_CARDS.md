@@ -303,15 +303,22 @@ flowchart LR
 | `deletionRequestedAt`, `deletionScheduledFor`, `statusBeforeDeletion` | ciclo de vida | sistema | só eu | — | sistema | ninguém | — |
 | `deletedAt` | ciclo de vida | sistema | interno | — | sistema | ninguém | — |
 | **`terms_acceptance`**: `document`, `version`, `acceptedAt`, `channel`, `ipHash` | legal | obrigatório | só eu | comum | sistema | ninguém (append-only) | HMAC do IP |
-| **`consent_event`** × 6: `purpose`, `legalBasis`, `granted`, `policyVersion` | legal | sistema (todos `false`) | só eu | comum | informado | titular (RF3) | — |
+| **`consent_event`** × 6: `purpose`, `legalBasis`, `granted`, `policyVersion`, `channel`, `ipHash`, `occurredAt` | legal | sistema (todos `false`) | só eu | comum | informado | titular (RF3, `PUT /api/v1/me/consents/{purpose}`; append-only) | HMAC do IP |
 | **`user_mfa`**: `secret`, `lastUsedStep`, `enabledAt` | acesso | opcional | nunca exibido | comum | sistema | fluxo próprio | AES-256-GCM (AAD = id) |
 | **`user_recovery_code`** × 10: `codeHash`, `usedAt` | acesso | com 2FA | mostrado 1 vez | comum | sistema | fluxo próprio | Argon2id |
 | **`user_preference`** (§3.5) | preferências | sistema (padrões) | só eu | comum | informado | titular | — |
 | **Sessão** (Valkey): principal, `authAt`, `device`, `channel`, criação, último acesso | acesso | sistema | só eu (sem o id real) | comum | sistema | titular encerra | id opaco; `handle` = HMAC |
 
-Finalidades de consentimento (`consent_event.purpose`, todas começam `false`): `MARKETING`,
-`LOCATION_TRACKING`, `PERSONALIZED_FEED`, `THIRD_PARTY_SHARING` (Art. 7º, I) e `FACIAL_RECOGNITION`,
-`SENSITIVE_PROFILE_DATA` (Art. 11, I).
+Finalidades de consentimento (`ConsentPurpose`, `consent_event.purpose`, todas começam `false`), na ordem da tela:
+
+| Finalidade | Rótulo | Base | Sensível | Travada para | Ao revogar |
+|---|---|---|---|---|---|
+| `LOCATION_TRACKING` | Guardar minha localização | Art. 7º, I | — | menor de 16 | apaga `lastSavedLocation` |
+| `PERSONALIZED_FEED` | Feed pelos meus interesses | Art. 7º, I | — | menor de 16 | — |
+| `SENSITIVE_PROFILE_DATA` | Orientação sexual no perfil | Art. 11, I | ✅ | menor de 18 | apaga `sexualPreference` |
+| `FACIAL_RECOGNITION` | Reconhecimento facial no aparelho | Art. 11, I | ✅ | menor de 18 | o app apaga o modelo local |
+| `MARKETING` | Novidades e ofertas da Velion e de marcas | Art. 7º, I | — | menor de 16 | — |
+| `THIRD_PARTY_SHARING` | Compartilhar com parceiros | Art. 7º, I | — | — | — |
 
 ### 3.3 Atributos por tipo (`type_details`)
 

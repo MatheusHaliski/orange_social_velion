@@ -155,7 +155,7 @@ flowchart LR
     FOTO(["Trocar ou remover a foto de perfil ✅<br/>quadrado 512 px · sem EXIF/GPS"])
     PREF(["Ajustar preferências<br/>tema · fundo · idioma · fonte ✅"])
     PRIV(["Ajustar privacidade e bem-estar ✅"])
-    CONS(["Consentir ou revogar finalidade 🟡"])
+    CONS(["Consentir ou revogar finalidade ✅<br/>6 chaves · revogação imediata"])
     EXP(["Exportar meus dados ⏳"]):::planned
     EXC(["Excluir conta ✅"])
     REAT(["Reativar em até 30 dias ✅"])
@@ -339,7 +339,7 @@ o fluxo de publicação ainda não.
 | Editar perfil | Titular | [RF2](rf/RF02-editar-perfil.md) | `PATCH /api/v1/me/profile` | ✅ |
 | Trocar ou remover a foto de perfil | Titular (conta ativa) | [RF2](rf/RF02-editar-perfil.md) | `POST /api/v1/media/uploads`, `PUT`/`DELETE /api/v1/me/photo` | ✅ |
 | Ajustar preferências e privacidade | Titular, Menor de 16 | RF2 | `PATCH /api/v1/me/preferences` | ✅ |
-| Consentir ou revogar | Titular | [RF3](rf/RF03-consentimento-privacidade.md) | `consent_event` | 🟡 registro no cadastro; tela de troca ⏳ |
+| Consentir ou revogar | Titular, Menor de 16 (chaves travadas) | [RF3](rf/RF03-consentimento-privacidade.md) | `GET /api/v1/me/consents`, `PUT /api/v1/me/consents/{purpose}` | ✅ API · ⏳ tela no app (OS-39, OS-48) |
 | Excluir conta · reativar | Titular | [RF23](rf/RF23-direitos-titular-lgpd.md) | `POST /api/v1/me/deletion`, `POST /api/v1/auth/reactivate` | ✅ |
 | Eliminar e anonimizar | AccountDeletionJob | RF23 | `AccountService.eliminate` + `PostContentEraser` | ✅ |
 | Exportar dados | Titular | RF23 | — | ⏳ OS-43 |

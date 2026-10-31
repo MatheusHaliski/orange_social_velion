@@ -112,16 +112,16 @@ Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 
 | ID | Título | Etiqueta | Pts | Critérios de aceite |
 |---|---|---|---|---|
-| OS-40 | `consent_event` append-only + API de consentimentos (Art. 7º, I) | 🔴 | 5 | Toggles desligados por padrão; versão do texto, canal e IP com hash; view `user_consent_current` |
-| OS-41 | Revogação de consentimento em 1 clique (Art. 8º, §5º) | 🔴 | 2 | Revogar é o mesmo controle que consentir; efeito imediato via evento |
-| OS-42 | Reconhecimento facial **on-device**, desligado por padrão (Art. 11) | 🔴 | 5 | Consentimento específico e destacado; template nunca sai do aparelho; bloqueado para menores |
+| OS-40 | `consent_event` append-only + API de consentimentos (Art. 7º, I) | 🔴 | 5 | ✅ Toggles desligados por padrão; versão do texto, canal e IP com hash; view `user_consent_current`; `GET /api/v1/me/consents` e `PUT /api/v1/me/consents/{purpose}` com o mesmo contrato do Friendly Eats ([RF3](rf/RF03-consentimento-privacidade.md)); repetir o valor não grava; `ConsentApiIT`; ⏳ tela no app (OS-39, OS-48) |
+| OS-41 | Revogação de consentimento em 1 clique (Art. 8º, §5º) | 🔴 | 2 | ✅ Revogar é o mesmo controle que consentir; efeito imediato na mesma transação (apaga `sexual_preference` e `last_saved_location`); ⏳ consumidores do feed, marketing e parceiros |
+| OS-42 | Reconhecimento facial **on-device**, desligado por padrão (Art. 11) | 🔴 | 5 | Consentimento específico e destacado; template nunca sai do aparelho; bloqueado para menores. 🟡 finalidade `FACIAL_RECOGNITION` sensível (Art. 11, I), desligada e travada para menor de 18 na API do RF3; ⏳ app on-device |
 | OS-43 | Exportar meus dados em JSON (Art. 18, V) | 🔴 | 5 | Step-up; job assíncrono; ZIP cifrado; URL pré-assinada 24–72 h; 1 pedido/dia |
 | OS-44 | Excluir conta — saga idempotente (Art. 18, VI) | 🔴 | 8 | Reautenticar → carência → revogar sessões → anonimizar PostgreSQL → Cassandra → S3 → **destruir DEK** → recibo; reconciliação diária |
 | OS-45 | Trilha de auditoria de operações (Art. 37) | 🔴 | 3 | Eventos com encadeamento de hash em S3 Object Lock; sem PII em claro |
 | OS-46 | Criptografia de campo com **Tink + KMS, DEK por usuário** | 🔴 | 8 | `sexual_preference`, `last_saved_location`, `address`, `cellphone_number`, foto cifrados; `user_id` como dado associado; tabela `user_key` |
 | OS-47 | Rate limiting (Bucket4j + Valkey) e proteção contra força bruta | 🔴 | 3 | Por IP, usuário e rota; mais rígido em login, cadastro, recuperação e exportação |
 | OS-48 | Página de configurações LGPD (Conta, Privacidade, Seus dados) | 🔴 🟠 | 5 | Cada controle mapeado ao artigo; `AlertDialog` acessível para excluir |
-| OS-49 **(novo)** | **ECA Digital**: aferição de idade e modo restrito para menores | 🔴 🟢 | 8 | Sem perfilamento, geolocalização ou publicidade direcionada para menores; supervisão parental; sem biometria |
+| OS-49 **(novo)** | **ECA Digital**: aferição de idade e modo restrito para menores | 🔴 🟢 | 8 | Sem perfilamento, geolocalização ou publicidade direcionada para menores; supervisão parental; sem biometria. 🟡 consentimentos travados por idade (16: localização, feed e marketing; 18: dado sensível e biometria); ⏳ aferição de idade e consentimento do responsável |
 | OS-4A **(novo)** | Registro de operações (Art. 37) e **RIPD** versionados no repositório | 🔴 | 5 | YAML com finalidade, base legal, categorias, retenção, operadores, transferências; RIPD aprovado antes do lançamento |
 | OS-4B **(novo)** | OWASP ASVS 5.0 nível 2 (nível 3 em auth e dados sensíveis) + WAF | 🔴 | 5 | Checklist ASVS no PR template; AWS WAF/Cloudflare com regras gerenciadas |
 | OS-4C **(novo)** | Backups em sa-east-1 com Vault Lock; política de retenção ≤ 35 dias; reaplicar exclusões após restore | 🔴 🔵 | 3 | RPO ≤ 5 min, RTO ≤ 4 h; restore testado por trimestre |
@@ -132,16 +132,16 @@ Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 | ID | Título | Etiqueta | Pts | Critérios de aceite |
 |---|---|---|---|---|
 | OS-56 | RF24 — Modal do post com dados completos e data de publicação | 🔵 🟠 | 5 | ✅ `GET /api/v1/posts/{id}` (rascunho só para o autor, removido/autor suspenso = 404), `PostApiIT`, protótipo `09-post-modal`; data relativa no card com `<time>` + tooltip absoluto; modal acessível (foco preso, `Esc`); pendente no app (OS-39) |
-| OS-57 | RF25 — Perfil público do autor + feed dele (toque na foto ou no nome) | 🔵 🟠 🔴 | 5 | ✅ `GET /api/v1/users/{id}/profile` com minimização LGPD e `GET …/posts` com cursor; protótipo `10-perfil-autor`; conta suspensa/eliminada sem link |
-| OS-58 | RF26 — Curtir, comentar (caixa de mensagens), compartilhar e salvar com contagem | 🔵 🟠 | 8 | ✅ tabelas `post_reaction`/`post_comment`/`post_share` (V2), contadores atômicos e idempotentes, 401/403/409, protótipo `11-comentarios` e `12-compartilhar`; botões `<button>` com `aria-label`/`aria-pressed` |
+| OS-57 | RF25 — Perfil público do autor + feed dele (toque na foto ou no nome) | 🔵 🟠 🔴 | 5 | ✅ `GET /api/v1/users/{id}/profile` com minimização LGPD e `GET …/posts` com cursor; protótipo `10-perfil-autor`; conta suspensa/eliminada sem link; `shareUrl` na rota do app `/u/{id}` |
+| OS-58 | RF26 — Curtir, comentar (caixa de mensagens), compartilhar e salvar com contagem | 🔵 🟠 | 8 | ✅ tabelas `post_reaction`/`post_comment`/`post_share` (V2), contadores atômicos e idempotentes, 401/403/409, protótipo `11-comentarios` e `12-compartilhar`; botões `<button>` com `aria-label`/`aria-pressed`; exclusão de comentário atômica (contador desce uma vez) |
 | OS-59 | RF26 — Interações em tempo real, notificação ao autor, moderação e limites | 🔵 🔴 | 8 | Contadores via SSE (OS-2B); notificação LIKE/COMMENT (OS-27); comentários na moderação (OS-4D); rate limit por usuário/rota (OS-47) |
 
 ### Conta, sessão, configurações e exclusão — RF1 · RF2 · RF23 · RF27 (17/10/2026)
 
 | ID | Título | Etiqueta | Pts | Critérios de aceite |
 |---|---|---|---|---|
-| OS-60 | RF1 — Cadastro com escolha do tipo de usuário, campos por tipo e aceite dos Termos de Uso da Velion | 🟢 🔴 | 8 | ✅ API `POST /api/v1/auth/register` (CNPJ alfanumérico, idade 13+/16/18, 6 consentimentos false, `terms_acceptance`), verificação de e-mail; `docs/legal/TERMOS_DE_USO.md` com `{{marcadores}}` para preencher; ⏳ telas e revisão jurídica |
-| OS-61 | RF27 — Login em etapas, sessão opaca no Valkey, CSRF, limites, sessões ativas e 2FA TOTP | 🟢 🔴 🔵 | 8 | ✅ cookie sem Max-Age (aba anônima deslogada), logout no servidor, 60 min/24 h, 10 códigos de recuperação, anti-replay; `AuthApiIT` |
+| OS-60 | RF1 — Cadastro com escolha do tipo de usuário, campos por tipo e aceite dos Termos de Uso da Velion | 🟢 🔴 | 8 | ✅ API `POST /api/v1/auth/register` (CNPJ alfanumérico, idade 13+/16/18, 6 consentimentos false, `terms_acceptance`, cadastros simultâneos → um 201 e o resto 409), verificação de e-mail; `docs/legal/TERMOS_DE_USO.md` com `{{marcadores}}` para preencher; ⏳ telas e revisão jurídica |
+| OS-61 | RF27 — Login em etapas, sessão opaca no Valkey, CSRF, limites, sessões ativas e 2FA TOTP | 🟢 🔴 🔵 | 8 | ✅ cookie sem Max-Age (aba anônima deslogada), logout no servidor, 60 min/24 h, 10 códigos de recuperação, anti-replay atômico (código de uso único mesmo com logins simultâneos; configuração concorrente dá 409); `AuthApiIT` |
 | OS-62 | RF27 — Passkeys (WebAuthn) e "lembrar este navegador por 30 dias" | 🟢 🔴 | 5 | Passkey como 1º fator; dispositivo confiável revogável na lista de sessões |
 | OS-63 | RF2 — Configurações (9 seções) e fundo do app (liso, rede, 6 mosaicos com o logo oficial) | 🟠 🟢 | 5 | ✅ API de perfil e preferências; menor de 16 com proteções travadas; ⏳ telas |
 | OS-64 | RF23 — Excluir conta: modal de consequências, 30 dias para reativar e job de eliminação | 🔴 | 5 | ✅ `POST /api/v1/me/deletion`, reativação no login, `AccountDeletionJob`; ⏳ modal no app, passos S3/Cassandra/DEK (OS-44) |
