@@ -150,6 +150,7 @@ flowchart TD
 | Camada | Artefato | Situação |
 |---|---|---|
 | Domínio | `UserControlList` (handle, bio, pronomes, links, `type_details`, selo), `UserPreference` (enums de tema, fundo, comentários, conteúdo) | ✅ |
+| Localização | `GeoLocation` (`LastSavedLocation`, gravada só com `LOCATION_TRACKING`, [RF3](RF03-consentimento-privacidade.md)): latitude −90..90 e longitude −180..180 validadas na forma positiva, então `NaN` é recusado (`lat < -90 \|\| lat > 90` deixava passar, lição do Friendly Eats 6da8069); `DomainModelTest.geoLocationRejectsInvalidCoordinates` | ✅ |
 | Aplicação / API | `ProfileService`, `PreferencesService`; `GET/PATCH /api/v1/me/profile`, `GET/PATCH /api/v1/me/preferences` | ✅ |
 | Foto de perfil | `PUT/DELETE /api/v1/me/photo` → `ProfileService.setPhoto/removePhoto` → `MediaUploads.claimImage(…, Fit.AVATAR)` (`ImageSanitizer`: recorte central de 512 px, sem EXIF/GPS) e `MediaJanitor` (foto anterior e original saem depois do commit); `avatarUrl` no `ProfileView` | ✅ |
 | Persistência | `user_preference` e colunas de perfil em `V3__auth_terms_mfa_deletion.sql` | ✅ |
