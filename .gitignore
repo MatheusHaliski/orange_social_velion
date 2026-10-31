@@ -3,3 +3,12 @@ target/
 *.iml
 .vscode/
 .DS_Store
+
+# Frontend (frontend/)
+node_modules/
+.next/
+playwright-report/
+test-results/
+frontend/**/dist/
+frontend/apps/web/next-env.d.ts
+*.tsbuildinfo

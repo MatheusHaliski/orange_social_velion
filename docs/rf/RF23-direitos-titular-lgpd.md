@@ -3,7 +3,7 @@ rf: RF23
 titulo: Direitos do titular — portabilidade e eliminação (LGPD)
 status: parcial
 escopo_inferido: true
-cards: [OS-43, OS-44, OS-45, OS-46, OS-4A, OS-4C]
+cards: [OS-43, OS-44, OS-45, OS-46, OS-48, OS-4A, OS-4C, OS-64]
 paths:
   - src/main/java/com/orangesocial/domain/model/UserControlList.java
   - src/main/java/com/orangesocial/domain/model/AccountStatus.java
@@ -17,6 +17,9 @@ paths:
   - src/main/java/com/orangesocial/infrastructure/persistence/postgres/PostRepository.java
   - src/main/java/com/orangesocial/infrastructure/persistence/postgres/PostCommentRepository.java
   - design/prototype/index.html
+  # app web (frontend/): telas, componentes e testes deste RF
+  - frontend/apps/web/app/configuracoes/conta/page.tsx
+  - frontend/apps/web/components/settings/AccountSection.tsx
 ---
 
 # RF23 · Direitos do titular — portabilidade e eliminação
@@ -148,6 +151,26 @@ stateDiagram-v2
 
 Ciclo de vida da conta: [`MAQUINA_ESTADOS.md`](../MAQUINA_ESTADOS.md) (estado terminal `Anonymous_LGPD_Deleted`).
 
+## Telas no app web
+
+Configurações → Conta (`/configuracoes/conta`): "Excluir minha conta" abre um `alertdialog` com as consequências, a
+data final (hoje + 30 dias), a caixa "Entendo" e a confirmação por senha e, com 2FA, pelo código
+(`SudoFields`, do [RF27](RF27-autenticacao-sessao.md)). Depois do `202` a sessão acaba e o app vai para o início sem
+mandar ao login no meio da navegação (`lib/use-leave.ts`). A reativação aparece no login (`/entrar`,
+`REACTIVATION_AVAILABLE`). "Baixar uma cópia" ainda diz que a exportação é pelo suporte (⏳ OS-43).
+
+```mermaid
+flowchart LR
+    T([Titular]) --> CONTA["Rota /configuracoes/conta<br/>AccountSection"]
+    CONTA --> MOD["alertdialog<br/>consequências, data final, Entendo"]
+    MOD --> SUDO["Senha e código 2FA<br/>SudoFields"]
+    SUDO -->|POST /api/v1/me/deletion| ME[MeController]
+    ME -->|202| FIM["Pedido registrado<br/>sessão encerrada"]
+    FIM -.volta em até 30 dias.-> LOGIN["Rota /entrar<br/>reativar · RF27"]
+    CONTA -.⏳ OS-43.-> EXP["Exportar meus dados"]:::planned
+    classDef planned stroke-dasharray:5 4
+```
+
 ## Rastreabilidade
 
 | Camada | Artefato | Situação |
@@ -163,4 +186,5 @@ Ciclo de vida da conta: [`MAQUINA_ESTADOS.md`](../MAQUINA_ESTADOS.md) (estado te
 | Exclusão — fotos no S3 | `AccountService.eliminate` → `MediaJanitor.deleteAfterCommit` com as chaves devolvidas pelo `PostContentEraser` e a foto de perfil: o banco perde a referência na transação e o objeto sai do bucket depois do commit (falha vira aviso no log) · teste `PostPublishingApiIT.accountEliminationDeletesThePhotosFromTheBucket` com Garage | ✅ |
 | Exclusão — demais passos fora do PostgreSQL | versões antigas no S3, Cassandra, Valkey (ranking), destruição da DEK, reconciliação | ⏳ OS-44, OS-46 |
 | Auditoria | registro de operações (Art. 37) | ⏳ OS-45, OS-4A |
+| Telas (app web) | `/configuracoes/conta` (`AccountSection` + `DeleteAccountDialog`); reativação em `/entrar` ([RF27](RF27-autenticacao-sessao.md)); `e2e/configuracoes.spec.ts` (botão só habilita depois de "Entendo", senha e código com 2FA, pedido registrado, axe) e `e2e/entrar.spec.ts` (reativar ou manter a exclusão) | ✅ web (OS-64) · ⏳ exportação (OS-43) e mobile |
 | Tela | Protótipo: [Configurações → Seus dados](../../design/prototype/screens/05-config-lgpd.png); modal de exclusão [19-excluir-conta](../../design/prototype/screens/19-excluir-conta.png) (`alertdialog` com consequências, data final, "Baixar uma cópia", caixa "Entendo" + senha + código; o botão só habilita após marcar); oferta de reativação no login [20-reativar-conta](../../design/prototype/screens/20-reativar-conta.png) | ✅ protótipo |

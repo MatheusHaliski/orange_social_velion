@@ -1,0 +1,31 @@
+{
+  "id": 42,
+  "name": "Ana Ribeiro",
+  "handle": "anaribeiro",
+  "email": "ana@example.com",
+  "recoveryEmail": null,
+  "cellphoneNumber": null,
+  "dateOfBirth": "1995-04-12",
+  "gender": null,
+  "bio": "Pedalo, fotografo e escrevo sobre Curitiba.",
+  "pronouns": [
+    "ela"
+  ],
+  "links": [
+    "https://anaribeiro.blog"
+  ],
+  "countryOfResidence": "BR",
+  "stateOfResidence": "PR",
+  "cityOfResidence": "Curitiba",
+  "category": {
+    "code": "VERDE",
+    "label": "Pessoa Física",
+    "color": "#3DDC6B"
+  },
+  "categoryVerification": "NOT_REQUIRED",
+  "typeDetails": {
+    "occupation": "Fotógrafa"
+  },
+  "avatarObjectKey": "avatars/ana.png",
+  "avatarUrl": "/media-teste/avatars/ana.png"
+}

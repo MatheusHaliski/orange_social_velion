@@ -1,0 +1,80 @@
+{
+  "0199a1b2-c3d4-7e5f-8a9b-000000000002": [
+    {
+      "id": 11,
+      "author": {
+        "id": 205,
+        "name": "Bruno Costa",
+        "category": {
+          "code": "VERDE",
+          "label": "Pessoa Física",
+          "color": "#3DDC6B"
+        },
+        "avatarUrl": null,
+        "profilePath": "/api/v1/users/205/profile",
+        "available": true
+      },
+      "body": "Faço isso há um ano e não volto atrás!",
+      "createdAt": "MINUTES:8",
+      "canDelete": false
+    },
+    {
+      "id": 12,
+      "author": {
+        "id": 412,
+        "name": "Clube Atlético Barigui",
+        "category": {
+          "code": "LARANJA",
+          "label": "Comunidade",
+          "color": "#FF9F1C"
+        },
+        "avatarUrl": null,
+        "profilePath": "/api/v1/users/412/profile",
+        "available": true
+      },
+      "body": "Bora no mutirão de sábado de bike então 🙂",
+      "createdAt": "MINUTES:5",
+      "canDelete": false
+    }
+  ],
+  "0199a1b2-c3d4-7e5f-8a9b-000000000009": [
+    {
+      "id": 13,
+      "author": {
+        "id": 205,
+        "name": "Bruno Costa",
+        "category": {
+          "code": "VERDE",
+          "label": "Pessoa Física",
+          "color": "#3DDC6B"
+        },
+        "avatarUrl": null,
+        "profilePath": "/api/v1/users/205/profile",
+        "available": true
+      },
+      "body": "Que céu! Foi perto do lago?",
+      "createdAt": "MINUTES:30",
+      "canDelete": false
+    }
+  ],
+  "0199a1b2-c3d4-7e5f-8a9b-000000000001": [
+    {
+      "id": 14,
+      "author": {
+        "id": 42,
+        "name": "Ana Ribeiro",
+        "category": {
+          "code": "VERDE",
+          "label": "Pessoa Física",
+          "color": "#3DDC6B"
+        },
+        "avatarUrl": "/media-teste/avatars/ana.png",
+        "profilePath": "/api/v1/users/42/profile",
+        "available": true
+      },
+      "body": "Terminar um projeto pequeno foi o que me destravou também.",
+      "createdAt": "MINUTES:1",
+      "canDelete": false
+    }
+  ]
+}

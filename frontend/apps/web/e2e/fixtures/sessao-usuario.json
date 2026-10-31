@@ -1,0 +1,17 @@
+{
+  "id": 42,
+  "name": "Ana Ribeiro",
+  "handle": "anaribeiro",
+  "email": "ana@example.com",
+  "category": {
+    "code": "VERDE",
+    "label": "Pessoa Física",
+    "color": "#3DDC6B"
+  },
+  "categoryVerification": "NOT_REQUIRED",
+  "accountStatus": "ACTIVE",
+  "emailVerified": true,
+  "mfaEnabled": false,
+  "minor": false,
+  "termsUpToDate": true
+}

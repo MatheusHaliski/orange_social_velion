@@ -1,0 +1,173 @@
+[
+  {
+    "id": 42,
+    "name": "Ana Ribeiro",
+    "category": {
+      "code": "VERDE",
+      "label": "Pessoa Física",
+      "color": "#3DDC6B"
+    },
+    "avatarUrl": "/media-teste/avatars/ana.png",
+    "memberSince": "2025-03-10T12:00:00Z",
+    "postCount": 0,
+    "postsPath": "/api/v1/users/42/posts",
+    "shareUrl": "http://localhost:3000/u/42",
+    "verified": false,
+    "city": "Curitiba",
+    "state": "PR",
+    "country": "BR",
+    "interests": [
+      "Ciclismo",
+      "Fotografia"
+    ]
+  },
+  {
+    "id": 205,
+    "name": "Bruno Costa",
+    "category": {
+      "code": "VERDE",
+      "label": "Pessoa Física",
+      "color": "#3DDC6B"
+    },
+    "avatarUrl": null,
+    "memberSince": "2024-11-02T12:00:00Z",
+    "postCount": 0,
+    "postsPath": "/api/v1/users/205/posts",
+    "shareUrl": "http://localhost:3000/u/205",
+    "verified": false,
+    "city": "Colombo",
+    "state": "PR",
+    "country": "BR",
+    "interests": [
+      "História"
+    ]
+  },
+  {
+    "id": 101,
+    "name": "techblog.br",
+    "category": {
+      "code": "AMARELO",
+      "label": "Networking",
+      "color": "#F7C948"
+    },
+    "avatarUrl": null,
+    "memberSince": "2023-06-01T12:00:00Z",
+    "postCount": 0,
+    "postsPath": "/api/v1/users/101/posts",
+    "shareUrl": "http://localhost:3000/u/101",
+    "verified": false,
+    "city": "São Paulo",
+    "state": "SP",
+    "country": "BR",
+    "interests": [
+      "Tecnologia",
+      "Carreira"
+    ]
+  },
+  {
+    "id": 310,
+    "name": "Agência Faísca",
+    "category": {
+      "code": "AZUL",
+      "label": "Marketing",
+      "color": "#4A93FF"
+    },
+    "avatarUrl": null,
+    "memberSince": "2024-01-15T12:00:00Z",
+    "postCount": 0,
+    "postsPath": "/api/v1/users/310/posts",
+    "shareUrl": "http://localhost:3000/u/310",
+    "verified": false,
+    "city": "Curitiba",
+    "state": "PR",
+    "country": "BR",
+    "interests": [
+      "Moda",
+      "Sustentabilidade"
+    ]
+  },
+  {
+    "id": 412,
+    "name": "Clube Atlético Barigui",
+    "category": {
+      "code": "LARANJA",
+      "label": "Comunidade",
+      "color": "#FF9F1C"
+    },
+    "avatarUrl": null,
+    "memberSince": "2022-09-20T12:00:00Z",
+    "postCount": 0,
+    "postsPath": "/api/v1/users/412/posts",
+    "shareUrl": "http://localhost:3000/u/412",
+    "verified": false,
+    "city": "Curitiba",
+    "state": "PR",
+    "country": "BR",
+    "interests": [
+      "Esporte",
+      "Meio ambiente"
+    ]
+  },
+  {
+    "id": 520,
+    "name": "Defesa Civil (exemplo)",
+    "category": {
+      "code": "VERMELHO",
+      "label": "Instituição",
+      "color": "#FF4D4D"
+    },
+    "avatarUrl": null,
+    "memberSince": "2021-05-05T12:00:00Z",
+    "postCount": 0,
+    "postsPath": "/api/v1/users/520/posts",
+    "shareUrl": "http://localhost:3000/u/520",
+    "verified": true,
+    "city": "Curitiba",
+    "state": "PR",
+    "country": "BR",
+    "interests": []
+  },
+  {
+    "id": 530,
+    "name": "Nimbus Tecnologia",
+    "category": {
+      "code": "VERMELHO",
+      "label": "Instituição",
+      "color": "#FF4D4D"
+    },
+    "avatarUrl": null,
+    "memberSince": "2023-02-11T12:00:00Z",
+    "postCount": 0,
+    "postsPath": "/api/v1/users/530/posts",
+    "shareUrl": "http://localhost:3000/u/530",
+    "verified": true,
+    "city": "Curitiba",
+    "state": "PR",
+    "country": "BR",
+    "interests": [
+      "Tecnologia"
+    ]
+  },
+  {
+    "id": 640,
+    "name": "Festival Primavera",
+    "category": {
+      "code": "PRETO",
+      "label": "Especial",
+      "color": "#0C0A07"
+    },
+    "avatarUrl": null,
+    "memberSince": "2026-08-01T12:00:00Z",
+    "postCount": 0,
+    "postsPath": "/api/v1/users/640/posts",
+    "shareUrl": "http://localhost:3000/u/640",
+    "verified": false,
+    "city": "Curitiba",
+    "state": "PR",
+    "country": "BR",
+    "interests": [
+      "Música",
+      "Eventos"
+    ]
+  }
+]

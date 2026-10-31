@@ -11,6 +11,15 @@ paths:
   - src/main/java/com/orangesocial/application/media/**
   - src/main/java/com/orangesocial/infrastructure/storage/**
   - infra/garage/**
+  # app web (frontend/): telas, componentes e testes deste RF
+  - frontend/apps/web/app/publicar/page.tsx
+  - frontend/apps/web/app/posts/?id?/editar/page.tsx
+  - frontend/apps/web/components/publish/PublishView.tsx
+  - frontend/apps/web/components/publish/PhotoPicker.tsx
+  - frontend/apps/web/components/post/AuthorActions.tsx
+  - frontend/apps/web/lib/post-form.*
+  - frontend/apps/web/e2e/publicar.spec.ts
+  - frontend/apps/web/e2e/fixtures/foto.png
 ---
 
 # RF29 · Publicar e gerenciar o próprio post
@@ -124,7 +133,7 @@ sequenceDiagram
 ```mermaid
 sequenceDiagram
     autonumber
-    actor A as Autor (app)
+    actor A as Autor (app web · PublishView)
     participant MC as MediaUploadController
     participant PM as MediaUploads
     participant S3 as Bucket S3
@@ -227,6 +236,30 @@ flowchart TD
     M3 --> G
 ```
 
+## Telas no app web
+
+`/publicar` e `/posts/[id]/editar` (`PublishView`): título, subtítulo, texto, foto (`PhotoPicker`), classificação,
+país e cidade e o Background Studio do [RF28](RF28-moldura-post.md). A foto vai antes da publicação: `POST
+/api/v1/media/uploads`, `PUT` direto na URL pré-assinada do bucket **privado** `orange-social-uploads` (sem cookie
+nem `X-XSRF-TOKEN`, com os cabeçalhos assinados) e a chave segue no `mediaObjectKey`. Erros locais e o `422` aparecem
+por campo, com o resumo focado; conta pendente ou com selo em verificação vê o porquê e não publica. Editar só manda o
+que mudou (a moldura só quando muda; a foto não muda). No post, o autor tem Editar, Arquivar/Restaurar e Excluir com
+confirmação (`AuthorActions`).
+
+```mermaid
+flowchart LR
+    A([Autor · conta ativa]) --> PUB["Rotas /publicar e /posts/id/editar<br/>PublishView"]
+    PUB --> FOTO["PhotoPicker<br/>JPEG ou PNG até 10 MB"]
+    FOTO -->|POST /api/v1/media/uploads| UP[MediaUploadController]
+    FOTO -.PUT direto, URL pré-assinada.-> BKT[("Bucket privado<br/>orange-social-uploads")]
+    PUB --> EST["FrameStudio · RF28"]
+    PUB -->|POST /api/v1/posts com mediaObjectKey| POSTS[PostPublishingController]
+    PUB -->|PATCH só do que mudou| POSTS
+    PAGINA["Página do post<br/>AuthorActions"] -->|archive, restore, DELETE| POSTS
+    FOTO -.⏳ mediaAlt.-> ALT["Texto alternativo da foto"]:::planned
+    classDef planned stroke-dasharray:5 4
+```
+
 ## Rastreabilidade
 
 | Camada | Artefato | Situação |
@@ -245,4 +278,6 @@ flowchart TD
 | Vídeo | Processamento que tira metadados e gera o pôster | ⏳ |
 | Áudio e alerta | Audio Feed (OS-24) e Alert Feed só para fontes verificadas (OS-25) | ⏳ |
 | Rascunho | Criar `DRAFT` e publicar depois, com o feed do autor ordenado pela data de publicação | ⏳ |
-| Tela | Protótipo do estúdio de moldura com "Publicar" ([RF28](RF28-moldura-post.md), telas 22–27); compositor de post | 🟡 / ⏳ OS-39 |
+| Tela | Protótipo do estúdio de moldura com "Publicar" ([RF28](RF28-moldura-post.md), telas 22–27) | ✅ protótipo |
+| Telas (app web) | `/publicar` e `/posts/[id]/editar` (`PublishView`, `PhotoPicker`, `lib/post-form.ts`, `lib/photo.ts`), `AuthorActions` na página do post; `e2e/publicar.spec.ts` (post com foto pela URL pré-assinada, classificação, local e moldura; 422 por campo; conta em verificação e pendente; editar só o que mudou; axe com o estúdio) e o teste de arquivar e excluir de `e2e/post.spec.ts` | ✅ web · ⏳ mobile (OS-39) |
+| Texto alternativo | `mediaAlt` escrito pelo autor no post com foto (a API ainda não tem o campo; hoje a foto do card vai com `alt=""`) e mostrado como `alt` no card e no post | ⏳ |

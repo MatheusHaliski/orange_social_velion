@@ -2,7 +2,7 @@
 rf: RF2
 titulo: Editar informações pessoais, preferências e configurações do perfil
 status: parcial
-cards: [OS-14, OS-15, OS-18, OS-19, OS-63]
+cards: [OS-14, OS-15, OS-18, OS-19, OS-30, OS-38, OS-48, OS-63]
 paths:
   - src/main/java/com/orangesocial/domain/model/UserControlList.java
   - src/main/java/com/orangesocial/domain/model/CommunityInterest.java
@@ -14,6 +14,40 @@ paths:
   - src/main/java/com/orangesocial/api/MeController.java
   - src/main/java/com/orangesocial/application/media/**
   - design/prototype/index.html
+  # app web (frontend/): telas, componentes e testes deste RF
+  - frontend/packages/tokens/**
+  - frontend/apps/web/app/globals.css
+  - frontend/apps/web/app/icon.png
+  - frontend/apps/web/app/apple-icon.png
+  - frontend/apps/web/public/brand/orange-social-*.svg
+  - frontend/apps/web/public/brand/backgrounds/*
+  - frontend/apps/web/components/ThemeToggle.tsx
+  - frontend/apps/web/components/Dialog.*
+  - frontend/apps/web/components/Form.tsx
+  - frontend/apps/web/components/Switch.tsx
+  - frontend/apps/web/components/Tabs.tsx
+  - frontend/apps/web/components/icons.tsx
+  - frontend/apps/web/lib/theme.ts
+  - frontend/apps/web/lib/font-scale.*
+  - frontend/apps/web/app/configuracoes/layout.tsx
+  - frontend/apps/web/app/configuracoes/page.tsx
+  - frontend/apps/web/app/configuracoes/perfil/page.tsx
+  - frontend/apps/web/app/configuracoes/exibicao/page.tsx
+  - frontend/apps/web/components/settings/SettingsShell.tsx
+  - frontend/apps/web/components/settings/SettingsNav.tsx
+  - frontend/apps/web/components/settings/SettingsIndex.tsx
+  - frontend/apps/web/components/settings/SectionHeading.tsx
+  - frontend/apps/web/components/settings/ProfileSection.tsx
+  - frontend/apps/web/components/settings/PhotoField.tsx
+  - frontend/apps/web/components/settings/DisplaySection.tsx
+  - frontend/apps/web/components/settings/PreferenceControls.tsx
+  - frontend/apps/web/lib/app-background.ts
+  - frontend/apps/web/lib/photo.*
+  - frontend/apps/web/lib/settings-sections.ts
+  - frontend/apps/web/e2e/configuracoes.spec.ts
+  - frontend/apps/web/e2e/fixtures/perfil.json
+  - frontend/apps/web/e2e/fixtures/preferencias.json
+  - frontend/apps/web/e2e/fixtures/avatar.png
 ---
 
 # RF2 · Editar informações pessoais, preferências e configurações
@@ -145,6 +179,31 @@ flowchart TD
     C1 & C2 & F --> L[(UPDATE VSusercontrolist)]
 ```
 
+## Telas no app web
+
+Configurações em `/configuracoes` (lista de seções no celular, menu lateral no computador, foco no título da seção).
+Perfil e Exibição são deste RF; Privacidade é do [RF3](RF03-consentimento-privacidade.md), Senha e segurança do
+[RF27](RF27-autenticacao-sessao.md) e Conta do [RF23](RF23-direitos-titular-lgpd.md). Tema, fundo do app, tamanho
+da fonte e reduzir movimento são aplicados na hora (`lib/theme.ts`, `lib/app-background.ts`, `lib/font-scale.ts`) e
+voltam ao valor salvo se a pessoa sair sem salvar. Cores só pelos tokens DTCG de `frontend/packages/tokens`
+(claro e escuro, PRETO com anel `#D6D0C8` no escuro, contraste conferido por teste); no `localStorage` fica só a
+preferência de tema (`os:tema`). A foto vai pela URL pré-assinada direto ao bucket **privado** de uploads e depois
+`PUT /api/v1/me/photo` (`lib/photo.ts`).
+
+```mermaid
+flowchart LR
+    T([Titular]) --> CFG["Rota /configuracoes<br/>SettingsShell e SettingsNav"]
+    CFG --> PERF["Perfil<br/>ProfileSection e PhotoField"]
+    CFG --> EXIB["Exibição<br/>tema, fundo, fonte, movimento"]
+    CFG -.-> OUTRAS["Privacidade RF3 · Segurança RF27 · Conta RF23"]
+    PERF -->|GET e PATCH /api/v1/me/profile| ME[MeController]
+    PERF -->|POST /api/v1/media/uploads| UP[MediaUploadController]
+    UP -.URL pré-assinada.-> BKT[("Bucket privado<br/>orange-social-uploads")]
+    PERF -->|PUT e DELETE /api/v1/me/photo| ME
+    EXIB -->|GET e PATCH /api/v1/me/preferences| ME
+    EXIB --> TOK["packages/tokens<br/>temas claro e escuro, véu do fundo"]
+```
+
 ## Rastreabilidade
 
 | Camada | Artefato | Situação |
@@ -156,5 +215,6 @@ flowchart TD
 | Persistência | `user_preference` e colunas de perfil em `V3__auth_terms_mfa_deletion.sql` | ✅ |
 | Testes | `AuthApiIT.preferencesIncludingAppBackgroundAndProfileEditing`, `AuthApiIT.minorsKeepProtectiveDefaults`, `DomainModelTest`; foto: `ImageSanitizerTest.avatarIsTheCenterSquareAt512Px`, `PostPublishingApiIT.profilePhotoIsASquareWithoutExifAndTheOldOneLeavesTheBucket` (Garage real) | ✅ |
 | Artes | `design/brand/backgrounds/` (6 mosaicos), `orange-social-logo.svg` (rede) | ✅ |
-| Pendências | troca de e-mail com reconfirmação; tela de recorte da foto no app (OS-39); `activity_log` sem valores (OS-45); comunidades encadeadas (OS-15) | ⏳ |
+| Telas (app web) | `/configuracoes` (`SettingsShell`, `SettingsNav`, `SettingsIndex`, `SectionHeading`), `/configuracoes/perfil` (`ProfileSection`, `PhotoField`, `lib/photo.ts`), `/configuracoes/exibicao` (`DisplaySection`, `PreferenceControls`, `lib/app-background.ts`, `lib/font-scale.ts`); casca visual: `packages/tokens` (DTCG → Style Dictionary 5), `globals.css`, `ThemeToggle`, `Dialog`, `Form`, `Switch`, `Tabs`, `icons`, logo, mark e os 6 mosaicos em `public/brand/`; `e2e/configuracoes.spec.ts` (foto com o `PUT` no bucket privado sem cookie nem CSRF, preferências, fundo que volta ao salvo, menor de 16 com proteções travadas, axe nos dois temas) | ✅ web · ⏳ mobile (OS-39) |
+| Pendências | troca de e-mail com reconfirmação; recorte interativo da foto (hoje o recorte central de 512 px é do servidor); `activity_log` sem valores (OS-45); comunidades encadeadas (OS-15); seções Notificações e Seus dados no app | ⏳ |
 | Tela | Protótipo: [05-config-lgpd](../../design/prototype/screens/05-config-lgpd.png) (Configurações), [18-exibicao-fundo](../../design/prototype/screens/18-exibicao-fundo.png) (tema + seletor com as 8 miniaturas, escolha aplicada na hora) e [21-feed-fundo-areia](../../design/prototype/screens/21-feed-fundo-areia.png) (feed com o fundo e o véu) | ✅ protótipo |

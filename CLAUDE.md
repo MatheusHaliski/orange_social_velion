@@ -29,7 +29,12 @@ mvn verify                                 # + integração com Testcontainers (
 python3 scripts/check_rf_docs.py           # estrutura dos docs de RF
 python3 scripts/wcag_contrast.py           # contraste da paleta
 docker compose up -d                       # PostGIS, Valkey, Garage (+ --profile full para Cassandra)
+cd frontend && npm run dev                 # app web (Next.js) em :3000, repassando /api para :8080
+cd frontend && npm run lint && npm run typecheck && npm test && npm run build && npm run e2e
 ```
+
+O app web (`frontend/`) também implementa RFs: telas e componentes entram nos `paths` do RF (ex.: `/cadastro` no RF1,
+`/entrar` no RF27, Background Studio no RF28). Cores e tokens só pelo `frontend/packages/tokens`, nunca valores soltos.
 
 ## Convenções
 

@@ -6,6 +6,7 @@
 # dependencies    → Trivy (CVEs em dependências e configuração)
 # image           → imagem OCI via Jib + Trivy na imagem
 # rf-docs         → diagramas por RF: estrutura, desatualização em relação ao código e sintaxe Mermaid
+# web             → app web (frontend/): ESLint, tipos, Vitest, next build e Playwright + axe com a API simulada
 #
 # Configurações do repositório (não deste arquivo) — ver docs/TRELLO_BACKLOG.md (OS-04):
 #   Settings → Advanced Security: Code scanning ativo (CodeQL + SARIF do Trivy), Secret scanning +
@@ -108,6 +109,52 @@ jobs:
             fi
           done
           exit $fail
+
+  web:
+    name: "Web: lint, tipos, testes e build"
+    # Playwright 1.56.1 (fixado: é o Chromium do ambiente de desenvolvimento) não instala dependências no
+    # ubuntu-latest atual (26.04); o 24.04 é suportado. Trocar junto com a versão do Playwright.
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: frontend
+    env:
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - name: npm ci
+        run: npm ci
+      - name: Lint
+        run: npm run lint
+      - name: Tipos
+        run: npm run typecheck
+      - name: Testes unitários (Vitest, inclui o contraste dos tokens)
+        run: npm test
+      - name: Build (next build, com a API apontando para uma origem inválida como no e2e)
+        env:
+          API_ORIGIN: http://127.0.0.1:9
+        run: npm run build
+      - name: Chromium do Playwright
+        run: npx playwright install --with-deps chromium
+      - name: Ponta a ponta (Playwright + axe nos dois temas, API simulada)
+        env:
+          E2E_SKIP_BUILD: "1"   # o build acabou de rodar no passo anterior
+        run: npm run e2e
+      - name: Relatório do Playwright
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: playwright-report
+          path: |
+            frontend/apps/web/playwright-report/
+            frontend/apps/web/test-results/
+          retention-days: 14
 
   secrets:
     name: Gitleaks

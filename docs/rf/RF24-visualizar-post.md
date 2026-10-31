@@ -3,7 +3,7 @@ rf: RF24
 titulo: Visualizar post em detalhe (modal com dados completos e data de publicação)
 status: parcial
 numeracao_provisoria: true
-cards: [OS-56]
+cards: [OS-56, OS-31, OS-32, OS-34, OS-35, OS-36]
 paths:
   - src/main/java/com/orangesocial/domain/model/Post.java
   - src/main/java/com/orangesocial/domain/model/PostStatus.java
@@ -21,6 +21,27 @@ paths:
   - src/main/java/com/orangesocial/infrastructure/persistence/postgres/PostRepository.java
   - src/main/resources/db/migration/V2__posts_interactions.sql
   - design/prototype/index.html
+  # app web (frontend/): telas, componentes e testes deste RF
+  - frontend/apps/web/app/?feeds?/page.tsx
+  - frontend/apps/web/app/?feeds?/layout.tsx
+  - frontend/apps/web/app/?feeds?/@modal/**
+  - frontend/apps/web/app/posts/?id?/page.tsx
+  - frontend/apps/web/app/p/?id?/page.tsx
+  - frontend/apps/web/app/not-found.tsx
+  - frontend/apps/web/components/feed/FeedView.tsx
+  - frontend/apps/web/components/feed/FilterBar.tsx
+  - frontend/apps/web/components/post/PostCard.*
+  - frontend/apps/web/components/post/PostBits.tsx
+  - frontend/apps/web/components/post/PostList.tsx
+  - frontend/apps/web/components/post/PostPage.tsx
+  - frontend/apps/web/components/post/PostModal.tsx
+  - frontend/apps/web/lib/feeds.*
+  - frontend/apps/web/lib/format.*
+  - frontend/apps/web/lib/post-format.*
+  - frontend/apps/web/lib/post-queries.ts
+  - frontend/apps/web/e2e/feed.spec.ts
+  - frontend/apps/web/e2e/post.spec.ts
+  - frontend/apps/web/e2e/fixtures/posts.json
 ---
 
 # RF24 · Visualizar post em detalhe
@@ -160,6 +181,41 @@ flowchart TD
 Erros em Problem Details (RFC 9457) com `detail` em pt-BR. Identidade: a sessão opaca criada pelo login
 ([RF27](RF27-autenticacao-sessao.md)); sem sessão — inclusive numa aba anônima — o modal abre como visitante.
 
+## Telas no app web
+
+A home `/` tem a TopBar com o Segmented Switcher (`role="tablist"`, setas, Home/End, feed na URL e o feed inicial
+da conta quando a URL não diz qual), a barra de filtros dos 6 eixos (`FilterBar`, estado na URL; "perto de mim"
+pede a localização ao navegador e não vai para a URL) e os cards (`PostCard`: bolinha + glifo + rótulo da
+categoria, tipo de mídia, classificação, data relativa com `<time>`, moldura do [RF28](RF28-moldura-post.md) e
+tendência). Tocar no título abre o modal **por cima do feed** (rota interceptada `@modal/(.)posts/[id]`), `Esc`
+fecha e devolve o foco ao card; o link direto `/posts/[id]` abre a página inteira e `/p/[id]` (o `shareUrl`)
+redireciona para ela. Post removido ou inexistente mostra "não está disponível".
+
+```mermaid
+flowchart LR
+    U([Visitante ou usuário]) --> HOME["Rota / com o feed na URL<br/>FeedView e tablist dos 4 feeds"]
+    HOME --> FIL["FilterBar<br/>6 eixos, estado na URL"]
+    HOME --> CARD["PostCard<br/>categoria com glifo, moldura, tempo"]
+    CARD -->|toque no título| MODAL["Modal por cima do feed<br/>rota interceptada"]
+    U --> PAG["Rotas /posts/id e /p/id<br/>PostPage"]
+    MODAL -->|GET /api/v1/posts/id| API[PostController]
+    PAG -->|GET /api/v1/posts/id| API
+    HOME -.⏳ GET /api/v1/posts com feed e filtros.-> FALTA["Post e Alert Feed<br/>a tela diz que aguarda a API"]:::planned
+    HOME -.⏳ OS-24.-> AUD["Audio Feed<br/>em breve"]:::planned
+    classDef planned stroke-dasharray:5 4
+```
+
+**Contrato que o app já usa e o backend ainda não tem** (a tela está pronta, o e2e simula a rota e, sem ela, a tela
+diz que aguarda a API em vez de fingir que o feed está vazio):
+
+| Rota ou campo | Proposta (em `frontend/packages/api/src/types.ts`) | Card |
+|---|---|---|
+| `GET /api/v1/posts?feed=POST` e `?feed=ALERT` | `FeedParams`: `category` repetível, `mediaType`, `country`, `city`, `q`, `lat`/`lng`/`radiusKm`, `cursor`, `limit` → `FeedPageView` | ⏳ OS-26, OS-35 |
+| `alert` no `PostCardView` e no `PostDetailView` | `AlertInfoView` (CAP 1.2): `category`, `severity`, `event`, `areaDesc`, `radiusKm`, `expiresAt`, `instruction`, `verifiedSource` | ⏳ OS-25, OS-34 |
+| `trending` no card e no detalhe | `HOT` · `RISING` · `STABLE` · `FALLING` (ZSET `trending:{feed}`) | ⏳ OS-20, OS-36 |
+| `mediaAlt` | texto alternativo escrito pelo autor ([RF29](RF29-publicar-post.md)); hoje a foto do card vai com `alt=""` | ⏳ RF29 |
+| Audio Feed | aba "Áudio: em breve", sem player falso | ⏳ OS-24, OS-33 |
+
 ## Rastreabilidade
 
 | Camada | Artefato | Situação |
@@ -170,7 +226,8 @@ Erros em Problem Details (RFC 9457) com `detail` em pt-BR. Identidade: a sessão
 | Erros compartilhados | `ApiExceptionHandler` também traduz os erros do envio de foto (`MediaExceptions`: `403` "Sem permissão" e `422` "Revise a foto" com `errors[]`), usados pela foto do post ([RF29](RF29-publicar-post.md)) e do perfil ([RF2](RF02-editar-perfil.md)); a leitura do post não muda | ✅ |
 | Testes | `PostDomainTest`, `PostApiIT.anonymousVisitorOpensFullPostWithAuthorDateAndCounts`, `PostApiIT.draftOfSomeoneElseRemovedPostAndSuspendedAuthorAnswer404` | ✅ |
 | Tela | Protótipo: modal [09-post-modal](../../design/prototype/screens/09-post-modal.png); card com `<time>` e tooltip em [01-post-feed](../../design/prototype/screens/01-post-feed.png) | ✅ protótipo |
-| App | modal em Next.js/Expo, rota `/p/{id}` | ⏳ OS-39 |
+| Telas (app web) | `/` (`(feeds)/page.tsx`, `FeedView`, `FilterBar`, `PostList`, `PostCard`, `PostBits`, `lib/feeds.ts`), modal `(feeds)/@modal/(.)posts/[id]` (`PostModal`), `/posts/[id]` (`PostPage`), `/p/[id]`, `not-found.tsx`; `lib/post-format.ts`, `lib/format.ts`, `lib/post-queries.ts`; `e2e/feed.spec.ts` (9 testes: tablist, filtros na URL e na API, "perto de mim", alerta e vaga, perfis, aviso "aguarda a API", áudio em breve) e `e2e/post.spec.ts` (modal com foco preso e `Esc`, link direto, `/p/{id}`, removido, alerta oficial, arquivar e excluir; os testes de curtir, comentar e compartilhar do mesmo arquivo ficam na rastreabilidade do [RF26](RF26-interacoes-post.md)) | ✅ web (OS-31, OS-32, OS-35 parcial) · ⏳ mobile (OS-39) |
+| API dos feeds | `GET /api/v1/posts` com os 6 eixos, `alert` (CAP 1.2), `trending`, `mediaAlt` e Audio Feed: ver "Contrato que o app já usa" acima | ⏳ OS-24, OS-25, OS-26, OS-35, OS-36 |
 | Identidade | `ViewerResolver` lê a sessão autenticada ([RF27](RF27-autenticacao-sessao.md)); o cabeçalho de dev `X-Orange-Dev-User` foi removido e os testes entram com login real (sessão + CSRF) | ✅ |
 | Moldura | `background` resolvido no detalhe ([RF28](RF28-moldura-post.md)): `null` = moldura padrão; a arte nunca cobre o conteúdo do modal | ✅ |
 | Pendências | contagem de visualizações (HyperLogLog, OS-21); bloqueio por idade para conteúdo 16+/18+ (OS-49) | ⏳ |

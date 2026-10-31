@@ -202,7 +202,7 @@ flowchart LR
     USR["Usuário ativo"]:::actor
     DONO["Dono do post"]:::actor
 
-    FEED(["Navegar nos 4 feeds<br/>e filtrar por 6 eixos ⏳"]):::planned
+    FEED(["Navegar nos 4 feeds<br/>e filtrar por 6 eixos<br/>tela web ✅ · API ⏳"]):::planned
     ABRIR(["Abrir post no modal ✅"])
     AUTOR(["Ver perfil e feed do autor ✅"])
     COMP(["Compartilhar ✅"])
@@ -245,18 +245,18 @@ flowchart LR
     AUT["Autor"]:::actor
     LEI["Leitor"]:::actor
 
-    ABRIR(["Abrir a moldura ao criar o post ⏳"]):::planned
-    COR(["Escolher cor, gradiente<br/>ou cartela sazonal ⏳"]):::planned
-    AURA(["Escolher aura, material<br/>e Metamorfose ⏳"]):::planned
-    PLUS(["Escolher Aura Plus animada ⏳"]):::planned
+    ABRIR(["Abrir a moldura ao criar o post ✅"])
+    COR(["Escolher cor, gradiente<br/>ou cartela sazonal ✅"])
+    AURA(["Escolher aura, material<br/>e Metamorfose ✅"])
+    PLUS(["Escolher Aura Plus animada ✅"])
     PROPRIA(["Gerar com IA ou enviar arte ⏳"]):::planned
-    CONT(["Ajustar container e tinta ⏳"]):::planned
-    VER(["Ver o card com a moldura ⏳"]):::planned
-    PREV(["Ver prévia ao vivo ⏳"]):::planned
+    CONT(["Ajustar container e tinta ✅"])
+    VER(["Ver o card com a moldura ✅"])
+    PREV(["Ver prévia ao vivo ✅"])
     LIMPA(["Recusar escolhas incompatíveis ✅<br/>servidor · 422"])
     CONTR(["Validar contraste AA ✅<br/>servidor · 422"])
-    POSTER(["Ver só o pôster ⏳"]):::planned
-    HYPE(["Mostrar Aura Hype ⏳"]):::planned
+    POSTER(["Ver só o pôster ✅"])
+    HYPE(["Mostrar Aura Hype<br/>prévia ✅ · ranking ⏳"]):::planned
     MODR(["Moderar e checar flashes ⏳"]):::planned
 
     MOD["Moderação · EA IRIS"]:::actor
@@ -279,8 +279,10 @@ flowchart LR
     classDef planned stroke-dasharray:5 4
 ```
 
-Telas ainda planejadas no app. A API ([RF28](rf/RF28-moldura-post.md) e [RF29](rf/RF29-publicar-post.md)) já valida e guarda a
-moldura, e o fluxo inteiro roda no protótipo (telas 22–28) e no teste `design/prototype/studio-smoke.mjs`.
+O app web tem o estúdio inteiro em Publicar e Editar (`FrameStudio`, [RF28](rf/RF28-moldura-post.md) ·
+[RF29](rf/RF29-publicar-post.md)), com a prévia ao vivo e a moldura no card (`PostFrame`); a API valida e guarda a
+moldura. Continuam planejados a arte própria (upload ou IA, com moderação e checagem de flashes) e a Aura Hype ligada
+pelo ranking de tendência, que o card ainda não recebe (`trending` ⏳).
 
 ---
 
@@ -339,7 +341,7 @@ o fluxo de publicação ainda não.
 | Editar perfil | Titular | [RF2](rf/RF02-editar-perfil.md) | `PATCH /api/v1/me/profile` | ✅ |
 | Trocar ou remover a foto de perfil | Titular (conta ativa) | [RF2](rf/RF02-editar-perfil.md) | `POST /api/v1/media/uploads`, `PUT`/`DELETE /api/v1/me/photo` | ✅ |
 | Ajustar preferências e privacidade | Titular, Menor de 16 | RF2 | `PATCH /api/v1/me/preferences` | ✅ |
-| Consentir ou revogar | Titular, Menor de 16 (chaves travadas) | [RF3](rf/RF03-consentimento-privacidade.md) | `GET /api/v1/me/consents`, `PUT /api/v1/me/consents/{purpose}` | ✅ API · ⏳ tela no app (OS-39, OS-48) |
+| Consentir ou revogar | Titular, Menor de 16 (chaves travadas) | [RF3](rf/RF03-consentimento-privacidade.md) | `GET /api/v1/me/consents`, `PUT /api/v1/me/consents/{purpose}` | ✅ API e tela web (`/configuracoes/privacidade`) · ⏳ mobile |
 | Excluir conta · reativar | Titular | [RF23](rf/RF23-direitos-titular-lgpd.md) | `POST /api/v1/me/deletion`, `POST /api/v1/auth/reactivate` | ✅ |
 | Eliminar e anonimizar | AccountDeletionJob | RF23 | `AccountService.eliminate` + `PostContentEraser` | ✅ |
 | Exportar dados | Titular | RF23 | — | ⏳ OS-43 |
@@ -347,11 +349,14 @@ o fluxo de publicação ainda não.
 | Ver perfil e feed do autor | Visitante, Usuário | [RF25](rf/RF25-perfil-publico-autor.md) | `GET /api/v1/users/{id}/profile`, `/posts` | ✅ |
 | Curtir, comentar, apagar, compartilhar, salvar | Usuário ativo, Dono do post | [RF26](rf/RF26-interacoes-post.md) | `PUT/DELETE …/like` e `…/save`, `GET/POST …/comments`, `DELETE …/comments/{id}`, `POST …/shares` | ✅ |
 | Publicar, editar, arquivar, restaurar e apagar post | Usuário ativo (instituição e banco com selo) | [RF29](rf/RF29-publicar-post.md) | `POST /api/v1/media/uploads`, `POST /api/v1/posts`, `PATCH`/`DELETE /api/v1/posts/{id}`, `…/archive`, `…/restore` | ✅ texto e foto · ⏳ vídeo e áudio |
-| Moldura do post (Background Studio, Aura Plus) | Autor, Leitor, Moderação | [RF28](rf/RF28-moldura-post.md) | `GET /api/v1/backgrounds/catalog`, `/recommendations`, `background` no post | ✅ API e validação · protótipo ✅ · ⏳ arte própria e app |
-| Navegar nos feeds com filtros | Visitante, Usuário | — | `FeedController` | ⏳ |
+| Moldura do post (Background Studio, Aura Plus) | Autor, Leitor, Moderação | [RF28](rf/RF28-moldura-post.md) | `GET /api/v1/backgrounds/catalog`, `/recommendations`, `background` no post | ✅ API, validação e estúdio no app web · ⏳ arte própria e mobile |
+| Navegar nos feeds com filtros | Visitante, Usuário | [RF24](rf/RF24-visualizar-post.md), [RF25](rf/RF25-perfil-publico-autor.md) | tela web `/` (`FeedView`, `FilterBar`, `ProfilesPanel`); ⏳ `GET /api/v1/posts` e `GET /api/v1/users` com os 6 eixos | 🟡 tela web · ⏳ API (OS-26, OS-35) |
 | Publicar alerta · vaga | Fonte oficial · Instituição | — | Alert Feed | ⏳ |
 | Moderação (selo, remoção, suspensão) | Moderação | — | papel e painel de moderação | ⏳ |
 | SSO e pontos Velion | Módulos Velion | — | Keycloak (OS-13), `VelionPointsService` | ⏳ |
+
+Os casos com API ✅ também têm tela no **app web** (`frontend/apps/web`, seção "Telas no app web" de cada RF),
+exceto exportar dados; o app mobile (Expo) continua planejado (OS-39).
 
 Os diagramas de **sequência**, **estados** e **atividades** de cada caso implementado estão no documento do RF;
 os transversais em [DIAGRAMA_SEQUENCIA.md](DIAGRAMA_SEQUENCIA.md), [MAQUINA_ESTADOS.md](MAQUINA_ESTADOS.md) e

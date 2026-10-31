@@ -1,0 +1,64 @@
+{
+  "items": [
+    {
+      "purpose": "LOCATION_TRACKING",
+      "label": "Guardar minha localização",
+      "description": "Guarda a última localização do aparelho para mostrar pessoas, comunidades e eventos perto de você. Desligar apaga a localização salva.",
+      "legalBasis": "ART_7_I",
+      "sensitive": false,
+      "granted": false,
+      "updatedAt": null,
+      "lockedForMinor": false
+    },
+    {
+      "purpose": "PERSONALIZED_FEED",
+      "label": "Feed pelos meus interesses",
+      "description": "Ordena o feed pelos seus interesses, comunidades e pelo que você curtiu e salvou.",
+      "legalBasis": "ART_7_I",
+      "sensitive": false,
+      "granted": false,
+      "updatedAt": null,
+      "lockedForMinor": false
+    },
+    {
+      "purpose": "SENSITIVE_PROFILE_DATA",
+      "label": "Orientação sexual no perfil",
+      "description": "Guarda sua orientação sexual, um dado sensível, para mostrar só a quem você escolher. Desligar apaga o que estiver salvo.",
+      "legalBasis": "ART_11_I",
+      "sensitive": true,
+      "granted": false,
+      "updatedAt": null,
+      "lockedForMinor": false
+    },
+    {
+      "purpose": "FACIAL_RECOGNITION",
+      "label": "Reconhecimento facial no aparelho",
+      "description": "Sugere marcar amigos nas fotos comparando rostos só no seu aparelho: o modelo do rosto nunca vai para o Orange Social. Desligar apaga o modelo do aparelho.",
+      "legalBasis": "ART_11_I",
+      "sensitive": true,
+      "granted": false,
+      "updatedAt": null,
+      "lockedForMinor": false
+    },
+    {
+      "purpose": "MARKETING",
+      "label": "Novidades e ofertas da Velion e de marcas",
+      "description": "Envia novidades do ecossistema Velion e ofertas de marcas por e-mail e notificação.",
+      "legalBasis": "ART_7_I",
+      "sensitive": false,
+      "granted": false,
+      "updatedAt": null,
+      "lockedForMinor": false
+    },
+    {
+      "purpose": "THIRD_PARTY_SHARING",
+      "label": "Compartilhar com parceiros",
+      "description": "Compartilha nome e contato com parceiros do ecossistema Velion quando você usa um serviço deles. Dado sensível nunca é compartilhado.",
+      "legalBasis": "ART_7_I",
+      "sensitive": false,
+      "granted": false,
+      "updatedAt": null,
+      "lockedForMinor": false
+    }
+  ]
+}
