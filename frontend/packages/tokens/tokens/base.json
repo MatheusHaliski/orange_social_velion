@@ -1,0 +1,44 @@
+{
+  "$description": "Tokens que não mudam com o tema (docs/DESIGN_SYSTEM.md).",
+  "color": {
+    "qr-light": {
+      "$type": "color",
+      "$value": "#FFFFFF",
+      "$description": "Fundo do QR code do 2FA: sempre claro, nos dois temas, para o leitor do app autenticador."
+    },
+    "qr-dark": {
+      "$type": "color",
+      "$value": "#000000",
+      "$description": "Módulos do QR code (21:1 sobre o fundo dele)."
+    },
+    "scrim": {
+      "$type": "color",
+      "$value": "#000000A6",
+      "$description": "Véu atrás de um diálogo modal (65 % de preto)."
+    }
+  },
+  "font": {
+    "family": {
+      "sans": {
+        "$type": "fontFamily",
+        "$value": ["system-ui", "-apple-system", "Segoe UI", "Roboto", "Ubuntu", "Noto Sans", "sans-serif"]
+      },
+      "mono": {
+        "$type": "fontFamily",
+        "$value": ["ui-monospace", "SFMono-Regular", "Menlo", "Consolas", "monospace"]
+      }
+    }
+  },
+  "radius": {
+    "sm": { "$type": "dimension", "$value": "0.375rem" },
+    "md": { "$type": "dimension", "$value": "0.75rem" },
+    "pill": { "$type": "dimension", "$value": "999px" }
+  },
+  "size": {
+    "target-min": {
+      "$type": "dimension",
+      "$value": "24px",
+      "$description": "Alvo de toque mínimo (WCAG 2.5.8)."
+    }
+  }
+}

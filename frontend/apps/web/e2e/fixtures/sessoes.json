@@ -1,0 +1,5 @@
+[
+  { "id": "a1b2c3d4e5f6a7b8c9d0e1f2", "device": "Chrome no Linux", "channel": "WEB", "createdAt": "2026-10-25T11:00:00Z", "lastAccessAt": "2026-10-25T13:58:00Z", "current": true },
+  { "id": "0f1e2d3c4b5a69788796a5b4", "device": "Safari no iOS", "channel": "IOS", "createdAt": "2026-10-24T22:10:00Z", "lastAccessAt": "2026-10-25T12:02:00Z", "current": false },
+  { "id": "99aa88bb77cc66dd55ee44ff", "device": "Firefox no Windows", "channel": "WEB", "createdAt": "2026-10-20T09:30:00Z", "lastAccessAt": "2026-10-24T18:45:00Z", "current": false }
+]

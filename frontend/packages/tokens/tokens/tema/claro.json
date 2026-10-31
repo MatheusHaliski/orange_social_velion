@@ -1,0 +1,244 @@
+{
+  "tema": {
+    "claro": {
+      "$description": "Cores do tema claro (docs/DESIGN_SYSTEM.md §3).",
+      "color": {
+        "bg": {
+          "$type": "color",
+          "$value": "#FFFFFF",
+          "$description": "Fundo (DESIGN_SYSTEM.md §3); todas as cores de categoria foram medidas contra ele."
+        },
+        "surface": {
+          "$type": "color",
+          "$value": "#FFFFFF",
+          "$description": "Cards e campos: o mesmo fundo, separados por borda."
+        },
+        "surface-sunken": {
+          "$type": "color",
+          "$value": "#F5EEE6",
+          "$description": "Só decorativo: trilhos, fundos de aba e de miniatura."
+        },
+        "text": {
+          "$type": "color",
+          "$value": "#17120D"
+        },
+        "text-muted": {
+          "$type": "color",
+          "$value": "#5C534A",
+          "$description": "Texto secundário."
+        },
+        "border": {
+          "$type": "color",
+          "$value": "#E2DAD0",
+          "$description": "Divisor decorativo."
+        },
+        "border-strong": {
+          "$type": "color",
+          "$value": "#8A8178",
+          "$description": "Contorno de campo, botão e chip (≥ 3:1)."
+        },
+        "focus": {
+          "$type": "color",
+          "$value": "#C2410C",
+          "$description": "Anel de foco laranja (≥ 3:1 contra o fundo)."
+        },
+        "brand": {
+          "$type": "color",
+          "$value": "#C2410C",
+          "$description": "Texto e link laranja: #FF6A2B no escuro (6,51:1), #C2410C no claro (5,18:1)."
+        },
+        "primary": {
+          "$type": "color",
+          "$value": "#FF6A2B",
+          "$description": "Botão principal laranja da marca nos dois temas."
+        },
+        "on-primary": {
+          "$type": "color",
+          "$value": "#17120D",
+          "$description": "Texto do botão laranja: carvão (6,51:1); branco reprova (2,86:1)."
+        },
+        "veil": {
+          "$type": "color",
+          "$value": "#FFFFFFE0",
+          "$description": "Véu sobre o fundo do app (rede ou mosaico) para os cards continuarem legíveis (RF2)."
+        },
+        "feedback": {
+          "error": {
+            "$type": "color",
+            "$value": "#B42318",
+            "$description": "Erro de formulário: sempre com ícone e texto."
+          },
+          "success": {
+            "$type": "color",
+            "$value": "#08693A",
+            "$description": "Confirmação: sempre com ícone e texto."
+          }
+        },
+        "category": {
+          "verde": {
+            "fill": {
+              "$type": "color",
+              "$value": "#1E7A3A"
+            },
+            "ink": {
+              "$type": "color",
+              "$value": "#1E7A3A"
+            },
+            "ring": {
+              "$type": "color",
+              "$value": "#1E7A3A"
+            },
+            "glyph": {
+              "$type": "color",
+              "$value": "#FFFFFF",
+              "$description": "Glifo desenhado sobre a bolinha."
+            }
+          },
+          "amarelo": {
+            "fill": {
+              "$type": "color",
+              "$value": "#8B6B00"
+            },
+            "ink": {
+              "$type": "color",
+              "$value": "#8B6B00"
+            },
+            "ring": {
+              "$type": "color",
+              "$value": "#8B6B00"
+            },
+            "glyph": {
+              "$type": "color",
+              "$value": "#FFFFFF",
+              "$description": "Glifo desenhado sobre a bolinha."
+            }
+          },
+          "azul": {
+            "fill": {
+              "$type": "color",
+              "$value": "#1D5FCC"
+            },
+            "ink": {
+              "$type": "color",
+              "$value": "#1D5FCC"
+            },
+            "ring": {
+              "$type": "color",
+              "$value": "#1D5FCC"
+            },
+            "glyph": {
+              "$type": "color",
+              "$value": "#FFFFFF",
+              "$description": "Glifo desenhado sobre a bolinha."
+            }
+          },
+          "laranja": {
+            "fill": {
+              "$type": "color",
+              "$value": "#A85200"
+            },
+            "ink": {
+              "$type": "color",
+              "$value": "#A85200"
+            },
+            "ring": {
+              "$type": "color",
+              "$value": "#A85200"
+            },
+            "glyph": {
+              "$type": "color",
+              "$value": "#FFFFFF",
+              "$description": "Glifo desenhado sobre a bolinha."
+            }
+          },
+          "vermelho": {
+            "fill": {
+              "$type": "color",
+              "$value": "#C5221F"
+            },
+            "ink": {
+              "$type": "color",
+              "$value": "#C5221F"
+            },
+            "ring": {
+              "$type": "color",
+              "$value": "#C5221F"
+            },
+            "glyph": {
+              "$type": "color",
+              "$value": "#FFFFFF",
+              "$description": "Glifo desenhado sobre a bolinha."
+            }
+          },
+          "preto": {
+            "fill": {
+              "$type": "color",
+              "$value": "#0C0A07",
+              "$description": "PRETO: 1,06:1 sozinho no escuro, por isso o anel."
+            },
+            "ink": {
+              "$type": "color",
+              "$value": "#0C0A07",
+              "$description": "Rótulo e glifo do PRETO."
+            },
+            "ring": {
+              "$type": "color",
+              "$value": "#0C0A07",
+              "$description": "Anel obrigatório de 2 px no escuro (12,15:1)."
+            },
+            "glyph": {
+              "$type": "color",
+              "$value": "#FFFFFF"
+            }
+          }
+        },
+        "rating": {
+          "livre": {
+            "$type": "color",
+            "$value": "#1E7A3A",
+            "$description": "Classificação Livre (verde, como no ClassInd)."
+          },
+          "12": {
+            "$type": "color",
+            "$value": "#8B6B00"
+          },
+          "16": {
+            "$type": "color",
+            "$value": "#C5221F"
+          },
+          "18": {
+            "$type": "color",
+            "$value": "#0C0A07",
+            "$description": "18+: preto com contorno, texto branco."
+          },
+          "sensivel": {
+            "$type": "color",
+            "$value": "#6B3FA0"
+          },
+          "ink": {
+            "$type": "color",
+            "$value": "#FFFFFF",
+            "$description": "Texto dos chips de classificação, igual nos dois temas."
+          }
+        },
+        "alert": {
+          "border": {
+            "$type": "color",
+            "$value": "#C5221F",
+            "$description": "Borda do alerta oficial (VERMELHO · instituição verificada)."
+          },
+          "hazard": {
+            "$type": "color",
+            "$value": "#FF6A2B",
+            "$description": "Listra da faixa hazard do Alert Feed."
+          },
+          "hazard-ink": {
+            "$type": "color",
+            "$value": "#17120D",
+            "$description": "Listra escura e texto sobre a faixa."
+          }
+        }
+      }
+    }
+  }
+}

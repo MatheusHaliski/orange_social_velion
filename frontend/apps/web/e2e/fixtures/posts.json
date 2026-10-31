@@ -1,0 +1,442 @@
+[
+  {
+    "id": "0199a1b2-c3d4-7e5f-8a9b-000000000001",
+    "feed": "POST",
+    "mediaType": "VIDEO",
+    "title": "O que ninguém te conta sobre começar a programar",
+    "subtitle": "Seis meses depois da primeira linha de código, o que eu faria diferente.",
+    "body": "Comecei com um curso gratuito e muita vontade.\n\nO que mais ajudou foi ter um projeto pequeno e terminar.",
+    "mediaUrl": "/media-teste/posts/video-poster.png",
+    "durationSeconds": 768,
+    "ageRating": "LIVRE",
+    "ageRatingLabel": "Livre",
+    "status": "PUBLISHED",
+    "country": "BR",
+    "city": "Curitiba",
+    "publishedAt": "MINUTES:3",
+    "author": {
+      "id": 101,
+      "name": "techblog.br",
+      "category": {
+        "code": "AMARELO",
+        "label": "Networking",
+        "color": "#F7C948"
+      },
+      "avatarUrl": null,
+      "profilePath": "/api/v1/users/101/profile",
+      "available": true
+    },
+    "counts": {
+      "likes": 2100,
+      "comments": 184,
+      "shares": 57,
+      "views": 9800
+    },
+    "viewer": {
+      "liked": false,
+      "saved": false,
+      "isAuthor": false
+    },
+    "interactionsOpen": true,
+    "shareUrl": "http://localhost:3000/p/0199a1b2-c3d4-7e5f-8a9b-000000000001",
+    "background": {
+      "v": 1,
+      "gradientId": "por-do-sol",
+      "auraHypeStyle": "SCANNER"
+    },
+    "alert": null,
+    "trending": "HOT"
+  },
+  {
+    "id": "0199a1b2-c3d4-7e5f-8a9b-000000000002",
+    "feed": "POST",
+    "mediaType": "TEXT",
+    "title": "Troquei o carro pela bike por 30 dias. O resultado me surpreendeu",
+    "subtitle": "Não foi o tempo de deslocamento que mudou — foi como eu passei a enxergar o bairro.",
+    "body": "No primeiro dia eu quase desisti na subida da Mateus Leme.\n\nNa segunda semana, já sabia o nome do dono da banca da esquina.",
+    "mediaUrl": null,
+    "durationSeconds": null,
+    "ageRating": "LIVRE",
+    "ageRatingLabel": "Livre",
+    "status": "PUBLISHED",
+    "country": "BR",
+    "city": "Curitiba",
+    "publishedAt": "MINUTES:12",
+    "author": {
+      "id": 42,
+      "name": "Ana Ribeiro",
+      "category": {
+        "code": "VERDE",
+        "label": "Pessoa Física",
+        "color": "#3DDC6B"
+      },
+      "avatarUrl": "/media-teste/avatars/ana.png",
+      "profilePath": "/api/v1/users/42/profile",
+      "available": true
+    },
+    "counts": {
+      "likes": 312,
+      "comments": 41,
+      "shares": 9,
+      "views": 2300
+    },
+    "viewer": {
+      "liked": false,
+      "saved": false,
+      "isAuthor": false
+    },
+    "interactionsOpen": true,
+    "shareUrl": "http://localhost:3000/p/0199a1b2-c3d4-7e5f-8a9b-000000000002",
+    "background": null,
+    "alert": null,
+    "trending": "STABLE"
+  },
+  {
+    "id": "0199a1b2-c3d4-7e5f-8a9b-000000000003",
+    "feed": "POST",
+    "mediaType": "IMAGE",
+    "title": "Nova coleção de outono chega às lojas na sexta",
+    "subtitle": "Peças feitas com algodão reciclado, em parceria com cooperativas do Paraná.",
+    "body": null,
+    "mediaUrl": "/media-teste/posts/foto.png",
+    "durationSeconds": null,
+    "ageRating": "AGE_12",
+    "ageRatingLabel": "12+",
+    "status": "PUBLISHED",
+    "country": "BR",
+    "city": "Curitiba",
+    "publishedAt": "MINUTES:55",
+    "author": {
+      "id": 310,
+      "name": "Agência Faísca",
+      "category": {
+        "code": "AZUL",
+        "label": "Marketing",
+        "color": "#4A93FF"
+      },
+      "avatarUrl": null,
+      "profilePath": "/api/v1/users/310/profile",
+      "available": true
+    },
+    "counts": {
+      "likes": 87,
+      "comments": 6,
+      "shares": 14,
+      "views": 1200
+    },
+    "viewer": {
+      "liked": false,
+      "saved": false,
+      "isAuthor": false
+    },
+    "interactionsOpen": true,
+    "shareUrl": "http://localhost:3000/p/0199a1b2-c3d4-7e5f-8a9b-000000000003",
+    "background": {
+      "v": 1,
+      "aura": {
+        "presetId": "asfalto",
+        "variantId": "ORIGINAL",
+        "format": "IMAGEM_UNICA"
+      },
+      "materialId": "vidro"
+    },
+    "alert": null,
+    "trending": "RISING"
+  },
+  {
+    "id": "0199a1b2-c3d4-7e5f-8a9b-000000000004",
+    "feed": "POST",
+    "mediaType": "TEXT",
+    "title": "Mutirão de limpeza do Parque Barigui no sábado",
+    "subtitle": "Encontro às 8h no portão principal. Luvas e sacos por nossa conta.",
+    "body": "Traga água e protetor solar.",
+    "mediaUrl": null,
+    "durationSeconds": null,
+    "ageRating": "LIVRE",
+    "ageRatingLabel": "Livre",
+    "status": "PUBLISHED",
+    "country": "BR",
+    "city": "Curitiba",
+    "publishedAt": "MINUTES:180",
+    "author": {
+      "id": 412,
+      "name": "Clube Atlético Barigui",
+      "category": {
+        "code": "LARANJA",
+        "label": "Comunidade",
+        "color": "#FF9F1C"
+      },
+      "avatarUrl": null,
+      "profilePath": "/api/v1/users/412/profile",
+      "available": true
+    },
+    "counts": {
+      "likes": 540,
+      "comments": 73,
+      "shares": 120,
+      "views": 4100
+    },
+    "viewer": {
+      "liked": false,
+      "saved": false,
+      "isAuthor": false
+    },
+    "interactionsOpen": true,
+    "shareUrl": "http://localhost:3000/p/0199a1b2-c3d4-7e5f-8a9b-000000000004",
+    "background": {
+      "v": 1,
+      "auraPlusId": "brasa",
+      "auraHypeStyle": "BRILHO"
+    },
+    "alert": null,
+    "trending": "HOT"
+  },
+  {
+    "id": "0199a1b2-c3d4-7e5f-8a9b-000000000005",
+    "feed": "POST",
+    "mediaType": "TEXT",
+    "title": "Line-up completo do Festival Primavera",
+    "subtitle": "Três palcos, vinte atrações e entrada solidária com 1 kg de alimento.",
+    "body": null,
+    "mediaUrl": null,
+    "durationSeconds": null,
+    "ageRating": "AGE_16",
+    "ageRatingLabel": "16+",
+    "status": "PUBLISHED",
+    "country": "BR",
+    "city": "Curitiba",
+    "publishedAt": "MINUTES:1560",
+    "author": {
+      "id": 640,
+      "name": "Festival Primavera",
+      "category": {
+        "code": "PRETO",
+        "label": "Especial",
+        "color": "#0C0A07"
+      },
+      "avatarUrl": null,
+      "profilePath": "/api/v1/users/640/profile",
+      "available": true
+    },
+    "counts": {
+      "likes": 1300,
+      "comments": 220,
+      "shares": 410,
+      "views": 15000
+    },
+    "viewer": {
+      "liked": false,
+      "saved": false,
+      "isAuthor": false
+    },
+    "interactionsOpen": true,
+    "shareUrl": "http://localhost:3000/p/0199a1b2-c3d4-7e5f-8a9b-000000000005",
+    "background": {
+      "v": 1,
+      "seasonal": {
+        "auto": true
+      },
+      "layoutId": "POLAROID"
+    },
+    "alert": null,
+    "trending": "FALLING"
+  },
+  {
+    "id": "0199a1b2-c3d4-7e5f-8a9b-000000000006",
+    "feed": "POST",
+    "mediaType": "TEXT",
+    "title": "Fotos antigas do centro de Curitiba",
+    "subtitle": "Post arquivado: fica só no perfil, para leitura.",
+    "body": null,
+    "mediaUrl": null,
+    "durationSeconds": null,
+    "ageRating": "LIVRE",
+    "ageRatingLabel": "Livre",
+    "status": "ARCHIVED",
+    "country": "BR",
+    "city": "Curitiba",
+    "publishedAt": "MINUTES:12960",
+    "author": {
+      "id": 205,
+      "name": "Bruno Costa",
+      "category": {
+        "code": "VERDE",
+        "label": "Pessoa Física",
+        "color": "#3DDC6B"
+      },
+      "avatarUrl": null,
+      "profilePath": "/api/v1/users/205/profile",
+      "available": true
+    },
+    "counts": {
+      "likes": 12,
+      "comments": 2,
+      "shares": 0,
+      "views": 300
+    },
+    "viewer": {
+      "liked": false,
+      "saved": false,
+      "isAuthor": false
+    },
+    "interactionsOpen": false,
+    "shareUrl": "http://localhost:3000/p/0199a1b2-c3d4-7e5f-8a9b-000000000006",
+    "background": null,
+    "alert": null,
+    "trending": null
+  },
+  {
+    "id": "0199a1b2-c3d4-7e5f-8a9b-000000000007",
+    "feed": "ALERT",
+    "mediaType": "TEXT",
+    "title": "Chuva forte com risco de alagamento na região metropolitana",
+    "subtitle": null,
+    "body": null,
+    "mediaUrl": null,
+    "durationSeconds": null,
+    "ageRating": "LIVRE",
+    "ageRatingLabel": "Livre",
+    "status": "PUBLISHED",
+    "country": "BR",
+    "city": "Curitiba",
+    "publishedAt": "MINUTES:2",
+    "author": {
+      "id": 520,
+      "name": "Defesa Civil (exemplo)",
+      "category": {
+        "code": "VERMELHO",
+        "label": "Instituição",
+        "color": "#FF4D4D"
+      },
+      "avatarUrl": null,
+      "profilePath": "/api/v1/users/520/profile",
+      "available": true
+    },
+    "counts": {
+      "likes": 0,
+      "comments": 0,
+      "shares": 1200,
+      "views": 30000
+    },
+    "viewer": {
+      "liked": false,
+      "saved": false,
+      "isAuthor": false
+    },
+    "interactionsOpen": true,
+    "shareUrl": "http://localhost:3000/p/0199a1b2-c3d4-7e5f-8a9b-000000000007",
+    "background": null,
+    "alert": {
+      "category": "NATURAL_DISASTER",
+      "severity": "SEVERE",
+      "event": "Chuva forte",
+      "areaDesc": "Curitiba, Colombo, Pinhais",
+      "radiusKm": 25,
+      "expiresAt": "TODAY:23",
+      "instruction": "Evite áreas próximas a rios e passagens subterrâneas.",
+      "verifiedSource": true
+    },
+    "trending": null
+  },
+  {
+    "id": "0199a1b2-c3d4-7e5f-8a9b-000000000008",
+    "feed": "ALERT",
+    "mediaType": "TEXT",
+    "title": "Pessoa desenvolvedora back-end Java · híbrido em Curitiba",
+    "subtitle": "Spring Boot, PostgreSQL e mensageria. Candidaturas abertas até 30/11.",
+    "body": null,
+    "mediaUrl": null,
+    "durationSeconds": null,
+    "ageRating": "LIVRE",
+    "ageRatingLabel": "Livre",
+    "status": "PUBLISHED",
+    "country": "BR",
+    "city": "Curitiba",
+    "publishedAt": "MINUTES:60",
+    "author": {
+      "id": 530,
+      "name": "Nimbus Tecnologia",
+      "category": {
+        "code": "VERMELHO",
+        "label": "Instituição",
+        "color": "#FF4D4D"
+      },
+      "avatarUrl": null,
+      "profilePath": "/api/v1/users/530/profile",
+      "available": true
+    },
+    "counts": {
+      "likes": 57,
+      "comments": 12,
+      "shares": 33,
+      "views": 900
+    },
+    "viewer": {
+      "liked": false,
+      "saved": false,
+      "isAuthor": false
+    },
+    "interactionsOpen": true,
+    "shareUrl": "http://localhost:3000/p/0199a1b2-c3d4-7e5f-8a9b-000000000008",
+    "background": null,
+    "alert": {
+      "category": "JOB_OPENING",
+      "severity": null,
+      "event": null,
+      "areaDesc": null,
+      "radiusKm": null,
+      "expiresAt": null,
+      "instruction": null,
+      "verifiedSource": false
+    },
+    "trending": "STABLE"
+  },
+  {
+    "id": "0199a1b2-c3d4-7e5f-8a9b-000000000009",
+    "feed": "POST",
+    "mediaType": "IMAGE",
+    "title": "Fim de tarde no Parque Barigui",
+    "subtitle": "Levei a câmera nova e o pôr do sol colaborou.",
+    "body": "Tinha capivara, tinha gente correndo e tinha aquele céu laranja que só o outono de Curitiba entrega.",
+    "mediaUrl": "/media-teste/posts/foto.png",
+    "durationSeconds": null,
+    "ageRating": "LIVRE",
+    "ageRatingLabel": "Livre",
+    "status": "PUBLISHED",
+    "country": "BR",
+    "city": "Curitiba",
+    "publishedAt": "MINUTES:300",
+    "author": {
+      "id": 42,
+      "name": "Ana Ribeiro",
+      "category": {
+        "code": "VERDE",
+        "label": "Pessoa Física",
+        "color": "#3DDC6B"
+      },
+      "avatarUrl": "/media-teste/avatars/ana.png",
+      "profilePath": "/api/v1/users/42/profile",
+      "available": true
+    },
+    "counts": {
+      "likes": 64,
+      "comments": 2,
+      "shares": 3,
+      "views": 700
+    },
+    "viewer": {
+      "liked": false,
+      "saved": false,
+      "isAuthor": false
+    },
+    "interactionsOpen": true,
+    "shareUrl": "http://localhost:3000/p/0199a1b2-c3d4-7e5f-8a9b-000000000009",
+    "background": {
+      "v": 1,
+      "color": "#3B1F33",
+      "materialId": "papel"
+    },
+    "alert": null,
+    "trending": null
+  }
+]

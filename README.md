@@ -23,6 +23,7 @@ LGPD por construção.
 
 ```
 design/brand/              logo principal (SVG) e mark
+frontend/                  app web (Next.js): apps/web, packages/tokens, packages/api
 docs/                      diagramas Mermaid, pesquisa de tecnologias, design system, backlog Trello
 scripts/wcag_contrast.py   verificação de contraste da paleta
 src/main/resources/
@@ -91,6 +92,19 @@ Fora do `dev`, o S3 usa `S3_ACCESS_KEY`/`S3_SECRET_KEY` ou, vazias, a cadeia pad
 mvn test                        # unitários (sem Docker)
 mvn verify                      # + testes de integração *IT com Testcontainers (PostGIS, Valkey, Cassandra 5, Garage)
 python3 scripts/wcag_contrast.py
+```
+
+### App web (`frontend/`)
+
+Next.js 16 + React 19 + Tailwind 4 num workspace npm (`apps/web`, `packages/tokens`, `packages/api`); detalhes em
+[`frontend/README.md`](frontend/README.md).
+
+```bash
+cd frontend
+npm install
+npm run dev                     # http://localhost:3000, repassa /api para http://localhost:8080 (API_ORIGIN muda)
+npm run lint && npm run typecheck && npm test && npm run build
+npm run e2e                     # Playwright + axe com a API simulada (sem backend nem Docker)
 ```
 
 `mvn package` também gera o SBOM CycloneDX em `target/classes/META-INF/sbom/application.cdx.json` (exposto em `/actuator/sbom` quando o Actuator estiver habilitado); `mvn package jib:dockerBuild` constrói a imagem
