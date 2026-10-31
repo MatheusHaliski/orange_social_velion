@@ -7,7 +7,7 @@ componente está no [diagrama de casos de uso](DIAGRAMA_CASOS_DE_USO.md).
 ```mermaid
 flowchart TB
     subgraph Clients["Clientes"]
-        WEB["Web App<br/>(TopBar · Segmented Switcher)"]:::planned
+        WEB["App web · Next.js 16<br/>frontend/apps/web<br/>(TopBar · Segmented Switcher · Configurações)"]
         MOBILE["Mobile App"]:::planned
         VELION["Módulos Velion<br/>FriendlyEats · Sports · Points · Trophies · Post"]:::planned
     end
@@ -117,10 +117,15 @@ flowchart TB
     TIMER --> CASS
     S3A --> S3
 
-    WEB -.->|upload direto<br/>via URL pré-assinada| S3
+    WEB -.->|PUT direto no bucket privado de uploads<br/>via URL pré-assinada| S3
 
     classDef planned stroke-dasharray:6 4
 ```
+
+O app web fala só com a própria origem: o Next repassa `/api/*` ao Spring (`next.config.ts`), então o cookie de
+sessão e o `XSRF-TOKEN` ficam na mesma origem; o cliente `frontend/packages/api` busca o CSRF antes da primeira
+escrita ([RF27](rf/RF27-autenticacao-sessao.md)). A única chamada a outra origem é o `PUT` da foto no bucket privado
+`orange-social-uploads`, sem cookie. O Mobile App (Expo) continua planejado (OS-39).
 
 ## Responsabilidades por camada
 

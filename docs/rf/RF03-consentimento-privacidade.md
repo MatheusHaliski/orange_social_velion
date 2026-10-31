@@ -13,6 +13,11 @@ paths:
   - src/main/resources/schema.sql
   - src/main/resources/db/migration/**
   - design/prototype/index.html
+  # app web (frontend/): telas, componentes e testes deste RF
+  - frontend/apps/web/app/configuracoes/privacidade/page.tsx
+  - frontend/apps/web/components/settings/PrivacySection.tsx
+  - frontend/apps/web/components/settings/ConsentSwitch.*
+  - frontend/apps/web/e2e/fixtures/consentimentos.json
 ---
 
 # RF3 · Gerenciar consentimentos e privacidade
@@ -162,6 +167,26 @@ sequenceDiagram
     R->>DB: COMMIT
 ```
 
+## Telas no app web
+
+Configurações → Privacidade (`/configuracoes/privacidade`): "Quem vê e comenta" grava em `user_preference`
+([RF2](RF02-editar-perfil.md)) e "Usos opcionais dos seus dados" lista as 6 finalidades **na ordem da API**, com o
+rótulo e a descrição que vêm do `ConsentPurpose`. A base legal chega como código (`ART_7_I`, `ART_11_I`) e a tela
+escreve "LGPD Art. 7º, I (consentimento)" ou "LGPD Art. 11, I (consentimento específico)"; finalidade sensível leva o
+selo "Dado sensível". Com `lockedForMinor` a chave fica desabilitada com o motivo ("a partir dos 16" ou, nas
+sensíveis, "a partir dos 18"). Revogar relê o perfil, porque o servidor apaga o dado na mesma transação.
+
+```mermaid
+flowchart LR
+    T([Titular]) --> PRIV["Rota /configuracoes/privacidade<br/>PrivacySection"]
+    PRIV -->|PATCH /api/v1/me/preferences| ME[MeController]
+    PRIV -->|GET /api/v1/me/consents| API[ConsentController]
+    PRIV --> SW["ConsentSwitch por finalidade<br/>rótulo, descrição e base legal"]
+    SW -->|PUT /api/v1/me/consents/purpose| API
+    SW -.lockedForMinor.-> LOCK["Chave desabilitada<br/>a partir dos 16 ou dos 18"]
+    API -.revogou.-> PERF["Relê o perfil<br/>dado apagado na hora"]
+```
+
 ## Rastreabilidade
 
 | Camada | Artefato | Situação |
@@ -179,3 +204,4 @@ sequenceDiagram
 | Consumidores | GPS (OS-16), feed personalizado, marketing e parceiros conferem `ConsentService.granted` quando existirem | ⏳ OS-16 |
 | Reconsentimento | nova `privacy-version` pede reconfirmação das finalidades ligadas | ⏳ |
 | Tela | Protótipo: [Configurações → Privacidade](../../design/prototype/screens/05-config-lgpd.png) | ✅ protótipo |
+| Telas (app web) | `/configuracoes/privacidade` (`PrivacySection`, `ConsentSwitch` com `legalBasisText`); `e2e/configuracoes.spec.ts` (as 6 finalidades na ordem da API, desligadas, ligar e desligar com o mesmo toque, menor com chaves travadas por 16 e 18 anos, fixture conferida contra o `ConsentView` e os códigos de base legal) e `ConsentSwitch.test.tsx` | ✅ web (OS-48 parcial) · ⏳ mobile (OS-39) |

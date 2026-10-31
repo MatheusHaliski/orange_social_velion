@@ -2,7 +2,7 @@
 rf: RF1
 titulo: Cadastro de usuário (VSusercontrolist) com tipo de usuário e aceite dos Termos de Uso
 status: parcial
-cards: [OS-10, OS-11, OS-12, OS-17, OS-49, OS-60]
+cards: [OS-10, OS-11, OS-12, OS-17, OS-37, OS-3A, OS-49, OS-60]
 paths:
   - src/main/java/com/orangesocial/domain/model/UserControlList.java
   - src/main/java/com/orangesocial/domain/model/UserCategoryEnum.java
@@ -24,6 +24,21 @@ paths:
   - src/main/resources/db/migration/V1__baseline.sql
   - src/main/resources/db/migration/V3__auth_terms_mfa_deletion.sql
   - design/prototype/index.html
+  # app web (frontend/): telas, componentes e testes deste RF
+  - frontend/apps/web/app/cadastro/page.tsx
+  - frontend/apps/web/app/confirmar-email/page.tsx
+  - frontend/apps/web/app/termos/page.tsx
+  - frontend/apps/web/components/auth/RegisterView.tsx
+  - frontend/apps/web/components/auth/VerifyEmailView.tsx
+  - frontend/apps/web/components/auth/AuthBackdrop.tsx
+  - frontend/apps/web/components/CategoryBadge.*
+  - frontend/apps/web/lib/categories.ts
+  - frontend/apps/web/lib/register-fields.*
+  - frontend/apps/web/lib/field-errors.*
+  - frontend/apps/web/lib/uf.ts
+  - frontend/apps/web/lib/markdown.*
+  - frontend/apps/web/e2e/cadastro.spec.ts
+  - frontend/apps/web/e2e/fixtures/termos.json
 ---
 
 # RF1 · Cadastro de usuário
@@ -183,6 +198,26 @@ erDiagram
 Fluxo de atividades geral do cadastro: [`DIAGRAMA_ATIVIDADES.md`](../DIAGRAMA_ATIVIDADES.md) · estados da conta:
 [`MAQUINA_ESTADOS.md`](../MAQUINA_ESTADOS.md) · login e sessão: [RF27](RF27-autenticacao-sessao.md).
 
+## Telas no app web
+
+`frontend/apps/web` (Next.js 16): o cadastro fica sobre o mosaico da marca (`AuthBackdrop`); o tipo de usuário é
+escolhido entre as 6 categorias com cor, glifo VSL e rótulo (`CategoryBadge`, a cor nunca é o único sinal). Os
+campos do tipo e da idade seguem as mesmas regras do `UserTypeDetailsValidator` e do `AgePolicy`
+(`lib/register-fields.ts`); o `422` com `errors[]` e o `409` de e-mail ou `@usuário` em uso marcam o campo certo
+(`lib/field-errors.ts`). `/termos` é gerada no build a partir de `docs/legal/TERMOS_DE_USO.md` (`lib/markdown.tsx`).
+
+```mermaid
+flowchart LR
+    V([Visitante]) --> CAD["Rota /cadastro<br/>RegisterView sobre o mosaico"]
+    CAD --> TIPO["CategoryBadge<br/>6 tipos com cor, glifo e rótulo"]
+    CAD --> CAMPOS["register-fields e uf<br/>campos por tipo e por idade"]
+    CAD -.lê os Termos.-> TERMOS["Rota /termos<br/>TERMOS_DE_USO.md no build"]
+    CAD -->|POST /api/v1/auth/register| AUTH[AuthController]
+    AUTH -->|422 ou 409| ERR["field-errors<br/>erro no campo e no resumo"]
+    AUTH -->|201 com sessão| CONF["Rota /confirmar-email<br/>VerifyEmailView"]
+    CONF -->|POST /api/v1/me/verify-email e resend| ME[MeController]
+```
+
 ## Rastreabilidade
 
 | Camada | Artefato | Situação |
@@ -196,4 +231,4 @@ Fluxo de atividades geral do cadastro: [`DIAGRAMA_ATIVIDADES.md`](../DIAGRAMA_AT
 | Termos | [`docs/legal/TERMOS_DE_USO.md`](../legal/TERMOS_DE_USO.md) — preencher os `{{…}}` e passar por revisão jurídica | 🟡 |
 | Pendências | e-mail transacional real (OS-12); eliminar cadastro não confirmado em 7 dias; vínculo do responsável (OS-49); consulta automática de CNPJ | ⏳ |
 | Tela | Protótipo sobre o mosaico laranja com o logo oficial: [14-cadastro](../../design/prototype/screens/14-cadastro.png) (dados + escolha do tipo, cor + glifo + rótulo) e [15-cadastro-termos](../../design/prototype/screens/15-cadastro-termos.png) (campos do tipo + caixa dos Termos **desmarcada**; "Criar conta" só habilita depois do aceite) | ✅ protótipo |
-| App | telas em Next.js/Expo | ⏳ OS-39 |
+| Telas (app web) | `/cadastro` (`RegisterView`, `AuthBackdrop`, `CategoryBadge`, `lib/register-fields.ts`, `lib/uf.ts`, `lib/field-errors.ts`), `/confirmar-email` (`VerifyEmailView`), `/termos` (`lib/markdown.tsx`); `e2e/cadastro.spec.ts` (7 testes: 6 categorias com glifo, Termos desmarcados com a versão da API, campos da Instituição e do Especial, 422 e 409 por campo, idade 13+/16/18, axe nos dois temas) e testes unitários de `register-fields`, `field-errors`, `markdown` e `CategoryBadge` | ✅ web · ⏳ mobile (Expo, OS-39) |

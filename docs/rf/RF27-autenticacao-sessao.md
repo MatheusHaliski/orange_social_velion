@@ -3,7 +3,7 @@ rf: RF27
 titulo: Login, controle de sessão, controle de acesso e verificação em duas etapas (2FA)
 status: parcial
 numeracao_provisoria: true
-cards: [OS-13, OS-47, OS-61, OS-62]
+cards: [OS-13, OS-39, OS-47, OS-61, OS-62]
 paths:
   - src/main/java/com/orangesocial/security/**
   - src/main/java/com/orangesocial/application/account/AuthService.java
@@ -23,6 +23,32 @@ paths:
   - src/main/java/com/orangesocial/api/ApiExceptionHandler.java
   - src/main/resources/db/migration/V3__auth_terms_mfa_deletion.sql
   - design/prototype/index.html
+  # app web (frontend/): telas, componentes e testes deste RF
+  - frontend/packages/api/**
+  - frontend/apps/web/app/layout.tsx
+  - frontend/apps/web/app/entrar/page.tsx
+  - frontend/apps/web/app/configuracoes/seguranca/page.tsx
+  - frontend/apps/web/components/SiteHeader.tsx
+  - frontend/apps/web/components/Providers.tsx
+  - frontend/apps/web/components/auth/LoginView.tsx
+  - frontend/apps/web/components/settings/SecuritySection.tsx
+  - frontend/apps/web/components/settings/MfaPanel.tsx
+  - frontend/apps/web/components/settings/QrCode.*
+  - frontend/apps/web/components/settings/RecoveryCodes.*
+  - frontend/apps/web/components/settings/SudoFields.tsx
+  - frontend/apps/web/lib/api.ts
+  - frontend/apps/web/lib/queries.ts
+  - frontend/apps/web/lib/safe-redirect.*
+  - frontend/apps/web/lib/use-leave.ts
+  - frontend/apps/web/lib/use-countdown.ts
+  - frontend/apps/web/next.config.ts
+  - frontend/apps/web/playwright.config.ts
+  - frontend/apps/web/e2e/casca.spec.ts
+  - frontend/apps/web/e2e/entrar.spec.ts
+  - frontend/apps/web/e2e/support/*
+  - frontend/apps/web/e2e/fixtures/sessao-usuario.json
+  - frontend/apps/web/e2e/fixtures/sessoes.json
+  - frontend/apps/web/e2e/fixtures/2fa-configuracao.json
 ---
 
 # RF27 · Login, sessão, controle de acesso e 2FA
@@ -173,6 +199,7 @@ sequenceDiagram
     M->>DB: INSERT user_mfa … ON CONFLICT (user_id) DO NOTHING (segredo AES-256-GCM)
     alt 2FA já ligado por outra sessão
         M-->>APP: 409 "O 2FA já está ativo"
+        APP-->>U: volta ao início sem o QR velho · relê o status · foco no resumo do erro
     end
     M->>DB: 10 user_recovery_code (Argon2id)
     API-->>APP: 10 códigos xxxxx-xxxxx (mostrados uma vez)
@@ -192,6 +219,37 @@ sequenceDiagram
 | `PUT`/`DELETE /api/v1/me/photo` (foto de perfil, com a chave do envio) | 401 | ✅ (o `PUT` dá 422: sem conta ativa não há envio) | ✅ |
 | `PUT` na URL pré-assinada (direto no bucket, fora da API) | 403 do bucket | 403 do bucket | ✅ com a assinatura recebida: até 15 min, mesmo tipo e tamanho |
 
+## Telas no app web
+
+**Casca.** O navegador fala só com a origem do Next, que repassa `/api/*` ao Spring (`next.config.ts`): o cookie de
+sessão e o `XSRF-TOKEN` ficam na mesma origem. O cliente (`frontend/packages/api`) usa
+`credentials: 'same-origin'`, busca `GET /api/v1/auth/csrf` antes da primeira escrita, manda `X-XSRF-TOKEN` em toda
+escrita (e tenta de novo uma vez com o token novo) e transforma o Problem Details em `ApiError` (`detail`,
+`errors[]`, `Retry-After`). Nada de token ou dado da conta no `localStorage`. Os cabeçalhos de segurança do Next
+(`nosniff`, `Referrer-Policy: no-referrer`, `frame-ancestors 'none'`, `Permissions-Policy`) valem em toda rota.
+O `voltar` do login só aceita caminho interno (`lib/safe-redirect.ts`).
+
+**Telas.** `/entrar` cobre `AUTHENTICATED`, `MFA_REQUIRED` (código de 6 dígitos ou de recuperação),
+`REACTIVATION_AVAILABLE` ([RF23](RF23-direitos-titular-lgpd.md)) e o `429` com contagem regressiva pelo
+`Retry-After` (`lib/use-countdown.ts`). Configurações → Senha e segurança: trocar a senha, sessões por aparelho
+("Sair" em cada uma, "Sair de todos os outros") e o 2FA em passos (senha → QR code e chave agrupada → código →
+10 códigos de recuperação para copiar ou baixar, "Concluir" só depois de "Guardei"). O `409` da configuração
+concorrente volta ao início.
+
+```mermaid
+flowchart LR
+    U([Usuário]) --> ENT["Rota /entrar<br/>LoginView"]
+    ENT -->|GET csrf e POST login| AUTH[AuthController]
+    AUTH -->|MFA_REQUIRED| COD["Código do app<br/>ou de recuperação"]
+    AUTH -->|REACTIVATION_AVAILABLE| REAT["Reativar ou manter<br/>a exclusão · RF23"]
+    AUTH -->|429 com Retry-After| ESP["use-countdown<br/>libera no fim da espera"]
+    U --> SEG["Rota /configuracoes/seguranca<br/>SecuritySection e MfaPanel"]
+    SEG -->|password, sessions, mfa| ME[MeController]
+    ME -.409 no confirm.-> VOLTA["Volta ao início<br/>sem o QR velho"]
+    CASCA["Casca: layout, SiteHeader, Providers<br/>packages/api com CSRF e mesma origem"] --> AUTH
+    CASCA --> ME
+```
+
 ## Rastreabilidade
 
 | Camada | Artefato | Situação |
@@ -203,5 +261,7 @@ sequenceDiagram
 | Persistência | `user_mfa`, `user_recovery_code` (V3); sessões no Valkey `orange:session` | ✅ |
 | API | `/api/v1/auth/{csrf,session,register,login,login/2fa,reactivate,logout}`; `/api/v1/me/{password,sessions,mfa,…}` | ✅ |
 | Testes | `TotpTest` (vetores da RFC 6238, cifra, timeout absoluto); `AuthApiIT` (aba anônima, cookie, CSRF, limite, logout entre abas, 2FA com anti-replay e códigos de recuperação, sessões; `secondFactorIsSingleUseUnderConcurrencyAndSetupNeverOverwritesAnActiveFactor`: 8 logins simultâneos com o mesmo código TOTP e de recuperação entram só uma vez, e duas configurações concorrentes dão 409 na segunda) | ✅ |
+| Casca do app web | `frontend/packages/api` (cliente com sessão e CSRF, tipos a partir dos records Java, `client.test.ts`), `app/layout.tsx` (pt-BR, "pular para o conteúdo"), `SiteHeader` (mark oficial, sair avisando as outras abas), `Providers`, `lib/api.ts`, `lib/queries.ts` (sessão; sem sessão → `/entrar?voltar=`), `lib/use-leave.ts`, `lib/safe-redirect.ts`, `next.config.ts` (repasse `/api` e cabeçalhos de segurança, sem `connect-src`: o `PUT` da foto vai direto ao bucket de outra origem); `e2e/casca.spec.ts` e a API simulada `e2e/support/*` (sessão, CSRF, Problem Details, bucket com CORS e assinatura) | ✅ web (OS-39 parcial: só `apps/web`) |
+| Telas (app web) | `/entrar` (`LoginView`, `lib/use-countdown.ts`), `/configuracoes/seguranca` (`SecuritySection`, `MfaPanel`, `QrCode`, `RecoveryCodes`, `SudoFields`); `e2e/entrar.spec.ts` (11 testes: CSRF antes da primeira escrita, senha errada, 2FA, reativar ou manter, 429, `voltar` externo ignorado, sair entre abas, axe) e `e2e/configuracoes.spec.ts` (2FA de ponta a ponta, `409` com outra sessão, novos códigos, trocar senha e encerrar sessões) | ✅ web · ⏳ mobile (OS-39) |
 | Pendências | passkeys/WebAuthn; "lembrar este navegador por 30 dias"; e-mail transacional (OS-12); CAPTCHA após 20 falhas/24 h; SSO Velion via Keycloak (OS-13) | ⏳ OS-61, OS-62 |
 | Tela | Protótipo: [13-login](../../design/prototype/screens/13-login.png) sobre o mosaico com o logo oficial, [16-login-2fa](../../design/prototype/screens/16-login-2fa.png), [17-seguranca](../../design/prototype/screens/17-seguranca.png) (2FA ativada, sessões por aparelho, "Sair" em cada uma, "Sair de todos os outros", "Sair desta conta" avisando as outras abas via `BroadcastChannel`) | ✅ protótipo |

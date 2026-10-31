@@ -3,7 +3,7 @@ rf: RF25
 titulo: Perfil público do autor com o feed dele (toque na foto ou no nome)
 status: parcial
 numeracao_provisoria: true
-cards: [OS-57]
+cards: [OS-57, OS-35]
 paths:
   - src/main/java/com/orangesocial/api/UserProfileController.java
   - src/main/java/com/orangesocial/application/post/PostQueryService.java
@@ -12,6 +12,12 @@ paths:
   - src/main/java/com/orangesocial/infrastructure/persistence/postgres/PostRepository.java
   - src/main/resources/db/migration/V2__posts_interactions.sql
   - design/prototype/index.html
+  # app web (frontend/): telas, componentes e testes deste RF
+  - frontend/apps/web/app/?feeds?/u/?id?/page.tsx
+  - frontend/apps/web/components/profile/ProfileView.tsx
+  - frontend/apps/web/components/feed/ProfilesPanel.tsx
+  - frontend/apps/web/e2e/perfil.spec.ts
+  - frontend/apps/web/e2e/fixtures/perfis.json
 ---
 
 # RF25 · Perfil público do autor com o feed dele
@@ -101,6 +107,26 @@ flowchart TD
     H -- não --> J[devolve todos + nextCursor = null]
 ```
 
+## Telas no app web
+
+`/u/[id]` (dentro do grupo dos feeds, então o modal do post também abre por cima do perfil): cabeçalho mínimo
+(nome, categoria com glifo, foto ou iniciais, "membro desde", número de posts), o botão "Copiar link do perfil"
+com o `shareUrl` e o feed do autor por cursor. Conta suspensa ou eliminada dá 404 com a mensagem de perfil
+indisponível. A aba **Perfis** da home (Profile Feed) já tem a tela (`ProfilesPanel`), mas espera
+`GET /api/v1/users`.
+
+```mermaid
+flowchart LR
+    U([Visitante ou usuário]) --> NOME["Nome ou foto do autor<br/>card, modal ou comentário"]
+    NOME --> PERF["Rota /u/id<br/>ProfileView"]
+    PERF -->|GET /api/v1/users/id/profile| API[UserProfileController]
+    PERF -->|GET /api/v1/users/id/posts por cursor| API
+    PERF --> LINK["Copiar link do perfil<br/>shareUrl em /u/id"]
+    U --> ABA["Aba Perfis da home<br/>ProfilesPanel"]
+    ABA -.⏳ GET /api/v1/users com filtros.-> FALTA["Profile Feed<br/>aguarda a API"]:::planned
+    classDef planned stroke-dasharray:5 4
+```
+
 ## Rastreabilidade
 
 | Camada | Artefato | Situação |
@@ -109,7 +135,8 @@ flowchart TD
 | Aplicação / API | `PostQueryService.getProfile` / `authorFeed`, `AuthorDirectory`, `GET /api/v1/users/{id}/profile`, `GET /api/v1/users/{id}/posts`; `PublicLinks.profileShareUrl` → `shareUrl` `/u/{id}` | ✅ |
 | Testes | `PostApiIT.profileShowsOnlyPublicDataAndFeedPagesByCursor` (inclui `shareUrl` = `http://localhost:3000/u/{id}`), `FeedCursorTest` | ✅ |
 | Tela | Protótipo: [10-perfil-autor](../../design/prototype/screens/10-perfil-autor.png); autor como link no card e no modal | ✅ protótipo |
-| App | rota `/u/{id}` | ⏳ OS-39 |
+| Telas (app web) | `/u/[id]` (`(feeds)/u/[id]/page.tsx`, `ProfileView`, `shareUrl` copiado); aba Perfis (`ProfilesPanel`); `e2e/perfil.spec.ts` (nome no card leva ao perfil, cabeçalho mínimo, membro desde, posts e link; arquivado só para o autor; inexistente dá 404) e o teste "perfis" de `e2e/feed.spec.ts` | ✅ web · ⏳ mobile (OS-39) |
+| Profile Feed | `GET /api/v1/users` com categoria, local, país, cidade e nome → `ProfilePageView` de `ProfileCardView` (`verified`, cidade/UF/país só se a visibilidade do titular permitir, `interests`): contrato proposto em `frontend/packages/api/src/types.ts`, a tela diz que aguarda a API | ⏳ OS-26, OS-35 |
 | Identidade | `ViewerResolver` lê a sessão autenticada ([RF27](RF27-autenticacao-sessao.md)); o cabeçalho de dev `X-Orange-Dev-User` foi removido e os testes entram com login real (sessão + CSRF) | ✅ |
 | Moldura | cada card do feed do autor traz `background` resolvido ([RF28](RF28-moldura-post.md)), sem consulta extra (vem da linha do `post`) | ✅ |
 | Pendências | seguir/deixar de seguir e contagem de seguidores; bloquear/silenciar | ⏳ novo RF |

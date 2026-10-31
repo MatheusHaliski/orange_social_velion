@@ -367,10 +367,11 @@ Finalidades de consentimento (`ConsentPurpose`, `consent_event.purpose`, todas c
 | | `country`, `city` | o | público | Filtros País e Cidade |
 | | `likeCount`, `commentCount`, `shareCount`, `viewCount` | sistema | público | Só leitura no JPA; mudam em UPDATE atômico |
 | | `createdAt`, `updatedAt`, `removedAt` | sistema | `createdAt` = `publishedAt` | — |
-| | ⏳ `sponsored`, `mediaAlt` | propostos | público | Selo de publicidade (CDC art. 36) e texto alternativo |
+| | ⏳ `sponsored`, `mediaAlt` | propostos | público | Selo de publicidade (CDC art. 36) e texto alternativo (hoje o app web marca a foto do card como decorativa, `alt=""`, até o campo existir) |
+| | ⏳ `trending` (na view) | sistema | público | `HOT` · `RISING` · `STABLE` · `FALLING`, lido do ZSET `trending:{feed}`; o card do app web já mostra ícone + texto |
 | | ✅ `background` (JSONB) | o (nulo = moldura padrão) | público | Moldura do post ([RF28](rf/RF28-moldura-post.md)): só ids do catálogo e chaves de asset, nunca URL nem CSS; `ALERT` não aceita (422 + CHECK); apagado ao remover o post e na eliminação LGPD |
 | **AudioContent** ⏳ | `kind`, `transcript`, `tags`, picos da onda | — | público | `PODCAST` · `PERSONAL_AUDIO` · `MUSIC` |
-| **AlertContent** ⏳ | `category`, `severity`, `epicenter`, `radiusKm`, `expiresAt`, `verifiedSource`, `instruction` | — | público | `EMERGENCY` · `NATURAL_DISASTER` · `OFFICIAL_COMMUNICATION` · `JOB_OPENING`; severidade segue o CAP 1.2 (`Extreme` · `Severe` · `Moderate` · `Minor`) |
+| **AlertContent** ⏳ | `category`, `severity`, `event`, `areaDesc`, `epicenter`, `radiusKm`, `expiresAt`, `verifiedSource`, `instruction` | — | público | `EMERGENCY` · `NATURAL_DISASTER` · `OFFICIAL_COMMUNICATION` · `JOB_OPENING`; severidade segue o CAP 1.2 (`Extreme` · `Severe` · `Moderate` · `Minor`); `event` e `areaDesc` vêm do CAP (`info.event`, `area.areaDesc`). Contrato proposto pelo app web: `AlertInfoView` em `frontend/packages/api/src/types.ts` (sem `epicenter`, que fica no servidor) |
 | **Comentário** | `body` (1–2.000), `status`, `createdAt`, `removedAt` | O | público | Removido: texto apagado, id mantido |
 | **Reação** | `kind` | — | `LIKE` público (contado) · `SAVE` privado | Uma por pessoa e tipo |
 | **Compartilhamento** | `channel`, `userId?` | — | só o total | `COPY_LINK` · `NATIVE` · `WHATSAPP` · `TELEGRAM` · `X` · `EMAIL`; conta 1× por pessoa e canal |
@@ -757,3 +758,6 @@ atualize a tabela do card.
 - **Chave nova em `type_details`** → `UserTypeDetailsValidator.RULES` (e `PRIVATE_KEYS` se for privada), §3.3 e
   [PESQUISA_DADOS_USUARIO.md](PESQUISA_DADOS_USUARIO.md) §3.
 - **Card novo ou alterado** → protótipo, `anatomy.mjs` (spec do card), `node design/prototype/anatomy.mjs` e a tabela em §5.3.
+- **App web** (`frontend/apps/web`): os cards do §5 viram componentes (`PostCard`, `PostBits`, `PostFrame`,
+  `ProfilesPanel`, `ProfileView`, `Comments`); mudar a anatomia muda também o componente e o e2e (`e2e/feed.spec.ts`,
+  `e2e/post.spec.ts`). O protótipo continua a fonte das imagens de anatomia.

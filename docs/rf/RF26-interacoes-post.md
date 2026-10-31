@@ -15,6 +15,11 @@ paths:
   - src/main/java/com/orangesocial/api/PostController.java
   - src/main/resources/db/migration/V2__posts_interactions.sql
   - design/prototype/index.html
+  # app web (frontend/): telas, componentes e testes deste RF
+  - frontend/apps/web/components/post/InteractionBar.tsx
+  - frontend/apps/web/components/post/Comments.tsx
+  - frontend/apps/web/lib/share.ts
+  - frontend/apps/web/e2e/fixtures/comentarios.json
 ---
 
 # RF26 · Interações com contagem
@@ -138,9 +143,11 @@ sequenceDiagram
     S->>PG: UPDATE post_comment SET status = REMOVED, body = NULL WHERE id = ? AND status = VISIBLE
     alt 0 linhas (a outra exclusão chegou antes)
         S-->>APP: 404 · o contador não mexe
+        APP-->>U: "Este comentário já tinha sido apagado" · some da lista e a contagem é relida
     else 1 linha
         S->>PG: UPDATE comment_count - 1
         S-->>APP: 204
+        APP-->>U: "Comentário apagado" · contador desce no card e no modal
     end
 ```
 
@@ -229,6 +236,27 @@ erDiagram
     }
 ```
 
+## Telas no app web
+
+A barra de interações (`InteractionBar`) fica no card, no modal e na página do post: curtir e salvar são
+otimistas e reconciliam com o número do servidor (o nome acessível traz o número por extenso, ex.: "Curtir, 2,1 mil
+(2.101 curtidas)"); visitante que toca em curtir vai para `/entrar?voltar=…`. A caixa de mensagens (`Comments`)
+pagina por `after`, conta 0/2.000 caracteres e confirma antes de apagar; o `404` da segunda exclusão tira o
+comentário da lista e relê a contagem. Compartilhar usa a folha nativa quando existe e senão a folha com os canais
+(`lib/share.ts`). Post arquivado mostra as ações desabilitadas com o motivo; alerta oficial só tem compartilhar.
+
+```mermaid
+flowchart LR
+    U([Usuário ativo]) --> BAR["InteractionBar<br/>curtir, comentar, compartilhar, salvar"]
+    BAR -->|PUT e DELETE like e save| API[PostController]
+    BAR --> COM["Comments<br/>página por after, 0 a 2.000"]
+    COM -->|POST e DELETE comments| API
+    API -.404 na segunda exclusão.-> SOME["Tira da lista<br/>e relê a contagem"]
+    BAR --> SH["lib/share<br/>folha nativa ou canais"]
+    SH -->|POST shares com o canal| API
+    V([Visitante]) -.toque em curtir.-> LOGIN["Rota /entrar com voltar"]
+```
+
 ## Rastreabilidade
 
 | Camada | Artefato | Situação |
@@ -239,4 +267,5 @@ erDiagram
 | Testes | `PostDomainTest.commentIsTrimmedValidatedAndRemovableByWriterOrPostOwner`; `PostApiIT` (curtir idempotente, 401/403/409, caixa de comentários, compartilhar por canal, eliminação LGPD; `removingTheSameCommentTwiceDecrementsTheCounterOnce`: autor e dono do post apagam em paralelo em 5 rodadas) | ✅ |
 | Tela | Protótipo: botões com contagem em [01-post-feed](../../design/prototype/screens/01-post-feed.png), [11-comentarios](../../design/prototype/screens/11-comentarios.png), [12-compartilhar](../../design/prototype/screens/12-compartilhar.png) | ✅ protótipo |
 | Identidade | `ViewerResolver` lê a sessão autenticada ([RF27](RF27-autenticacao-sessao.md)); o cabeçalho de dev `X-Orange-Dev-User` foi removido e os testes entram com login real (sessão + CSRF) | ✅ |
+| Telas (app web) | `InteractionBar`, `Comments`, `lib/share.ts` (no card, no modal e na página do post); `e2e/post.spec.ts` (curtir, salvar, comentar com contador, apagar e compartilhar com `aria-live`; número compacto e por extenso; visitante vai ao login; segunda exclusão com 404 tira da lista e avisa) | ✅ web (OS-58) · ⏳ mobile (OS-39) |
 | Pendências | tempo real dos contadores (SSE, OS-2B); notificação ao autor (OS-27); moderação de comentários (OS-4D); rate limit (OS-47); repost como ação separada | ⏳ OS-59 |

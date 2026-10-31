@@ -11,6 +11,15 @@ paths:
   - src/main/java/com/orangesocial/application/background/**
   - src/main/java/com/orangesocial/api/BackgroundController.java
   - src/main/resources/db/migration/V4__post_background.sql
+  # app web (frontend/): telas, componentes e testes deste RF
+  - frontend/apps/web/components/studio/FrameStudio.tsx
+  - frontend/apps/web/components/studio/SeasonDialog.tsx
+  - frontend/apps/web/components/studio/Swatch.tsx
+  - frontend/apps/web/components/post/PostFrame.tsx
+  - frontend/apps/web/lib/frame.*
+  - frontend/apps/web/public/brand/auras/*
+  - frontend/apps/web/e2e/estudio.spec.ts
+  - frontend/apps/web/e2e/fixtures/catalogo-molduras.json
 ---
 
 # RF28 · Moldura do post (Background Studio)
@@ -103,7 +112,7 @@ flowchart LR
 sequenceDiagram
     autonumber
     actor A as Autor
-    participant APP as App (estúdio)
+    participant APP as App web (FrameStudio)
     participant API as API
     participant CAT as BackgroundCatalog
     participant PG as PostgreSQL
@@ -201,6 +210,31 @@ flowchart TD
 }
 ```
 
+## Telas no app web
+
+O Background Studio (`FrameStudio`) fica dentro de Publicar e Editar ([RF29](RF29-publicar-post.md)), com 4 abas
+(Cor · Aura e Material · Layout e Estilo · Container) e a prévia ao vivo do card com o que já foi digitado (normal ou
+"Em alta"). Uma arte por vez: escolher outra tira a anterior e avisa; o Pôster limpa arte, material e Metamorfose
+com uma frase explicando. A cartela sazonal abre um diálogo de rascunho com Aplicar e Cancelar, ou fica automática
+pela data. O contraste da tinta sobre o container é o mesmo cálculo do servidor (`lib/frame.ts`): abaixo de 4,5:1 a
+tela avisa (`role="alert"`) e sugere a tinta que passa, sem mandar ao servidor. No feed e no post, `PostFrame`
+desenha a moldura resolvida; a Aura Plus toca até 5 s e volta ao pôster, e com "Reduzir movimento" só o pôster.
+Enviar arte própria ou gerar por IA aparece desabilitado com o motivo (⏳ OS-69, OS-70).
+
+```mermaid
+flowchart LR
+    A([Autor]) --> PUB["Publicar ou Editar · RF29<br/>PublishView"]
+    PUB --> EST["FrameStudio<br/>4 abas e prévia ao vivo"]
+    EST -->|GET /api/v1/backgrounds/catalog com ETag| BG[BackgroundController]
+    EST -->|GET /api/v1/backgrounds/recommendations| BG
+    EST --> FR["lib/frame<br/>uma arte por vez, contraste 4,5:1"]
+    FR -->|background no POST ou PATCH| POSTS[PostPublishingController]
+    L([Leitor]) --> CARD["PostFrame<br/>moldura resolvida no card"]
+    CARD -.Reduzir movimento.-> POSTER["Só o pôster da Aura Plus"]
+    EST -.⏳ OS-69, OS-70.-> PROPRIA["Arte própria ou IA"]:::planned
+    classDef planned stroke-dasharray:5 4
+```
+
 ## Rastreabilidade
 
 | Camada | Artefato | Situação |
@@ -219,3 +253,4 @@ flowchart TD
 | Aura Plus e upload | Pipeline ffprobe → ffmpeg → EA IRIS → moderação → variantes | ⏳ OS-69, OS-70 |
 | Preferência do leitor | "Animações de fundo: Sempre / Só no Wi-Fi / Nunca" em Configurações → Exibição | ⏳ (RF2) |
 | Jurídico | Parecer sobre licenças, IA, retirada por direito autoral e marcas | ⏳ OS-72 |
+| Telas (app web) | `FrameStudio`, `SeasonDialog`, `Swatch`, `PostFrame`, `lib/frame.ts` (+ `frame.test.ts`), Aura Plus "Brasa" e "Aurora" em `public/brand/auras/` (cópias de `design/brand/auras/`); `e2e/estudio.spec.ts` (8 testes: 4 abas e prévia, uma arte por vez, cartela com rascunho e automática, aura com variação e mosaico, material, Aura Hype na prévia "Em alta", Metamorfose, Aura Plus com e sem "Reduzir movimento", Pôster, contraste baixo sem ir ao servidor, axe em cada aba) com o catálogo em `e2e/fixtures/catalogo-molduras.json` | ✅ web · ⏳ mobile (Skia, OS-39) · ⏳ arte própria (OS-69, OS-70) |

@@ -1,7 +1,9 @@
 # Trello Backlog — Orange Social
 
 Fonte do quadro **[Orange Social - Velion Tech](https://trello.com/b/ImdiBMps/orange-social-velion-tech)** no Trello.
-Atualizado em 17/10/2026 após a pesquisa de tecnologias ([`PESQUISA_TECNOLOGIAS.md`](PESQUISA_TECNOLOGIAS.md)).
+Atualizado em 17/10/2026 após a pesquisa de tecnologias ([`PESQUISA_TECNOLOGIAS.md`](PESQUISA_TECNOLOGIAS.md)) e em
+31/10/2026 com o app web (`frontend/`, Next.js 16): OS-30, OS-31, OS-32, OS-34, OS-35 (parcial), OS-37, OS-38, OS-39
+(só web), OS-3A, OS-48 (parcial), OS-63, OS-64 e as telas de OS-56, OS-57, OS-58, OS-60 e OS-61.
 
 > **Estado no Trello (17/10/2026):** 6 listas, 62 cards e etiquetas de cor aplicados via API.
 > As etiquetas foram criadas sem nome (limitação da API usada) — nomeie-as no quadro conforme a
@@ -71,20 +73,20 @@ Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 | OS-15 | Seleção encadeada typeofcommunity → selectcountry → selectcity | 🟢 🟠 | 5 | Listas filtradas pelo item anterior; grava `Listofcommunitiesofinterest` |
 | OS-16 | Captura de GPS `LastSavedLocation` com consentimento | 🟢 🔴 | 3 | Sem consentimento não grava; JSONB `{lat,lng,timestamp}`; `last_saved_point` gerado pelo PostGIS |
 | OS-17 | Fluxo de cadastro por Usertype (6 categorias) | 🟢 🟠 | 5 | Campos específicos por categoria; VERMELHO/PRETO com verificação manual |
-| OS-18 | Upload de foto de perfil via URL pré-assinada S3 | 🟢 🔵 | 3 | ✅ `PUT/DELETE /api/v1/me/photo` sobre o mesmo envio do OS-23 (`MediaUploads`): recorte quadrado de 512 px, sem EXIF/GPS, a foto anterior e a da conta eliminada saem do bucket; ⏳ tela de recorte no app |
+| OS-18 | Upload de foto de perfil via URL pré-assinada S3 | 🟢 🔵 | 3 | ✅ `PUT/DELETE /api/v1/me/photo` sobre o mesmo envio do OS-23 (`MediaUploads`): recorte quadrado de 512 px, sem EXIF/GPS, a foto anterior e a da conta eliminada saem do bucket; ✅ tela web (Configurações → Perfil, `PUT` direto no bucket privado de uploads); ⏳ recorte interativo |
 | OS-19 **(novo)** | Step-up de autenticação (`max_age`/`acr`) para Exportar e Excluir | 🟢 🔴 | 3 | Ações sensíveis exigem reautenticação recente |
 
 ### Backend & Persistência Poliglota (Backlog)
 
 | ID | Título | Etiqueta | Pts | Critérios de aceite |
 |---|---|---|---|---|
-| OS-20 | `TrendingScoreRepository` (Valkey ZSET) | 🔵 | 3 | Ranking global e por cor; TTL 48h |
+| OS-20 | `TrendingScoreRepository` (Valkey ZSET) | 🔵 | 3 | Ranking global e por cor; TTL 48h. ⏳ Expor `trending` (`HOT`/`RISING`/`STABLE`/`FALLING`) no card e no detalhe do post, que o app web já desenha (OS-36) |
 | OS-21 | Trending Score com decaimento temporal e anti-manipulação | 🔵 | 5 | ✅ fórmula `log10(views)·W + Σ pesos / (idade_h + 2)^1.6` em `TrendingScoreCalculator`; pendente: HyperLogLog de views únicas, tempo mínimo de exibição, z-score e job de recálculo |
 | OS-22 | `PostTimelineEntity` + fan-out **híbrido** no Cassandra | 🔵 | 8 | On write para < 10k seguidores; merge na leitura (`author_posts`) para contas grandes; inativos > 30 dias sem fan-out |
-| OS-23 | Publicação de post (texto/imagem/vídeo) — [RF29](rf/RF29-publicar-post.md) | 🔵 | 5 | ✅ texto: `POST/PATCH/DELETE /api/v1/posts`, arquivar/restaurar, conta ativa + selo, 422 com todos os erros; ✅ foto: `POST /api/v1/media/uploads` (URL pré-assinada, tipo e tamanho na assinatura), `HEAD` no S3, foto limpa sem EXIF/GPS (orientação aplicada, até 2.048 px), apagar o post apaga a foto; ⏳ vídeo, rascunho, AVIF/WebP + miniaturas, moderação da imagem |
-| OS-24 | Publicação no Audio Feed (podcast, áudio pessoal, música) | 🔵 | 5 | Conforme `DIAGRAMA_SEQUENCIA.md`; waveform pré-computado (`audiowaveform`) |
-| OS-25 | Alert Feed **geográfico**: restrito a fontes verificadas | 🔵 🔴 | 8 | Somente VERMELHO verificado; consulta por geohash/município IBGE; sem timeline por seguidor; vagas para VERMELHO/AMARELO |
-| OS-26 | Filtro multidimensional (6 eixos) nos 4 feeds via PostgreSQL | 🔵 | 8 | Categoria, tipo, local (PostGIS `ST_DWithin`), país, cidade, nome (`pg_trgm` + `unaccent`) combináveis |
+| OS-23 | Publicação de post (texto/imagem/vídeo) — [RF29](rf/RF29-publicar-post.md) | 🔵 | 5 | ✅ telas web `/publicar` e `/posts/{id}/editar` com o estúdio; ⏳ `mediaAlt` (texto alternativo da foto); ✅ texto: `POST/PATCH/DELETE /api/v1/posts`, arquivar/restaurar, conta ativa + selo, 422 com todos os erros; ✅ foto: `POST /api/v1/media/uploads` (URL pré-assinada, tipo e tamanho na assinatura), `HEAD` no S3, foto limpa sem EXIF/GPS (orientação aplicada, até 2.048 px), apagar o post apaga a foto; ⏳ vídeo, rascunho, AVIF/WebP + miniaturas, moderação da imagem |
+| OS-24 | Publicação no Audio Feed (podcast, áudio pessoal, música) | 🔵 | 5 | Conforme `DIAGRAMA_SEQUENCIA.md`; waveform pré-computado (`audiowaveform`). O app web mostra a aba Áudio como "em breve" até existir |
+| OS-25 | Alert Feed **geográfico**: restrito a fontes verificadas | 🔵 🔴 | 8 | Somente VERMELHO verificado; consulta por geohash/município IBGE; sem timeline por seguidor; vagas para VERMELHO/AMARELO. ⏳ O app web já espera `GET /api/v1/posts?feed=ALERT` e o campo `alert` (CAP 1.2: `category`, `severity`, `event`, `areaDesc`, `radiusKm`, `expiresAt`, `instruction`, `verifiedSource`) no card e no detalhe ([RF24](rf/RF24-visualizar-post.md)) |
+| OS-26 | Filtro multidimensional (6 eixos) nos 4 feeds via PostgreSQL | 🔵 | 8 | Categoria, tipo, local (PostGIS `ST_DWithin`), país, cidade, nome (`pg_trgm` + `unaccent`) combináveis. ⏳ O app web já chama `GET /api/v1/posts` (`feed`, `category` repetível, `mediaType`, `country`, `city`, `q`, `lat`/`lng`/`radiusKm`, `cursor`, `limit`) e `GET /api/v1/users` (Profile Feed) e diz "aguarda a API" sem elas ([RF24](rf/RF24-visualizar-post.md), [RF25](rf/RF25-perfil-publico-autor.md)) |
 | OS-27 | Notificações em Cassandra com TTL | 🔵 | 3 | Lidas/não lidas; TTL 30 dias |
 | OS-28 | Outbox transacional + **Kafka 4 + Debezium** | 🔵 | 8 | Tabela `outbox_event`; tópicos por agregado; consumidores idempotentes; nunca dual-write |
 | OS-29 **(novo)** | OpenSearch para busca e facetas (escala) | 🔵 | 8 | Índices `users`/`posts` alimentados por CDC; `geo_point`; `edge_ngram` + `asciifolding` |
@@ -96,23 +98,23 @@ Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 
 | ID | Título | Etiqueta | Pts | Critérios de aceite |
 |---|---|---|---|---|
-| OS-30 | Design tokens DTCG 2025.10 → Style Dictionary 5 (`packages/tokens`) | 🟠 | 5 | Variáveis CSS/`@theme` e objeto TS gerados; temas claro e escuro |
-| OS-31 | TopBar com Segmented Switcher (Profile/Post/Audio/Alert) | 🟠 | 5 | `role="tablist"`, navegação por teclado; estado persistido |
-| OS-32 | Componente Feed Card (bolinha + glifo + borda + classificação) | 🟠 | 5 | Título obrigatório, sem texto corrido no feed; `aria-label` da categoria |
-| OS-33 | Card de áudio com waveform e player | 🟠 | 5 | Play/pause, duração, acessível; `expo-audio` no mobile |
-| OS-34 | Card de alerta (hazard) e card de vaga | 🟠 | 3 | Fonte verificada e validade visíveis; sem sensacionalismo |
-| OS-35 | Barra de filtros dos 6 eixos | 🟠 | 5 | Chips combináveis; limpar filtros; estado na URL |
-| OS-36 | Indicadores de trending (🔥 📈 ➖ 📉) | 🟠 | 2 | Nunca competem com o título |
-| OS-37 | Acessibilidade: cor nunca é o único sinal (WCAG 1.4.1 / 1.4.11) | 🟠 🔴 | 3 | Glifo + rótulo por categoria; `scripts/wcag_contrast.py` sem reprovação |
-| OS-38 **(novo)** | Paleta para tema claro e correção do PRETO no tema escuro | 🟠 | 3 | Variantes `700` no tema claro; anel `#D6D0C8` + glifo no PRETO; texto escuro nos botões Orange |
-| OS-39 **(novo)** | Monorepo Turborepo: Next.js 16 (web) + Expo 58 (mobile) + `packages/api` gerado do OpenAPI | 🟠 🔵 | 8 | `apps/web`, `apps/mobile`, pacotes compartilhados; Storybook 10 + axe no CI |
-| OS-3A **(novo)** | Glifos VSL completos (losango, estrela, triângulo, hexágono, retângulo, círculo duplo) | 🟠 | 3 | SVG em `packages/glyphs`; SVGR e `react-native-svg` |
+| OS-30 | Design tokens DTCG 2025.10 → Style Dictionary 5 (`packages/tokens`) | 🟠 | 5 | ✅ `frontend/packages/tokens`: `tokens.css` (claro padrão, escuro por `prefers-color-scheme` e por `data-theme`) e `tokens.ts`; teste de contraste igual ao `scripts/wcag_contrast.py` ([RF2](rf/RF02-editar-perfil.md)) |
+| OS-31 | TopBar com Segmented Switcher (Profile/Post/Audio/Alert) | 🟠 | 5 | ✅ web: `role="tablist"`, setas e Home/End, feed na URL e o feed inicial da conta (`defaultFeed`) ([RF24](rf/RF24-visualizar-post.md)) |
+| OS-32 | Componente Feed Card (bolinha + glifo + borda + classificação) | 🟠 | 5 | ✅ web: `PostCard` com título, sem texto corrido, bolinha + glifo + rótulo, tipo, classificação, `<time>`, moldura e ações; ⏳ dados reais do Post Feed (`GET /api/v1/posts`, OS-26) |
+| OS-33 | Card de áudio com waveform e player | 🟠 | 5 | Play/pause, duração, acessível; `expo-audio` no mobile. Web: a aba Áudio diz "em breve" (sem player falso) até o OS-24 |
+| OS-34 | Card de alerta (hazard) e card de vaga | 🟠 | 3 | ✅ web: faixa hazard, severidade + evento, fonte verificada, área, validade e o que fazer, sem moldura, só compartilhar; vaga com as 4 ações. ⏳ backend: campo `alert` (CAP 1.2, `AlertInfoView` proposto em `frontend/packages/api`) e Alert Feed (OS-25) |
+| OS-35 | Barra de filtros dos 6 eixos | 🟠 | 5 | 🟡 web: `FilterBar` com categoria combinável, tipo, local (perto de mim, fora da URL), país, cidade e nome; limpar; estado na URL. ⏳ API: `GET /api/v1/posts?feed=POST\|ALERT` e `GET /api/v1/users` (Profile Feed) com os filtros (OS-26) |
+| OS-36 | Indicadores de trending (🔥 📈 ➖ 📉) | 🟠 | 2 | Nunca competem com o título. 🟡 web: ícone + texto discreto no card; ⏳ campo `trending` na view do post (OS-20) |
+| OS-37 | Acessibilidade: cor nunca é o único sinal (WCAG 1.4.1 / 1.4.11) | 🟠 🔴 | 3 | ✅ glifo + rótulo por categoria (`CategoryBadge`); `scripts/wcag_contrast.py` e `packages/tokens/test/contraste.test.ts` sem reprovação; axe nos dois temas em toda tela do e2e |
+| OS-38 **(novo)** | Paleta para tema claro e correção do PRETO no tema escuro | 🟠 | 3 | ✅ tokens claro e escuro: variantes `700` no claro, anel `#D6D0C8` + glifo no PRETO, texto escuro nos botões Orange |
+| OS-39 **(novo)** | Monorepo Turborepo: Next.js 16 (web) + Expo 58 (mobile) + `packages/api` gerado do OpenAPI | 🟠 🔵 | 8 | 🟡 só web: workspace npm em `frontend/` com `apps/web`, `packages/tokens` e `packages/api` (tipos escritos à mão a partir dos records Java), job `web` no CI (ESLint, tipos, Vitest, `next build`, Playwright + axe com a API simulada) e Dependabot npm. ⏳ `apps/mobile` (Expo), Turborepo, Storybook e `packages/api` gerado do OpenAPI (OS-55) |
+| OS-3A **(novo)** | Glifos VSL completos (losango, estrela, triângulo, hexágono, retângulo, círculo duplo) | 🟠 | 3 | ✅ web: os 6 glifos em SVG no `CategoryBadge`, sempre com o rótulo; ⏳ `packages/glyphs` compartilhado com o mobile (`react-native-svg`) |
 
 ### LGPD Compliance & Segurança — RF23 (Backlog)
 
 | ID | Título | Etiqueta | Pts | Critérios de aceite |
 |---|---|---|---|---|
-| OS-40 | `consent_event` append-only + API de consentimentos (Art. 7º, I) | 🔴 | 5 | ✅ Toggles desligados por padrão; versão do texto, canal e IP com hash; view `user_consent_current`; `GET /api/v1/me/consents` e `PUT /api/v1/me/consents/{purpose}` com o mesmo contrato do Friendly Eats ([RF3](rf/RF03-consentimento-privacidade.md)); repetir o valor não grava; `ConsentApiIT`; ⏳ tela no app (OS-39, OS-48) |
+| OS-40 | `consent_event` append-only + API de consentimentos (Art. 7º, I) | 🔴 | 5 | ✅ Toggles desligados por padrão; versão do texto, canal e IP com hash; view `user_consent_current`; `GET /api/v1/me/consents` e `PUT /api/v1/me/consents/{purpose}` com o mesmo contrato do Friendly Eats ([RF3](rf/RF03-consentimento-privacidade.md)); repetir o valor não grava; `ConsentApiIT`; ✅ tela web (Configurações → Privacidade, base legal traduzida, chaves travadas por idade); ⏳ mobile |
 | OS-41 | Revogação de consentimento em 1 clique (Art. 8º, §5º) | 🔴 | 2 | ✅ Revogar é o mesmo controle que consentir; efeito imediato na mesma transação (apaga `sexual_preference` e `last_saved_location`); ⏳ consumidores do feed, marketing e parceiros |
 | OS-42 | Reconhecimento facial **on-device**, desligado por padrão (Art. 11) | 🔴 | 5 | Consentimento específico e destacado; template nunca sai do aparelho; bloqueado para menores. 🟡 finalidade `FACIAL_RECOGNITION` sensível (Art. 11, I), desligada e travada para menor de 18 na API do RF3; ⏳ app on-device |
 | OS-43 | Exportar meus dados em JSON (Art. 18, V) | 🔴 | 5 | Step-up; job assíncrono; ZIP cifrado; URL pré-assinada 24–72 h; 1 pedido/dia |
@@ -120,7 +122,7 @@ Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 | OS-45 | Trilha de auditoria de operações (Art. 37) | 🔴 | 3 | Eventos com encadeamento de hash em S3 Object Lock; sem PII em claro |
 | OS-46 | Criptografia de campo com **Tink + KMS, DEK por usuário** | 🔴 | 8 | `sexual_preference`, `last_saved_location`, `address`, `cellphone_number`, foto cifrados; `user_id` como dado associado; tabela `user_key` |
 | OS-47 | Rate limiting (Bucket4j + Valkey) e proteção contra força bruta | 🔴 | 3 | Por IP, usuário e rota; mais rígido em login, cadastro, recuperação e exportação |
-| OS-48 | Página de configurações LGPD (Conta, Privacidade, Seus dados) | 🔴 🟠 | 5 | Cada controle mapeado ao artigo; `AlertDialog` acessível para excluir |
+| OS-48 | Página de configurações LGPD (Conta, Privacidade, Seus dados) | 🔴 🟠 | 5 | Cada controle mapeado ao artigo; `AlertDialog` acessível para excluir. 🟡 web: Perfil, Exibição, Privacidade, Senha e segurança e Conta (com o `alertdialog` de exclusão); ⏳ Seus dados (exportação, OS-43) e Notificações |
 | OS-49 **(novo)** | **ECA Digital**: aferição de idade e modo restrito para menores | 🔴 🟢 | 8 | Sem perfilamento, geolocalização ou publicidade direcionada para menores; supervisão parental; sem biometria. 🟡 consentimentos travados por idade (16: localização, feed e marketing; 18: dado sensível e biometria); ⏳ aferição de idade e consentimento do responsável |
 | OS-4A **(novo)** | Registro de operações (Art. 37) e **RIPD** versionados no repositório | 🔴 | 5 | YAML com finalidade, base legal, categorias, retenção, operadores, transferências; RIPD aprovado antes do lançamento |
 | OS-4B **(novo)** | OWASP ASVS 5.0 nível 2 (nível 3 em auth e dados sensíveis) + WAF | 🔴 | 5 | Checklist ASVS no PR template; AWS WAF/Cloudflare com regras gerenciadas |
@@ -131,25 +133,26 @@ Cards marcados com **(novo)** vieram da pesquisa de tecnologias.
 
 | ID | Título | Etiqueta | Pts | Critérios de aceite |
 |---|---|---|---|---|
-| OS-56 | RF24 — Modal do post com dados completos e data de publicação | 🔵 🟠 | 5 | ✅ `GET /api/v1/posts/{id}` (rascunho só para o autor, removido/autor suspenso = 404), `PostApiIT`, protótipo `09-post-modal`; data relativa no card com `<time>` + tooltip absoluto; modal acessível (foco preso, `Esc`); pendente no app (OS-39) |
-| OS-57 | RF25 — Perfil público do autor + feed dele (toque na foto ou no nome) | 🔵 🟠 🔴 | 5 | ✅ `GET /api/v1/users/{id}/profile` com minimização LGPD e `GET …/posts` com cursor; protótipo `10-perfil-autor`; conta suspensa/eliminada sem link; `shareUrl` na rota do app `/u/{id}` |
-| OS-58 | RF26 — Curtir, comentar (caixa de mensagens), compartilhar e salvar com contagem | 🔵 🟠 | 8 | ✅ tabelas `post_reaction`/`post_comment`/`post_share` (V2), contadores atômicos e idempotentes, 401/403/409, protótipo `11-comentarios` e `12-compartilhar`; botões `<button>` com `aria-label`/`aria-pressed`; exclusão de comentário atômica (contador desce uma vez) |
+| OS-56 | RF24 — Modal do post com dados completos e data de publicação | 🔵 🟠 | 5 | ✅ `GET /api/v1/posts/{id}` (rascunho só para o autor, removido/autor suspenso = 404), `PostApiIT`, protótipo `09-post-modal`; data relativa no card com `<time>` + tooltip absoluto; modal acessível (foco preso, `Esc`); ✅ tela web (modal por cima do feed, `/posts/{id}` e `/p/{id}`); ⏳ mobile (OS-39) |
+| OS-57 | RF25 — Perfil público do autor + feed dele (toque na foto ou no nome) | 🔵 🟠 🔴 | 5 | ✅ `GET /api/v1/users/{id}/profile` com minimização LGPD e `GET …/posts` com cursor; protótipo `10-perfil-autor`; conta suspensa/eliminada sem link; `shareUrl` na rota do app `/u/{id}`; ✅ tela web `/u/{id}`; ⏳ Profile Feed (`GET /api/v1/users`, OS-35) |
+| OS-58 | RF26 — Curtir, comentar (caixa de mensagens), compartilhar e salvar com contagem | 🔵 🟠 | 8 | ✅ tabelas `post_reaction`/`post_comment`/`post_share` (V2), contadores atômicos e idempotentes, 401/403/409, protótipo `11-comentarios` e `12-compartilhar`; botões `<button>` com `aria-label`/`aria-pressed`; exclusão de comentário atômica (contador desce uma vez); ✅ tela web (barra de interações, caixa de mensagens; o 404 da segunda exclusão tira o comentário da lista) |
 | OS-59 | RF26 — Interações em tempo real, notificação ao autor, moderação e limites | 🔵 🔴 | 8 | Contadores via SSE (OS-2B); notificação LIKE/COMMENT (OS-27); comentários na moderação (OS-4D); rate limit por usuário/rota (OS-47) |
 
 ### Conta, sessão, configurações e exclusão — RF1 · RF2 · RF23 · RF27 (17/10/2026)
 
 | ID | Título | Etiqueta | Pts | Critérios de aceite |
 |---|---|---|---|---|
-| OS-60 | RF1 — Cadastro com escolha do tipo de usuário, campos por tipo e aceite dos Termos de Uso da Velion | 🟢 🔴 | 8 | ✅ API `POST /api/v1/auth/register` (CNPJ alfanumérico, idade 13+/16/18, 6 consentimentos false, `terms_acceptance`, cadastros simultâneos → um 201 e o resto 409), verificação de e-mail; `docs/legal/TERMOS_DE_USO.md` com `{{marcadores}}` para preencher; ⏳ telas e revisão jurídica |
-| OS-61 | RF27 — Login em etapas, sessão opaca no Valkey, CSRF, limites, sessões ativas e 2FA TOTP | 🟢 🔴 🔵 | 8 | ✅ cookie sem Max-Age (aba anônima deslogada), logout no servidor, 60 min/24 h, 10 códigos de recuperação, anti-replay atômico (código de uso único mesmo com logins simultâneos; configuração concorrente dá 409); `AuthApiIT` |
+| OS-60 | RF1 — Cadastro com escolha do tipo de usuário, campos por tipo e aceite dos Termos de Uso da Velion | 🟢 🔴 | 8 | ✅ API `POST /api/v1/auth/register` (CNPJ alfanumérico, idade 13+/16/18, 6 consentimentos false, `terms_acceptance`, cadastros simultâneos → um 201 e o resto 409), verificação de e-mail; `docs/legal/TERMOS_DE_USO.md` com `{{marcadores}}` para preencher; ✅ telas web `/cadastro`, `/confirmar-email` e `/termos`; ⏳ revisão jurídica e mobile |
+| OS-61 | RF27 — Login em etapas, sessão opaca no Valkey, CSRF, limites, sessões ativas e 2FA TOTP | 🟢 🔴 🔵 | 8 | ✅ cookie sem Max-Age (aba anônima deslogada), logout no servidor, 60 min/24 h, 10 códigos de recuperação, anti-replay atômico (código de uso único mesmo com logins simultâneos; configuração concorrente dá 409); `AuthApiIT`; ✅ telas web `/entrar` e Senha e segurança (o 409 volta ao início sem o QR velho) |
 | OS-62 | RF27 — Passkeys (WebAuthn) e "lembrar este navegador por 30 dias" | 🟢 🔴 | 5 | Passkey como 1º fator; dispositivo confiável revogável na lista de sessões |
-| OS-63 | RF2 — Configurações (9 seções) e fundo do app (liso, rede, 6 mosaicos com o logo oficial) | 🟠 🟢 | 5 | ✅ API de perfil e preferências; menor de 16 com proteções travadas; ⏳ telas |
-| OS-64 | RF23 — Excluir conta: modal de consequências, 30 dias para reativar e job de eliminação | 🔴 | 5 | ✅ `POST /api/v1/me/deletion`, reativação no login, `AccountDeletionJob`; ⏳ modal no app, passos S3/Cassandra/DEK (OS-44) |
+| OS-63 | RF2 — Configurações (9 seções) e fundo do app (liso, rede, 6 mosaicos com o logo oficial) | 🟠 🟢 | 5 | ✅ API de perfil e preferências; menor de 16 com proteções travadas; ✅ telas web (5 seções: Perfil, Exibição com tema, fundo, fonte e movimento, Privacidade, Senha e segurança, Conta); ⏳ Notificações, Seus dados e as demais seções |
+| OS-64 | RF23 — Excluir conta: modal de consequências, 30 dias para reativar e job de eliminação | 🔴 | 5 | ✅ `POST /api/v1/me/deletion`, reativação no login, `AccountDeletionJob`; ✅ modal no app web e reativação em `/entrar`; ⏳ passos S3/Cassandra/DEK (OS-44) |
 
 ### Background Studio — moldura dos cards e Aura Plus (pesquisa 17/10/2026)
 
 Detalhes em [`PESQUISA_BACKGROUND_STUDIO.md`](PESQUISA_BACKGROUND_STUDIO.md) e no [RF28](rf/RF28-moldura-post.md). Depende de OS-23
 (publicar post). ✅ Protótipo navegável (telas 22–28), Aura Plus "Brasa" e "Aurora" no formato final e teste de fumaça.
+✅ Estúdio no app web (`FrameStudio` em Publicar e Editar, `PostFrame` no card) com `e2e/estudio.spec.ts`.
 
 | ID | Título | Etiqueta | Pts | Critérios de aceite |
 |---|---|---|---|---|

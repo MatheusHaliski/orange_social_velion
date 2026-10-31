@@ -49,6 +49,12 @@ paths:                        # código que implementa o RF (glob)
 ---
 ```
 
+**App web.** Telas, componentes, libs e testes de `frontend/` também entram nos `paths` do RF que implementam
+(cada arquivo em um RF só; a casca de sessão e o cliente da API ficam no RF27 e os tokens e a casca visual no RF2).
+Os padrões são `fnmatch`: `*` atravessa pastas e colchetes viram classe de caracteres, então os segmentos do App
+Router com `[id]` ou `(feeds)` usam `?` no lugar de cada colchete ou parêntese
+(ex.: `frontend/apps/web/app/?feeds?/u/?id?/page.tsx`).
+
 Verificação local: `python3 scripts/check_rf_docs.py` (estrutura) e
 `python3 scripts/check_rf_docs.py --base origin/main` (desatualização em relação à `main`).
 
