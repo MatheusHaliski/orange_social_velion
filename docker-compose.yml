@@ -60,7 +60,7 @@ services:
 
   garage-init:
     # init.sh fala com a Admin API v2 por HTTP; a imagem do curl traz o sh que a do Garage não tem
-    image: curlimages/curl:8.11.1
+    image: curlimages/curl:8.23.0
     container_name: os-garage-init
     depends_on:
       garage:
