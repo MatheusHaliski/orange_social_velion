@@ -13,7 +13,21 @@ interface ConsentSwitchProps {
   busy?: boolean;
 }
 
-/** Texto da chave travada (lockedForMinor): o sensível só aos 18 (LGPD Art. 14), os demais aos 16 (ECA Digital). */
+/** ConsentPurpose.getLegalBasis(): o código gravado em consent_event.legal_basis, em texto para a tela. */
+const LEGAL_BASIS: Record<string, string> = {
+  ART_7_I: 'LGPD Art. 7º, I (consentimento)',
+  ART_11_I: 'LGPD Art. 11, I (consentimento específico)',
+};
+
+/** "ART_7_I" → "LGPD Art. 7º, I (consentimento)"; um código desconhecido aparece como veio. */
+export function legalBasisText(code: string): string {
+  return LEGAL_BASIS[code] ?? code;
+}
+
+/**
+ * Texto da chave travada (lockedForMinor): o sensível só aos 18 (LGPD Art. 14), os demais aos 16 (ECA Digital).
+ * Segue ConsentPurpose.MinorRule: UNDER_18 são exatamente as finalidades sensíveis; THIRD_PARTY_SHARING nunca trava.
+ */
 export function lockedText(consent: Pick<ConsentView, 'sensitive'>): string {
   return consent.sensitive ? 'Disponível a partir dos 18 anos' : 'Disponível a partir dos 16 anos';
 }
@@ -42,7 +56,7 @@ export function ConsentSwitch({ consent, onToggle, busy }: ConsentSwitchProps) {
         <p className="flex flex-wrap gap-2">
           <span id={lawId} className="os-law">
             <span className="sr-only">Base legal: </span>
-            {consent.legalBasis}
+            {legalBasisText(consent.legalBasis)}
           </span>
           {consent.sensitive && <span className="os-law">Dado sensível</span>}
         </p>

@@ -50,15 +50,22 @@ export function MfaPanel({ account }: { account: string }) {
   const [summaryRef, focusSummary] = useDeferredFocus<HTMLDivElement>();
   const doneRef = useRef<HTMLDivElement>(null);
   const firstRender = useRef(true);
+  /** Volta ao início com um erro (ex.: 409, o 2FA foi ligado em outra sessão): o foco vai ao resumo, não ao título. */
+  const summaryOnReturn = useRef(false);
 
   useEffect(() => {
     if (firstRender.current) {
       firstRender.current = false;
       return;
     }
-    if (step === 'inicio') requestAnimationFrame(() => (done ? doneRef.current : headingRef.current)?.focus());
+    if (step === 'inicio')
+      requestAnimationFrame(() => {
+        const toSummary = summaryOnReturn.current;
+        summaryOnReturn.current = false;
+        (toSummary ? summaryRef.current : done ? doneRef.current : headingRef.current)?.focus();
+      });
     else headingRef.current?.focus();
-  }, [step, done]);
+  }, [step, done, summaryRef]);
 
   const enabled = status.data?.enabled === true;
 
@@ -101,6 +108,16 @@ export function MfaPanel({ account }: { account: string }) {
       go('codigos');
     },
     onError: (e) => {
+      if (isApiError(e, 409)) {
+        // outra sessão ligou o 2FA depois do passo da senha (MfaService.confirmSetup): este QR code não vale mais
+        setSetup(null);
+        setCode('');
+        refresh();
+        summaryOnReturn.current = true;
+        setErrors({ fields: {}, general: [e.detail] });
+        setStep('inicio');
+        return;
+      }
       if (isApiError(e, 422)) {
         setErrors({ fields: { code: e.errors.length ? e.errors : [e.detail] }, general: [] });
         if (/expirou/.test(e.detail)) setErrors({ fields: {}, general: [e.detail] });

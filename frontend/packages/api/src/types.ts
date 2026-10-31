@@ -178,7 +178,10 @@ export interface PreferencesPatch {
   loginAlerts?: boolean;
 }
 
-/** Finalidades opcionais do tratamento (consent_event.purpose, RF3), todas desligadas por padrão. */
+/**
+ * ConsentPurpose (domain/model/ConsentPurpose.java): finalidades opcionais do tratamento (consent_event.purpose, RF3),
+ * todas desligadas por padrão. A API devolve na ordem do enum, que é a ordem da tela.
+ */
 export type ConsentPurpose =
   | 'MARKETING'
   | 'LOCATION_TRACKING'
@@ -187,20 +190,31 @@ export type ConsentPurpose =
   | 'FACIAL_RECOGNITION'
   | 'SENSITIVE_PROFILE_DATA';
 
-/** Um consentimento (GET /api/v1/me/consents, PUT /api/v1/me/consents/{purpose}) — API em portagem (RF3). */
+/** ConsentPurpose.getLegalBasis(): código gravado em consent_event.legal_basis (a tela traduz). */
+export type ConsentLegalBasis = 'ART_7_I' | 'ART_11_I';
+
+/**
+ * ConsentService.ConsentView (GET /api/v1/me/consents, PUT /api/v1/me/consents/{purpose} com {@code {granted}}).
+ * Finalidade desconhecida no PUT = 404; {@code granted} ausente = 422.
+ */
 export interface ConsentView {
   purpose: ConsentPurpose;
   label: string;
   description: string;
-  legalBasis: string;
+  /** ConsentLegalBasis; string para não quebrar se o backend acrescentar uma base. */
+  legalBasis: ConsentLegalBasis | (string & {});
   sensitive: boolean;
   granted: boolean;
-  /** Instant em ISO-8601; null se nunca mudou. */
+  /** Instant em ISO-8601 do último evento; null se nunca houve evento (contas anteriores ao RF3). */
   updatedAt: string | null;
-  /** Menor de 16: o PUT dá 403. */
+  /**
+   * ConsentPurpose.MinorRule: travada para menor de 16 (UNDER_16) ou, nas sensíveis, de 18 (UNDER_18); ligar dá 403,
+   * desligar é sempre livre.
+   */
   lockedForMinor: boolean;
 }
 
+/** ConsentService.ConsentList. */
 export interface ConsentList {
   items: ConsentView[];
 }
@@ -230,7 +244,7 @@ export interface SessionView {
   current: boolean;
 }
 
-/** AccountViews.MfaStatusView. */
+/** AccountViews.MfaStatusView. Confirmar a configuração quando outra sessão já ligou o 2FA dá 409. */
 export interface MfaStatusView {
   enabled: boolean;
   enabledAt: string | null;
@@ -276,7 +290,11 @@ export interface UploadRequest {
   sizeBytes: number;
 }
 
-/** MediaUploads.UploadTicket: URL pré-assinada para o PUT direto ao bucket. */
+/**
+ * MediaUploads.UploadTicket: URL pré-assinada para o PUT direto ao bucket <b>privado</b> de uploads
+ * (orange-social.storage.uploads-bucket); {@code headers} traz os cabeçalhos assinados (Content-Type e
+ * Content-Length). A foto limpa vai depois para o bucket público de mídias.
+ */
 export interface UploadTicket {
   objectKey: string;
   uploadUrl: string;
@@ -519,7 +537,7 @@ export interface ShareResultView {
 
 // ------------------------------------------------------------ perfis (PostViews.PublicProfileView, RF25)
 
-/** Perfil público (RF25): minimização, só nome, categoria, foto e datas. */
+/** PostViews.PublicProfileView (GET /api/v1/users/{id}/profile, RF25): minimização, só nome, categoria, foto e datas. */
 export interface PublicProfileView {
   id: number;
   name: string;

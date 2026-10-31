@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url';
-import { CODIGO_2FA, fixture, problem, SENHA_CERTA } from './support/mock-api';
+import { CODIGO_2FA, fixture, problem, SENHA_CERTA, UPLOADS_BUCKET } from './support/mock-api';
 import { expect, expectAccessibleInBothThemes, test } from './support/test';
 
 const AVATAR = fileURLToPath(new URL('./fixtures/avatar.png', import.meta.url));
@@ -81,6 +81,8 @@ test.describe('Perfil (RF2)', () => {
     const put = api.account.bucketPuts[0]!;
     expect(put.method).toBe('PUT');
     expect(put.url).toContain('X-Amz-Signature=teste');
+    // o original vai ao bucket privado de uploads, nunca ao público de mídias (PR #13)
+    expect(new URL(put.url).pathname).toBe(`/${UPLOADS_BUCKET}/uploads/42/01991.png`);
     expect(put.headers['content-type']).toBe('image/png');
     expect(put.headers['x-xsrf-token']).toBeUndefined();
     expect(put.headers.cookie).toBeUndefined();
@@ -211,12 +213,12 @@ test.describe('Menor de 16 (RF2, RF3)', () => {
     await expect(page.getByLabel('Perfil privado')).toBeDisabled();
     await expect(page.getByRole('radio', { name: /Todo mundo/ })).toBeDisabled();
     await expect(page.getByRole('radio', { name: /Mostrar tudo/ })).toBeDisabled();
-    const local = page.getByRole('switch', { name: 'Salvar minha localização' });
+    const local = page.getByRole('switch', { name: 'Guardar minha localização' });
     await expect(local).toBeDisabled();
     await expect(local).toHaveAccessibleDescription(/Disponível a partir dos 16 anos/);
     await expect(page.getByRole('switch', { name: 'Orientação sexual no perfil' })).toHaveAccessibleDescription(/Disponível a partir dos 18 anos/);
     await expect(page.getByRole('switch', { name: 'Reconhecimento facial no aparelho' })).toHaveAccessibleDescription(/Disponível a partir dos 18 anos/);
-    await expect(page.getByRole('switch', { name: 'Compartilhar com módulos Velion' })).toBeEnabled();
+    await expect(page.getByRole('switch', { name: 'Compartilhar com parceiros' })).toBeEnabled();
     await expectAccessibleInBothThemes(page, 'Privacidade (menor)');
 
     await page.goto('/configuracoes/exibicao');
@@ -278,6 +280,28 @@ test.describe('Senha e segurança (RF27)', () => {
     await expect(painel.getByRole('status').filter({ hasText: 'Verificação em duas etapas desativada.' })).toBeVisible();
     await expect(painel.getByTestId('status-2fa')).toHaveText('Desativada');
     expect(api.last('POST', /\/mfa\/disable$/)!.body).toEqual({ password: SENHA_CERTA, code: CODIGO_2FA });
+  });
+
+  test('2FA ligado em outra sessão no meio da configuração: o 409 volta ao início sem o QR velho', async ({ page, api }) => {
+    api.login();
+    await page.goto('/configuracoes/seguranca');
+    const painel = page.getByTestId('painel-2fa');
+    await painel.getByRole('button', { name: 'Ativar' }).click();
+    await painel.getByLabel('Senha atual').fill(SENHA_CERTA);
+    await painel.getByRole('button', { name: 'Continuar' }).click();
+    await expect(painel.getByRole('heading', { name: 'Leia o QR code no app autenticador' })).toBeFocused();
+    // outra sessão confirmou primeiro (MfaService.confirmSetup → 409, o fator ativo não é sobrescrito)
+    const msg = 'O 2FA já está ativo. Desative antes de configurar outro aparelho.';
+    api.on('POST', /\/mfa\/totp\/confirm$/, () => {
+      api.account.mfa = { ...api.account.mfa, enabled: true, enabledAt: new Date().toISOString(), setup: false, codes: ['abcde-fghjk'] };
+      return problem(409, msg);
+    });
+    await painel.getByLabel('Código de 6 dígitos').fill(CODIGO_2FA);
+    await painel.getByRole('button', { name: 'Confirmar e ativar' }).click();
+    await expect(painel.getByTestId('error-summary')).toBeFocused();
+    await expect(painel.getByTestId('error-summary')).toContainText(msg);
+    await expect(painel.getByTestId('status-2fa')).toHaveText('Ativada');
+    await expect(painel.getByTestId('chave-2fa')).toHaveCount(0);
   });
 
   test('gerar novos códigos pede senha e código', async ({ page, api }) => {
@@ -441,4 +465,6 @@ test('fixtures das Configurações seguem os records Java', () => {
   expect(consent.map((c) => c.purpose)).toEqual(['LOCATION_TRACKING', 'PERSONALIZED_FEED', 'SENSITIVE_PROFILE_DATA', 'FACIAL_RECOGNITION', 'MARKETING', 'THIRD_PARTY_SHARING']);
   expect(consent.every((c) => c.granted === false)).toBe(true);
   expect(Object.keys(consent[0]!).sort()).toEqual(['purpose', 'label', 'description', 'legalBasis', 'sensitive', 'granted', 'updatedAt', 'lockedForMinor'].sort());
+  // ConsentPurpose.getLegalBasis(): o código gravado em consent_event.legal_basis; a tela traduz
+  expect(consent.map((c) => c.legalBasis)).toEqual(['ART_7_I', 'ART_7_I', 'ART_11_I', 'ART_11_I', 'ART_7_I', 'ART_7_I']);
 });

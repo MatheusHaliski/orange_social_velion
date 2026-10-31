@@ -82,7 +82,7 @@ export function createApi(client: ApiClient = createClient()) {
       preferences: () => client.get<PreferencesView>('/api/v1/me/preferences'),
       updatePreferences: (patch: PreferencesPatch) => client.patch<PreferencesView>('/api/v1/me/preferences', patch),
 
-      // consentimentos (RF3): API em portagem, mesmo contrato do Friendly Eats
+      // consentimentos (RF3, ConsentController): uma chave por finalidade; desligar tem efeito imediato
       consents: () => client.get<ConsentList>('/api/v1/me/consents'),
       setConsent: (purpose: ConsentPurpose, granted: boolean) =>
         client.put<ConsentView>(`/api/v1/me/consents/${encodeURIComponent(purpose)}`, { granted }).then((r) => r.data),
@@ -96,7 +96,10 @@ export function createApi(client: ApiClient = createClient()) {
         status: () => client.get<MfaStatusView>('/api/v1/me/mfa'),
         /** Passo 1: senha (modo sudo); devolve a chave e a otpauth:// do QR code. */
         start: (body: SudoRequest) => client.post<MfaSetupView>('/api/v1/me/mfa/totp', body),
-        /** Passo 2: o código do app liga o 2FA e devolve os 10 códigos de recuperação. */
+        /**
+         * Passo 2: o código do app liga o 2FA e devolve os 10 códigos de recuperação. 409 = outra sessão ligou o 2FA
+         * depois do passo 1 (o fator ativo não é sobrescrito).
+         */
         confirm: (code: string) => client.post<RecoveryCodesView>('/api/v1/me/mfa/totp/confirm', { code }),
         regenerateCodes: (body: SudoRequest) => client.post<RecoveryCodesView>('/api/v1/me/mfa/recovery-codes', body),
         disable: (body: SudoRequest) => client.post<MfaStatusView>('/api/v1/me/mfa/disable', body),
@@ -131,6 +134,7 @@ export function createApi(client: ApiClient = createClient()) {
       comments: (id: string, after = 0, limit = 20) =>
         client.get<CommentPageView>(`${post(id)}/comments`, { query: { after, limit } }),
       comment: (id: string, body: string) => client.post<CommentCreatedView>(`${post(id)}/comments`, { body }),
+      /** 404 = outra exclusão chegou antes (o contador já desceu). */
       removeComment: (id: string, commentId: number) => client.del(`${post(id)}/comments/${seg(commentId)}`),
       share: (id: string, channel: ShareChannelCode) => client.post<ShareResultView>(`${post(id)}/shares`, { channel }),
     },

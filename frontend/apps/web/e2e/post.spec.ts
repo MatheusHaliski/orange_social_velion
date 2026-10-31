@@ -112,13 +112,19 @@ test.describe('Interações (RF26)', () => {
     await expect(page).toHaveURL(/\/entrar\?voltar=/);
   });
 
-  test('apagar duas vezes o mesmo comentário: a segunda responde 404 e a tela avisa', async ({ page, api }) => {
+  test('apagar um comentário que outra exclusão já tirou: o 404 tira da lista e a tela avisa', async ({ page, api }) => {
     api.login({ id: 205, name: 'Bruno Costa', handle: 'brunocosta' });
-    api.on('DELETE', /\/comments\/13$/, { status: 404, body: { title: 'Não encontrado', status: 404, detail: 'Comentário não encontrado.' } });
+    // o dono do post apagou antes (PostInteractionService.removeComment devolve 404 na segunda exclusão)
+    api.on('DELETE', /\/comments\/13$/, () => {
+      const id9 = [...api.posts.comments.keys()].find((k) => k.endsWith('000000000009'))!;
+      api.posts.comments.set(id9, (api.posts.comments.get(id9) ?? []).filter((c) => c.id !== 13));
+      return { status: 404, body: { title: 'Não encontrado', status: 404, detail: 'Comentário não encontrado.' } };
+    });
     await page.goto(BARIGUI);
     await page.getByRole('button', { name: 'Apagar o comentário de Bruno Costa' }).click();
     await page.getByRole('button', { name: 'Sim, apagar' }).click();
-    await expect(page.getByTestId('status-comentarios')).toHaveText('Comentário não encontrado.');
+    await expect(page.getByTestId('status-comentarios')).toHaveText('Este comentário já tinha sido apagado.');
+    await expect(page.getByRole('button', { name: 'Apagar o comentário de Bruno Costa' })).toHaveCount(0);
   });
 
   test('alerta oficial (OS-34): só compartilhar, sem moldura, fonte verificada, área, validade e o que fazer', async ({ page, api }) => {

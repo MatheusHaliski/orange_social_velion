@@ -46,6 +46,11 @@ export const SENHA_CERTA = 'uma frase longa e segura';
 export const CODIGO_2FA = '123456';
 /** Origem da URL pré-assinada do bucket (outra origem, como o Garage/S3 de verdade). */
 export const BUCKET_ORIGIN = 'http://media.localhost:3900';
+/**
+ * Bucket privado dos originais (orange-social.storage.uploads-bucket): a URL pré-assinada do PUT aponta para ele, não
+ * para o bucket público de mídias (S3MediaStorage.bucketFor, uploads/ → privado).
+ */
+export const UPLOADS_BUCKET = 'orange-social-uploads';
 /** Onde as fotos já tratadas ficam públicas (PublicLinks.mediaUrl). */
 export const MEDIA_PUBLIC = '/media-teste/';
 const AVATAR_PNG = fileURLToPath(new URL('../fixtures/avatar.png', import.meta.url));
@@ -62,7 +67,7 @@ const CATEGORY_LABELS: Record<CategoryCode, [string, string]> = {
   PRETO: ['Especial', '#0C0A07'],
 };
 
-/** Finalidades travadas para menor de 16 (PR #13): as sensíveis vão até os 18; compartilhar com a Velion não trava. */
+/** Finalidades travadas para menor de 16 (ConsentPurpose.MinorRule): as sensíveis (UNDER_18) vão até os 18; THIRD_PARTY_SHARING não trava. */
 const LOCKED_UNDER_16 = new Set(['LOCATION_TRACKING', 'PERSONALIZED_FEED', 'MARKETING', 'SENSITIVE_PROFILE_DATA', 'FACIAL_RECOGNITION']);
 
 /** Estado da conta logada: perfil, preferências, consentimentos, 2FA e sessões (Configurações, RF2 a RF23). */
@@ -183,7 +188,7 @@ export class MockApi {
       return;
     }
     const url = new URL(req.url());
-    const key = url.pathname.replace(/^\/os-media\//, '');
+    const key = url.pathname.replace(new RegExp(`^/${UPLOADS_BUCKET}/`), '');
     const headers = await req.allHeaders();
     const size = req.postDataBuffer()?.length ?? 0;
     this.account.bucketPuts.push({ url: req.url(), method: req.method(), headers, size });
@@ -344,9 +349,11 @@ export class MockApi {
         status: 201,
         body: {
           objectKey,
-          uploadUrl: `${BUCKET_ORIGIN}/os-media/${objectKey}?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Signature=teste`,
+          uploadUrl: `${BUCKET_ORIGIN}/${UPLOADS_BUCKET}/${objectKey}?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Signature=teste`,
           method: 'PUT',
-          headers: { 'Content-Type': String(body.contentType) },
+          // S3MediaStorage.presignPut devolve os cabeçalhos assinados menos o host: Content-Type e Content-Length
+          // (o navegador ignora o Content-Length do fetch, cabeçalho proibido, e manda o tamanho real do arquivo)
+          headers: { 'Content-Type': String(body.contentType), 'Content-Length': String(body.sizeBytes) },
           expiresAt: new Date(Date.now() + 15 * 60_000).toISOString(),
           maxBytes: 10 * 1024 * 1024,
         },

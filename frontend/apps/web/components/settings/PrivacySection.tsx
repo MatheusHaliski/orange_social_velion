@@ -11,7 +11,7 @@ import { ConsentSwitch } from './ConsentSwitch';
 import { CheckRow, MinorNotice, RadioPills, ResultNotice, useSavePreferences, type Result } from './PreferenceControls';
 import { SectionHeading } from './SectionHeading';
 
-/** Configurações → Privacidade (RF2 · RF3): quem vê e comenta e os 5 consentimentos opcionais. */
+/** Configurações → Privacidade (RF2 · RF3): quem vê e comenta e os 6 consentimentos opcionais (ConsentPurpose). */
 export function PrivacySection() {
   const prefs = usePreferences();
   return (

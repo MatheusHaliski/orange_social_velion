@@ -63,18 +63,29 @@ export function Comments({ post }: { post: PostDetailView }) {
     },
   });
 
+  const dropComment = (c: CommentView) =>
+    qc.setQueryData<InfiniteData<CommentPageView>>(commentsKey(post.id), (d) =>
+      d ? { ...d, pages: d.pages.map((p) => ({ ...p, items: p.items.filter((x) => x.id !== c.id), total: Math.max(0, p.total - 1) })) } : d,
+    );
+
   const remove = useMutation({
     mutationFn: (c: CommentView) => api.posts.removeComment(post.id, c.id),
     onSuccess: (_r, c) => {
-      qc.setQueryData<InfiniteData<CommentPageView>>(commentsKey(post.id), (d) =>
-        d ? { ...d, pages: d.pages.map((p) => ({ ...p, items: p.items.filter((x) => x.id !== c.id), total: Math.max(0, p.total - 1) })) } : d,
-      );
+      dropComment(c);
       setCount(Math.max(0, total - 1));
       setToDelete(null);
       setStatus('Comentário apagado.');
     },
-    onError: (e) => {
+    onError: (e, c) => {
       setToDelete(null);
+      if (isApiError(e, 404)) {
+        // outra exclusão (quem escreveu ou o dono do post) chegou antes: o servidor já tirou o comentário e
+        // baixou o contador; some da lista e a contagem vem de novo do servidor
+        dropComment(c);
+        void qc.invalidateQueries({ queryKey: commentsKey(post.id) });
+        setStatus('Este comentário já tinha sido apagado.');
+        return;
+      }
       setStatus(isApiError(e) ? e.detail : 'Não foi possível apagar agora.');
     },
   });

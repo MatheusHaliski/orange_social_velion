@@ -52,7 +52,11 @@ frontend/
   Erros viram `ApiError` com o Problem Details (`detail`, `errors[]`, `Retry-After`).
 - **⏳ Rotas que o backend ainda não tem** (a tela está pronta, o e2e simula, e sem a rota a tela diz que aguarda a
   API): `GET /api/v1/posts?feed=POST|ALERT` com os filtros dos 6 eixos, `GET /api/v1/users` (Profile Feed), os
-  campos `alert` e `trending` no card e o Audio Feed (a aba mostra "em breve").
+  campos `alert` (CAP 1.2) e `trending` no card, o texto alternativo da foto (`mediaAlt`) e o Audio Feed (a aba
+  mostra "em breve"). As pendências estão nos docs de RF (`docs/rf/RF24`, `RF25`, `RF29`) e no `docs/TRELLO_BACKLOG.md`.
+- **Fotos**: `POST /api/v1/media/uploads` devolve a URL pré-assinada do bucket **privado** `orange-social-uploads`; o
+  navegador manda o `PUT` direto para lá (CORS do `infra/garage/init.sh` libera `http://localhost:3000`) e a API grava a
+  versão limpa, sem EXIF/GPS, no bucket público de mídias.
 - **Nada de token ou dado da conta no `localStorage`**: só a preferência de tema (`os:tema`).
 - **Termos de Uso**: `/termos` é gerada no build a partir de `docs/legal/TERMOS_DE_USO.md`.
 

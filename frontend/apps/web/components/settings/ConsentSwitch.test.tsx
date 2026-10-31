@@ -2,13 +2,13 @@ import type { ConsentView } from '@orange-social/api';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, expect, it, vi } from 'vitest';
-import { ConsentSwitch, lockedText } from './ConsentSwitch';
+import { ConsentSwitch, legalBasisText, lockedText } from './ConsentSwitch';
 
 const base: ConsentView = {
   purpose: 'LOCATION_TRACKING',
-  label: 'Salvar minha localização',
-  description: 'Usada no “perto de mim” e nos alertas oficiais da região.',
-  legalBasis: 'Art. 7º, I (consentimento)',
+  label: 'Guardar minha localização',
+  description: 'Guarda a última localização do aparelho para mostrar pessoas, comunidades e eventos perto de você.',
+  legalBasis: 'ART_7_I',
   sensitive: false,
   granted: false,
   updatedAt: null,
@@ -27,9 +27,9 @@ function renderSwitch(patch: Partial<ConsentView> = {}, onToggle = vi.fn()) {
 describe('ConsentSwitch', () => {
   it('interruptor desligado, com nome, finalidade e base legal na descrição', async () => {
     const onToggle = renderSwitch();
-    const sw = screen.getByRole('switch', { name: 'Salvar minha localização' });
+    const sw = screen.getByRole('switch', { name: 'Guardar minha localização' });
     expect(sw).toHaveAttribute('aria-checked', 'false');
-    expect(sw).toHaveAccessibleDescription(/perto de mim.*Base legal:\s?Art\. 7º, I \(consentimento\)/);
+    expect(sw).toHaveAccessibleDescription(/perto de você.*Base legal:\s?LGPD Art\. 7º, I \(consentimento\)/);
     expect(screen.getByText('Desligado')).toBeInTheDocument();
     await userEvent.click(sw);
     expect(onToggle).toHaveBeenCalledWith(true);
@@ -37,7 +37,7 @@ describe('ConsentSwitch', () => {
 
   it('ligado: um toque revoga', async () => {
     const onToggle = renderSwitch({ granted: true, updatedAt: '2026-10-20T15:00:00Z' });
-    const sw = screen.getByRole('switch', { name: 'Salvar minha localização' });
+    const sw = screen.getByRole('switch', { name: 'Guardar minha localização' });
     expect(sw).toHaveAttribute('aria-checked', 'true');
     expect(screen.getByText('Ligado')).toBeInTheDocument();
     expect(screen.getByText('Alterado em 20 de outubro de 2026.')).toBeInTheDocument();
@@ -46,8 +46,9 @@ describe('ConsentSwitch', () => {
   });
 
   it('sensível mostra o selo "Dado sensível" e trava até os 18', () => {
-    renderSwitch({ purpose: 'SENSITIVE_PROFILE_DATA', label: 'Orientação sexual no perfil', sensitive: true, lockedForMinor: true });
+    renderSwitch({ purpose: 'SENSITIVE_PROFILE_DATA', label: 'Orientação sexual no perfil', legalBasis: 'ART_11_I', sensitive: true, lockedForMinor: true });
     expect(screen.getByText('Dado sensível')).toBeInTheDocument();
+    expect(screen.getByRole('switch')).toHaveAccessibleDescription(/LGPD Art\. 11, I \(consentimento específico\)/);
     expect(screen.getByRole('switch')).toHaveAccessibleDescription(/Disponível a partir dos 18 anos/);
   });
 
@@ -59,6 +60,7 @@ describe('ConsentSwitch', () => {
     await userEvent.click(sw);
     expect(onToggle).not.toHaveBeenCalled();
     expect(lockedText({ sensitive: true })).toBe('Disponível a partir dos 18 anos');
+    expect(legalBasisText('ART_99')).toBe('ART_99');
   });
 
   it('enquanto salva fica ocupado e ignora outro toque', async () => {
