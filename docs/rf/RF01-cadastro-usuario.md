@@ -53,6 +53,9 @@ paths:
 6. O cadastro já abre a sessão; um código de 6 dígitos vai por e-mail (30 min, 5 tentativas, reenvio 1/min)
    e confirmar leva a conta a `ACTIVE`. Sem confirmar, a pessoa lê mas não interage (403).
 7. Todos os erros de validação voltam juntos (`422` com `errors[]`) para o formulário marcar cada campo.
+8. **Cadastros simultâneos** com o mesmo e-mail ou `@usuário` (duas abas, clique duplo, robô): todos passam pela
+   checagem prévia, mas as chaves únicas do banco (`uk_vsusercontrolist_email`, `uk_vsusercontrolist_handle`) deixam
+   entrar só um; os outros recebem `409`, nunca `500`, e nada fica gravado pela metade.
 
 ## Caso de uso
 
@@ -92,6 +95,10 @@ sequenceDiagram
     else ok
         R->>DB: BEGIN
         R->>DB: INSERT "VSusercontrolist" (PENDING_VERIFICATION, type_details, selo)
+        alt outro cadastro com o mesmo e-mail ou @ entrou antes (corrida)
+            DB-->>R: violação de chave única (23505) · ROLLBACK
+            R-->>V: 409 (ApiExceptionHandler)
+        end
         R->>DB: INSERT terms_acceptance (TERMS_OF_USE, 2026-10-17)
         R->>DB: INSERT consent_event × 6 (granted = false)
         R->>DB: INSERT user_preference (padrões · protetivos se menor de 16)
@@ -184,7 +191,8 @@ Fluxo de atividades geral do cadastro: [`DIAGRAMA_ATIVIDADES.md`](../DIAGRAMA_AT
 | Regras | `RegistrationService`, `UserTypeDetailsValidator`, `AgePolicy`, `PasswordPolicy`, `EmailVerificationService`, `LegalDocuments` | ✅ |
 | Persistência | `V1__baseline.sql`, `V3__auth_terms_mfa_deletion.sql` (handle, type_details, selo, `terms_acceptance`) | ✅ |
 | API | `POST /api/v1/auth/register`, `GET /api/v1/legal/terms`, `POST /api/v1/me/verify-email` (+ `/resend`), `POST /api/v1/me/terms` | ✅ |
-| Testes | `AccountRulesTest` (CNPJ alfanumérico, senha, campos por tipo), `AuthApiIT.registerWithChosenTypeAndTermsStartsASessionThatAnIncognitoWindowDoesNotSee`, `AuthApiIT.registrationRulesTermsTypeFieldsAgeAndUniqueness`, `AuthApiIT.minorsKeepProtectiveDefaults` | ✅ |
+| Testes | `AccountRulesTest` (CNPJ alfanumérico, senha, campos por tipo), `AuthApiIT.registerWithChosenTypeAndTermsStartsASessionThatAnIncognitoWindowDoesNotSee`, `AuthApiIT.registrationRulesTermsTypeFieldsAgeAndUniqueness`, `AuthApiIT.minorsKeepProtectiveDefaults`, `AuthApiIT.simultaneousRegistrationsWithTheSameEmailOrHandleCreateOneAccountAndTheRestGet409` (6 cadastros ao mesmo tempo: um 201, o resto 409) | ✅ |
+| Corrida | `ApiExceptionHandler.race`: chave única violada (SQLState 23505) ou lock otimista → `409`; CHECK ou FK violado continua `500` e vai para o log | ✅ |
 | Termos | [`docs/legal/TERMOS_DE_USO.md`](../legal/TERMOS_DE_USO.md) — preencher os `{{…}}` e passar por revisão jurídica | 🟡 |
 | Pendências | e-mail transacional real (OS-12); eliminar cadastro não confirmado em 7 dias; vínculo do responsável (OS-49); consulta automática de CNPJ | ⏳ |
 | Tela | Protótipo sobre o mosaico laranja com o logo oficial: [14-cadastro](../../design/prototype/screens/14-cadastro.png) (dados + escolha do tipo, cor + glifo + rótulo) e [15-cadastro-termos](../../design/prototype/screens/15-cadastro-termos.png) (campos do tipo + caixa dos Termos **desmarcada**; "Criar conta" só habilita depois do aceite) | ✅ protótipo |

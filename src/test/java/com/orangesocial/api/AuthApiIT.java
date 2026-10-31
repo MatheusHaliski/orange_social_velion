@@ -137,6 +137,17 @@ class AuthApiIT {
     // ------------------------------------------------------------ login, limite de tentativas e logout
 
     @Test
+    void simultaneousRegistrationsWithTheSameEmailOrHandleCreateOneAccountAndTheRestGet409() {
+        // a checagem existsBy… passa em todas; a chave única do banco barra as outras, que recebem 409 (antes, 500)
+        assertThat(concurrentRegistrations(i -> registration("eva@example.com", "eva" + i, "VERDE", "1995-03-10", Map.of())))
+                .isSubsetOf(201, 409).containsOnlyOnce(201);
+        assertThat(concurrentRegistrations(i -> registration("eva" + i + "@example.com", "eva.unica", "VERDE", "1995-03-10", Map.of())))
+                .isSubsetOf(201, 409).containsOnlyOnce(201);
+        assertThat(jdbc.queryForObject("SELECT count(*) FROM \"VSusercontrolist\" WHERE email = 'eva@example.com' "
+                + "OR handle = 'eva.unica'", Integer.class)).isEqualTo(2);
+    }
+
+    @Test
     void wrongPasswordIsNeutralThenThrottledAndLogoutKillsTheSessionEverywhere() {
         register("bia@example.com", "bia");
         ApiClient attacker = new ApiClient(port);
@@ -350,6 +361,19 @@ class AuthApiIT {
     }
 
     // ------------------------------------------------------------ apoio
+
+    /** Manda 6 cadastros ao mesmo tempo (cada um com sessão e CSRF próprios) e devolve os status. */
+    private List<Integer> concurrentRegistrations(java.util.function.IntFunction<Map<String, Object>> body) {
+        List<ApiClient> tabs = new java.util.ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            ApiClient tab = new ApiClient(port);
+            tab.get("/api/v1/auth/csrf");
+            tabs.add(tab);
+        }
+        return java.util.stream.IntStream.range(0, tabs.size()).parallel()
+                .mapToObj(i -> tabs.get(i).post("/api/v1/auth/register", body.apply(i)).getStatusCode().value())
+                .toList();
+    }
 
     /** Abre {@code n} logins na etapa do 2FA e manda o mesmo código em todos ao mesmo tempo; devolve quantos entraram. */
     private int concurrentSecondFactor(String code, int n) throws Exception {
