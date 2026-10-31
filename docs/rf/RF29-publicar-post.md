@@ -197,8 +197,8 @@ stateDiagram-v2
     Expirado --> [*]
     Apagado --> [*]
     note right of Enviado
-        uploads/{autor}/… é privado:
-        nunca aparece em mediaUrl
+        uploads/{autor}/… fica no bucket PRIVADO de uploads,
+        nunca no de mídias públicas, e nunca aparece em mediaUrl
     end note
 ```
 
@@ -240,7 +240,7 @@ flowchart TD
 | Foto · ao apagar | `PostPublishingService.remove` apaga a foto do bucket depois do commit; a eliminação da conta faz o mesmo com todas as fotos ([RF23](RF23-direitos-titular-lgpd.md)) | ✅ |
 | Foto · testes | `ImageSanitizerTest` (EXIF/GPS some, 8 orientações, redução, PNG com transparência, "bomba" e arquivo falso); `PostPublishingApiIT` com Garage real: envio pré-assinado, chave alheia, tamanho fora da assinatura, arquivo que não é foto, apagar | ✅ |
 | Ambiente | Garage no Compose e nos testes (`support/GarageContainer`), iniciado pela Admin API v2 (`infra/garage/init.sh`); leitura pública em `:3902` no papel da CDN | ✅ |
-| Bucket em dev | `infra/garage/init.sh`: envios em `uploads/` expiram em 1 dia (lifecycle) e o CORS libera `PUT`/`GET` da origem web (`WEB_ORIGIN`) | ✅ |
+| Buckets | **Dois buckets**: o original enviado pelo app (`uploads/…`, com EXIF/GPS e dono ainda não conferido) vai para o bucket **privado** `orange-social.storage.uploads-bucket`; o bucket de mídias, com leitura pública (CDN; em dev a leitura pública do Garage), só recebe as versões limpas (`posts/`, `avatars/`, `backgrounds/`). `S3MediaStorage.bucketFor` escolhe pelo prefixo e recusa subir com os dois iguais. Em dev, `infra/garage/init.sh` cria os dois, liga a leitura pública só no de mídias, faz os originais expirarem em 1 dia e libera o `PUT` da origem web (`WEB_ORIGIN`) no de uploads; `S3MediaStorageTest` e `PostPublishingApiIT` (a URL de envio aponta para o bucket privado) | ✅ |
 | Foto · próximos | AVIF/WebP e miniaturas (imgproxy, ADR-05), moderação antes de publicar, as mesmas regras de bucket na produção (infraestrutura como código) | ⏳ |
 | Vídeo | Processamento que tira metadados e gera o pôster | ⏳ |
 | Áudio e alerta | Audio Feed (OS-24) e Alert Feed só para fontes verificadas (OS-25) | ⏳ |

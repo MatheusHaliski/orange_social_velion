@@ -17,13 +17,15 @@ import java.util.regex.Pattern;
 
 /**
  * Garage (API S3) dos testes de integração, com a mesma configuração do docker-compose ({@code infra/garage/garage.toml}).
- * A inicialização repete o {@code infra/garage/init.sh} pela Admin API v2: layout de nó único, bucket e a chave de
+ * A inicialização repete o {@code infra/garage/init.sh} pela Admin API v2: layout de nó único, os dois buckets (mídias e o privado de uploads) e a chave de
  * desenvolvimento. Idempotente, para funcionar com container reutilizado.
  */
 public class GarageContainer extends GenericContainer<GarageContainer> {
 
     static final String IMAGE = "dxflrs/garage:v2.4.1";
     public static final String BUCKET = "orange-social-media";
+    /** Privado: originais enviados pelo app. */
+    public static final String UPLOADS_BUCKET = "orange-social-uploads";
     public static final String REGION = "sa-east-1";
     public static final String ACCESS_KEY = "GK6f72616e6765646576000000";
     public static final String SECRET_KEY = "6f72616e67652d736f6369616c2d6465762d6f6e6c7900000000000000000000";
@@ -52,16 +54,18 @@ public class GarageContainer extends GenericContainer<GarageContainer> {
                     + "\",\"zone\":\"dc1\",\"capacity\":1000000000,\"tags\":[]}]}");
             admin("POST", "/v2/ApplyClusterLayout", "{\"version\":1}");
         }
-        if (status("/v2/GetBucketInfo?globalAlias=" + BUCKET) == 404) {
-            admin("POST", "/v2/CreateBucket", "{\"globalAlias\":\"" + BUCKET + "\"}");
-        }
-        String bucketId = match(FIRST_ID, admin("GET", "/v2/GetBucketInfo?globalAlias=" + BUCKET, null));
         if (status("/v2/GetKeyInfo?id=" + ACCESS_KEY) == 404) {
             admin("POST", "/v2/ImportKey", "{\"name\":\"orange-it\",\"accessKeyId\":\"" + ACCESS_KEY
                     + "\",\"secretAccessKey\":\"" + SECRET_KEY + "\"}");
         }
-        admin("POST", "/v2/AllowBucketKey", "{\"bucketId\":\"" + bucketId + "\",\"accessKeyId\":\"" + ACCESS_KEY
-                + "\",\"permissions\":{\"read\":true,\"write\":true,\"owner\":true}}");
+        for (String bucket : new String[]{BUCKET, UPLOADS_BUCKET}) {
+            if (status("/v2/GetBucketInfo?globalAlias=" + bucket) == 404) {
+                admin("POST", "/v2/CreateBucket", "{\"globalAlias\":\"" + bucket + "\"}");
+            }
+            String bucketId = match(FIRST_ID, admin("GET", "/v2/GetBucketInfo?globalAlias=" + bucket, null));
+            admin("POST", "/v2/AllowBucketKey", "{\"bucketId\":\"" + bucketId + "\",\"accessKeyId\":\"" + ACCESS_KEY
+                    + "\",\"permissions\":{\"read\":true,\"write\":true,\"owner\":true}}");
+        }
     }
 
     private String admin(String method, String path, String json) {

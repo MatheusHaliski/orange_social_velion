@@ -67,6 +67,7 @@ public class PolyglotContainers {
             registry.add("orange-social.storage.presign-endpoint", garage::s3Endpoint);
             registry.add("orange-social.storage.region", () -> GarageContainer.REGION);
             registry.add("orange-social.storage.bucket", () -> GarageContainer.BUCKET);
+            registry.add("orange-social.storage.uploads-bucket", () -> GarageContainer.UPLOADS_BUCKET);
             registry.add("orange-social.storage.access-key", () -> GarageContainer.ACCESS_KEY);
             registry.add("orange-social.storage.secret-key", () -> GarageContainer.SECRET_KEY);
         };

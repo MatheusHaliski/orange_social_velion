@@ -7,6 +7,7 @@ import com.orangesocial.domain.model.UserCategoryEnum;
 import com.orangesocial.domain.model.UserControlList;
 import com.orangesocial.infrastructure.persistence.postgres.UserControlListRepository;
 import com.orangesocial.support.ApiClient;
+import com.orangesocial.support.GarageContainer;
 import com.orangesocial.support.CapturingNotifier;
 import com.orangesocial.support.PolyglotContainers;
 import com.orangesocial.support.TestImages;
@@ -219,6 +220,9 @@ class PostPublishingApiIT {
         String uploadKey = (String) ticket.get("objectKey");
         assertThat(uploadKey).startsWith("uploads/" + author.getId() + "/").endsWith(".jpg");
         assertThat(ticket).containsEntry("method", "PUT").containsKey("expiresAt");
+        // o original (com EXIF/GPS) vai para o bucket privado de uploads, nunca para o de mídias públicas
+        assertThat((String) ticket.get("uploadUrl")).contains("/" + GarageContainer.UPLOADS_BUCKET + "/uploads/")
+                .doesNotContain("/" + GarageContainer.BUCKET + "/");
         assertThat(putToBucket(ticket, photo)).isEqualTo(200);
 
         // a chave é de Ana: outra conta não publica com ela (mesma resposta de "não existe")

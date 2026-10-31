@@ -33,6 +33,11 @@ import java.util.Optional;
  * igual no Garage e na AWS. A URL pré-assinada pode usar outro endereço ({@code presign-endpoint}): o app fala
  * com o bucket pela rede interna, e o celular, pelo endereço público.
  *
+ * <p>Dois buckets: os originais enviados pelo app ({@code uploads/…}, com EXIF/GPS e ainda sem dono conferido)
+ * ficam num bucket <b>privado</b>; o bucket de mídias, servido publicamente pela CDN (ou pela leitura pública do
+ * Garage em dev), só recebe as versões limpas ({@code posts/}, {@code avatars/}, {@code backgrounds/}). Assim nada
+ * em {@code uploads/} é legível sem passar pela conferência de dono e pelo {@code ImageSanitizer}.
+ *
  * <p>Sem chave de acesso configurada, as credenciais vêm da cadeia padrão da AWS (papel da instância, variáveis
  * {@code AWS_*}); nada de segredo no yml.
  */
@@ -40,8 +45,10 @@ import java.util.Optional;
 public class S3MediaStorage implements MediaStorage {
 
     private static final List<String> UNSIGNED_FOR_CLIENT = List.of("host");
+    static final String UPLOADS_PREFIX = "uploads/";
 
     private final String bucket;
+    private final String uploadsBucket;
     private final S3Client s3;
     private final S3Presigner presigner;
 
@@ -49,9 +56,15 @@ public class S3MediaStorage implements MediaStorage {
                           @Value("${orange-social.storage.presign-endpoint:${orange-social.storage.endpoint}}") String presignEndpoint,
                           @Value("${orange-social.storage.region}") String region,
                           @Value("${orange-social.storage.bucket}") String bucket,
+                          @Value("${orange-social.storage.uploads-bucket}") String uploadsBucket,
                           @Value("${orange-social.storage.access-key:}") String accessKey,
                           @Value("${orange-social.storage.secret-key:}") String secretKey) {
+        if (bucket.equals(uploadsBucket)) {
+            throw new IllegalStateException("orange-social.storage.uploads-bucket precisa ser diferente do bucket público "
+                    + "de mídias: os originais em uploads/ não podem ficar legíveis.");
+        }
         this.bucket = bucket;
+        this.uploadsBucket = uploadsBucket;
         AwsCredentialsProvider credentials = accessKey.isBlank()
                 ? DefaultCredentialsProvider.builder().build()
                 : StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey));
@@ -81,7 +94,7 @@ public class S3MediaStorage implements MediaStorage {
     public PresignedUpload presignPut(String objectKey, String contentType, long sizeBytes, Duration ttl) {
         PresignedPutObjectRequest signed = presigner.presignPutObject(p -> p
                 .signatureDuration(ttl)
-                .putObjectRequest(r -> r.bucket(bucket).key(objectKey)
+                .putObjectRequest(r -> r.bucket(bucketFor(objectKey)).key(objectKey)
                         .contentType(contentType)
                         .contentLength(sizeBytes)));
         Map<String, String> headers = new LinkedHashMap<>();
@@ -97,7 +110,7 @@ public class S3MediaStorage implements MediaStorage {
     @Override
     public Optional<StoredObject> head(String objectKey) {
         try {
-            HeadObjectResponse head = s3.headObject(r -> r.bucket(bucket).key(objectKey));
+            HeadObjectResponse head = s3.headObject(r -> r.bucket(bucketFor(objectKey)).key(objectKey));
             return Optional.of(new StoredObject(head.contentType(), head.contentLength()));
         } catch (NoSuchKeyException e) {
             return Optional.empty();
@@ -111,12 +124,12 @@ public class S3MediaStorage implements MediaStorage {
 
     @Override
     public byte[] read(String objectKey) {
-        return s3.getObjectAsBytes(r -> r.bucket(bucket).key(objectKey)).asByteArray();
+        return s3.getObjectAsBytes(r -> r.bucket(bucketFor(objectKey)).key(objectKey)).asByteArray();
     }
 
     @Override
     public void write(String objectKey, byte[] bytes, String contentType) {
-        s3.putObject(r -> r.bucket(bucket).key(objectKey).contentType(contentType)
+        s3.putObject(r -> r.bucket(bucketFor(objectKey)).key(objectKey).contentType(contentType)
                         // a chave nunca muda: a CDN e o app guardam o arquivo por um ano
                         .cacheControl("public, max-age=31536000, immutable"),
                 RequestBody.fromBytes(bytes));
@@ -124,7 +137,12 @@ public class S3MediaStorage implements MediaStorage {
 
     @Override
     public void delete(String objectKey) {
-        s3.deleteObject(r -> r.bucket(bucket).key(objectKey));
+        s3.deleteObject(r -> r.bucket(bucketFor(objectKey)).key(objectKey));
+    }
+
+    /** Originais no bucket privado; versões limpas no público. */
+    String bucketFor(String objectKey) {
+        return objectKey.startsWith(UPLOADS_PREFIX) ? uploadsBucket : bucket;
     }
 
     @PreDestroy
