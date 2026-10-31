@@ -127,6 +127,39 @@ test.describe('Interações (RF26)', () => {
     await expect(page.getByRole('button', { name: 'Apagar o comentário de Bruno Costa' })).toHaveCount(0);
   });
 
+  test('comentar com páginas ainda por carregar não duplica: o novo chega no fim, na sua vez', async ({ page, api }) => {
+    api.login({ id: 205, name: 'Bruno Costa', handle: 'brunocosta' });
+    // a API real devolve os comentários em ordem crescente de id, de 1 em 1 aqui para haver páginas pendentes
+    const id = [...api.posts.comments.keys()].find((k) => k.endsWith('000000000009'))!;
+    const first = api.posts.comments.get(id)![0]!;
+    const other = { id: 42, name: 'Ana Ribeiro', category: first.author.category, avatarUrl: null, profilePath: '/api/v1/users/42/profile', available: true };
+    api.posts.comments.set(id, [first, { ...first, id: first.id + 1, author: other, body: 'Que pôr do sol!', canDelete: false }]);
+    api.on('GET', /\/posts\/[^/]+\/comments$/, (req) => {
+      const all = api.posts.comments.get(id) ?? [];
+      const after = Number(req.search.get('after') ?? 0);
+      const items = all.filter((c) => c.id > after).slice(0, 1).map((c) => ({ ...c, canDelete: c.author.id === 205 }));
+      const last = items.at(-1);
+      const more = last ? all.some((c) => c.id > last.id) : false;
+      return { status: 200, body: { items, nextAfter: more ? last!.id : null, total: all.length } };
+    });
+    await page.goto(BARIGUI);
+    const comentarios = page.getByTestId('comentarios');
+    await expect(comentarios.getByTestId('comentario')).toHaveCount(1);
+    await comentarios.getByLabel('Seu comentário').fill('Chego no fim da fila');
+    await comentarios.getByRole('button', { name: 'Enviar comentário' }).click();
+    await expect(page.getByTestId('status-comentarios')).toHaveText('Comentário publicado. 3 comentários.');
+    // ainda há página por carregar: o novo não entra fora de ordem
+    await expect(comentarios.getByTestId('comentario')).toHaveCount(1);
+    const mais = comentarios.getByRole('button', { name: 'Carregar mais comentários' });
+    await mais.click();
+    await expect(comentarios.getByTestId('comentario')).toHaveCount(2);
+    await mais.click();
+    await expect(comentarios.getByTestId('comentario')).toHaveCount(3);
+    await expect(mais).toHaveCount(0);
+    await expect(comentarios.getByTestId('comentario').last()).toContainText('Chego no fim da fila');
+    await expect(comentarios.getByText('Chego no fim da fila')).toHaveCount(1);
+  });
+
   test('alerta oficial (OS-34): só compartilhar, sem moldura, fonte verificada, área, validade e o que fazer', async ({ page, api }) => {
     api.login();
     await page.goto(ALERTA);

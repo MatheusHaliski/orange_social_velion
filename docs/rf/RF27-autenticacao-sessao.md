@@ -74,7 +74,9 @@ paths:
 2. **Aba anônima abre deslogada.** Ela tem cookies próprios e não herda a sessão da janela normal. Fechar o navegador encerra a sessão; o servidor a mata depois de 60 min ociosa ou 24 h de vida, mesmo se o navegador "restaurar" o cookie.
 3. **Sair** (`POST /api/v1/auth/logout`) invalida a sessão no servidor:
    - outras abas da mesma janela recebem 401 na próxima chamada;
-   - o app avisa as abas abertas via `BroadcastChannel('orange-auth')`.
+   - o app avisa as abas abertas via `BroadcastChannel('orange-auth')`;
+   - o app só esquece a sessão local quando o servidor confirma (`204`) ou já não a reconhece (`401`); falha de rede ou
+     `5xx` mantém a pessoa conectada e avisa "Não foi possível sair agora", para tentar de novo.
 4. **Login em etapas:** senha → código do 2FA, se ativo → oferta de reativação, se a conta estiver em exclusão ([RF23](RF23-direitos-titular-lgpd.md)) → sessão com **id novo**. A meia-sessão não acessa nada e expira em 5 min / 5 tentativas.
 5. **Mensagens neutras** ("E-mail ou senha incorretos.") e o mesmo custo de hash para e-mail inexistente.
 6. **Limite de tentativas:**
@@ -171,7 +173,8 @@ stateDiagram-v2
     SenhaConferida --> Autenticada : código válido (id de sessão novo)
     SenhaConferida --> Visitante : 5 erros ou 5 min
     OfertaReativacao --> Autenticada : reativar
-    Autenticada --> Visitante : Sair · fechar navegador · 60 min ocioso · 24 h
+    Autenticada --> Visitante : Sair confirmado (204 ou 401) · fechar navegador · 60 min ocioso · 24 h
+    Autenticada --> Autenticada : Sair falhou (rede ou 5xx) · avisa e deixa tentar de novo
     Autenticada --> Visitante : encerrada em outro aparelho / troca de senha / exclusão
     note right of Autenticada
         Cookie sem Max-Age, HttpOnly, SameSite=Lax.
@@ -261,7 +264,7 @@ flowchart LR
 | Persistência | `user_mfa`, `user_recovery_code` (V3); sessões no Valkey `orange:session` | ✅ |
 | API | `/api/v1/auth/{csrf,session,register,login,login/2fa,reactivate,logout}`; `/api/v1/me/{password,sessions,mfa,…}` | ✅ |
 | Testes | `TotpTest` (vetores da RFC 6238, cifra, timeout absoluto); `AuthApiIT` (aba anônima, cookie, CSRF, limite, logout entre abas, 2FA com anti-replay e códigos de recuperação, sessões; `secondFactorIsSingleUseUnderConcurrencyAndSetupNeverOverwritesAnActiveFactor`: 8 logins simultâneos com o mesmo código TOTP e de recuperação entram só uma vez, e duas configurações concorrentes dão 409 na segunda) | ✅ |
-| Casca do app web | `frontend/packages/api` (cliente com sessão e CSRF, tipos a partir dos records Java, `client.test.ts`), `app/layout.tsx` (pt-BR, "pular para o conteúdo"), `SiteHeader` (mark oficial, sair avisando as outras abas), `Providers`, `lib/api.ts`, `lib/queries.ts` (sessão; sem sessão → `/entrar?voltar=`), `lib/use-leave.ts`, `lib/safe-redirect.ts`, `next.config.ts` (repasse `/api` e cabeçalhos de segurança, sem `connect-src`: o `PUT` da foto vai direto ao bucket de outra origem); `e2e/casca.spec.ts` e a API simulada `e2e/support/*` (sessão, CSRF, Problem Details, bucket com CORS e assinatura) | ✅ web (OS-39 parcial: só `apps/web`) |
-| Telas (app web) | `/entrar` (`LoginView`, `lib/use-countdown.ts`), `/configuracoes/seguranca` (`SecuritySection`, `MfaPanel`, `QrCode`, `RecoveryCodes`, `SudoFields`); `e2e/entrar.spec.ts` (11 testes: CSRF antes da primeira escrita, senha errada, 2FA, reativar ou manter, 429, `voltar` externo ignorado, sair entre abas, axe) e `e2e/configuracoes.spec.ts` (2FA de ponta a ponta, `409` com outra sessão, novos códigos, trocar senha e encerrar sessões) | ✅ web · ⏳ mobile (OS-39) |
+| Casca do app web | `frontend/packages/api` (cliente com sessão e CSRF, tipos a partir dos records Java, `client.test.ts`), `app/layout.tsx` (pt-BR, "pular para o conteúdo"), `SiteHeader` (mark oficial, sair avisando as outras abas; falha de rede ou 5xx no sair não esquece a sessão), `Providers`, `lib/api.ts`, `lib/queries.ts` (sessão; sem sessão → `/entrar?voltar=`), `lib/use-leave.ts`, `lib/safe-redirect.ts`, `next.config.ts` (repasse `/api` e cabeçalhos de segurança, sem `connect-src`: o `PUT` da foto vai direto ao bucket de outra origem); `e2e/casca.spec.ts` e a API simulada `e2e/support/*` (sessão, CSRF, Problem Details, bucket com CORS e assinatura) | ✅ web (OS-39 parcial: só `apps/web`) |
+| Telas (app web) | `/entrar` (`LoginView`, `lib/use-countdown.ts`), `/configuracoes/seguranca` (`SecuritySection`, `MfaPanel`, `QrCode`, `RecoveryCodes`, `SudoFields`); `e2e/entrar.spec.ts` (12 testes: CSRF antes da primeira escrita, senha errada, 2FA, reativar ou manter, 429, `voltar` externo ignorado, sair entre abas, sair que falha não desloga, axe) e `e2e/configuracoes.spec.ts` (2FA de ponta a ponta, `409` com outra sessão, novos códigos, trocar senha e encerrar sessões) | ✅ web · ⏳ mobile (OS-39) |
 | Pendências | passkeys/WebAuthn; "lembrar este navegador por 30 dias"; e-mail transacional (OS-12); CAPTCHA após 20 falhas/24 h; SSO Velion via Keycloak (OS-13) | ⏳ OS-61, OS-62 |
 | Tela | Protótipo: [13-login](../../design/prototype/screens/13-login.png) sobre o mosaico com o logo oficial, [16-login-2fa](../../design/prototype/screens/16-login-2fa.png), [17-seguranca](../../design/prototype/screens/17-seguranca.png) (2FA ativada, sessões por aparelho, "Sair" em cada uma, "Sair de todos os outros", "Sair desta conta" avisando as outras abas via `BroadcastChannel`) | ✅ protótipo |

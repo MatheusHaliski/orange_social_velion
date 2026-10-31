@@ -1,9 +1,11 @@
 'use client';
 
+import { isApiError } from '@orange-social/api';
 import { useMutation } from '@tanstack/react-query';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 import { api } from '@/lib/api';
 import { useSession } from '@/lib/queries';
 import { useLeaveAccount } from '@/lib/use-leave';
@@ -14,8 +16,16 @@ function SessionLinks() {
   const { data: user, isPending } = useSession();
   const pathname = usePathname();
   const leave = useLeaveAccount();
-  // sair encerra a sessão no servidor; as outras abas descobrem pelo BroadcastChannel (RF27)
-  const logout = useMutation({ mutationFn: () => api.auth.logout(), onSettled: () => leave('/entrar') });
+  const [logoutFailed, setLogoutFailed] = useState(false);
+  // sair encerra a sessão no servidor; as outras abas descobrem pelo BroadcastChannel (RF27). Só esquece a sessão
+  // local depois que o servidor confirmou (ou disse que ela já não existe, 401): com erro de rede ou 5xx a sessão
+  // continua válida no servidor, então a pessoa vê o aviso e tenta de novo.
+  const logout = useMutation({
+    mutationFn: () => api.auth.logout(),
+    onMutate: () => setLogoutFailed(false),
+    onSuccess: () => leave('/entrar'),
+    onError: (e) => (isApiError(e, 401) ? leave('/entrar') : setLogoutFailed(true)),
+  });
   if (isPending) return <span className="inline-block h-11 w-24" aria-hidden="true" />;
   if (!user) {
     return (
@@ -50,6 +60,9 @@ function SessionLinks() {
         <IconLogout size={18} />
         <span className="sr-only md:not-sr-only">Sair</span>
       </button>
+      <span role="status" aria-live="polite" className={logoutFailed ? 'basis-full text-right text-sm text-error' : 'sr-only'} data-testid="sair-erro">
+        {logoutFailed ? 'Não foi possível sair agora. Você continua conectado; tente de novo.' : ''}
+      </span>
     </>
   );
 }

@@ -120,6 +120,21 @@ test.describe('Entrar (RF27)', () => {
     await expect(outra.getByTestId('link-entrar')).toBeVisible();
   });
 
+  test('sair que falha (rede ou 5xx) não esquece a sessão: avisa e deixa tentar de novo', async ({ page, api }) => {
+    api.login();
+    let falhas = 1;
+    api.on('POST', /\/auth\/logout$/, () =>
+      falhas-- > 0 ? problem(503, 'Serviço indisponível.') : { status: 204, body: null },
+    );
+    await page.goto('/');
+    await page.getByTestId('sair').click();
+    await expect(page.getByTestId('sair-erro')).toHaveText('Não foi possível sair agora. Você continua conectado; tente de novo.');
+    await expect(page).not.toHaveURL(/\/entrar$/);
+    await expect(page.getByTestId('link-configuracoes')).toBeVisible();
+    await page.getByTestId('sair').click();
+    await expect(page).toHaveURL(/\/entrar$/);
+  });
+
   test('o login fica sobre o mosaico da marca, com o logo oficial', async ({ page }) => {
     await page.goto('/entrar');
     const fundo = await page.locator('.os-auth-bg').evaluate((el) => getComputedStyle(el).backgroundImage);
