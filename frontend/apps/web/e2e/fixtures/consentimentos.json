@@ -1,0 +1,64 @@
+{
+  "items": [
+    {
+      "purpose": "LOCATION_TRACKING",
+      "label": "Salvar minha localização",
+      "description": "Guarda a última localização do aparelho para o “perto de mim” e os alertas da região.",
+      "legalBasis": "Art. 7º, I (consentimento)",
+      "sensitive": false,
+      "granted": false,
+      "updatedAt": null,
+      "lockedForMinor": false
+    },
+    {
+      "purpose": "PERSONALIZED_FEED",
+      "label": "Feed personalizado",
+      "description": "Usa o que você curte e salva para ordenar os feeds.",
+      "legalBasis": "Art. 7º, I (consentimento)",
+      "sensitive": false,
+      "granted": false,
+      "updatedAt": null,
+      "lockedForMinor": false
+    },
+    {
+      "purpose": "SENSITIVE_PROFILE_DATA",
+      "label": "Orientação sexual no perfil",
+      "description": "Permite guardar a orientação sexual no seu perfil. Dado sensível.",
+      "legalBasis": "Art. 11, I (consentimento específico)",
+      "sensitive": true,
+      "granted": false,
+      "updatedAt": null,
+      "lockedForMinor": false
+    },
+    {
+      "purpose": "FACIAL_RECOGNITION",
+      "label": "Reconhecimento facial no aparelho",
+      "description": "Sugere marcações em fotos com um modelo que roda só no seu aparelho.",
+      "legalBasis": "Art. 11, I (consentimento específico)",
+      "sensitive": true,
+      "granted": false,
+      "updatedAt": null,
+      "lockedForMinor": false
+    },
+    {
+      "purpose": "MARKETING",
+      "label": "Ofertas e novidades",
+      "description": "E-mails e avisos sobre novidades da Velion e de parceiros.",
+      "legalBasis": "Art. 7º, I (consentimento)",
+      "sensitive": false,
+      "granted": false,
+      "updatedAt": null,
+      "lockedForMinor": false
+    },
+    {
+      "purpose": "THIRD_PARTY_SHARING",
+      "label": "Compartilhar com módulos Velion",
+      "description": "Leva dados do perfil para FriendlyEats, Sports, Points e Trophies.",
+      "legalBasis": "Art. 7º, I (consentimento)",
+      "sensitive": false,
+      "granted": false,
+      "updatedAt": null,
+      "lockedForMinor": false
+    }
+  ]
+}

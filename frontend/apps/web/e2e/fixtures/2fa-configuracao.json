@@ -1,0 +1,7 @@
+{
+  "secret": "JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP",
+  "otpauthUri": "otpauth://totp/Orange%20Social:ana%40example.com?secret=JBSWY3DPEHPK3PXPJBSWY3DPEHPK3PXP&issuer=Orange%20Social&algorithm=SHA1&digits=6&period=30",
+  "issuer": "Orange Social",
+  "account": "ana@example.com",
+  "expiresAt": "2026-10-25T14:10:00Z"
+}

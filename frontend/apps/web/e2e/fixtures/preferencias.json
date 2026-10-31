@@ -1,0 +1,21 @@
+{
+  "theme": "SYSTEM",
+  "appBackground": "PLAIN",
+  "language": "pt-BR",
+  "fontScale": 100,
+  "reduceMotion": false,
+  "profilePrivate": false,
+  "whoCanComment": "EVERYONE",
+  "showBirthYear": false,
+  "defaultFeed": "POST",
+  "sensitiveContent": "LIMIT",
+  "usageReminderMinutes": null,
+  "notifications": {
+    "likes": true,
+    "comments": true,
+    "shares": true,
+    "officialAlerts": true
+  },
+  "loginAlerts": true,
+  "minorProtectionsLocked": false
+}

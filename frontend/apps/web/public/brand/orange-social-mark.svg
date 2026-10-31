@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="168 146 176 208" role="img" aria-labelledby="t">
+  <title id="t">Orange Social</title>
+  <defs>
+    <radialGradient id="disc" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#FF8F3A"/>
+      <stop offset=".55" stop-color="#F27A22"/>
+      <stop offset=".82" stop-color="#A9672C"/>
+      <stop offset="1" stop-color="#6E5236"/>
+    </radialGradient>
+    <linearGradient id="fruit" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#FFA24A"/>
+      <stop offset=".55" stop-color="#FF7A1F"/>
+      <stop offset="1" stop-color="#F0610F"/>
+    </linearGradient>
+  </defs>
+  <g id="orange">
+    <!-- folha e cabinho -->
+    <path d="M256 196c-2-12-8-22-17-28" fill="none" stroke="#FFFFFF" stroke-width="15" stroke-linecap="round"/>
+    <path d="M262 190c8-26 34-40 64-36-6 28-32 44-64 36z" fill="#FFFFFF" stroke="#FFFFFF" stroke-width="12" stroke-linejoin="round"/>
+    <path d="M256 196c-2-12-8-22-17-28" fill="none" stroke="#6B3E1F" stroke-width="7" stroke-linecap="round"/>
+    <path d="M262 190c8-26 34-40 64-36-6 28-32 44-64 36z" fill="#3FA34D"/>
+    <path d="M268 186c14-12 30-20 52-28" fill="none" stroke="#2E7D3A" stroke-width="2.5" stroke-linecap="round"/>
+    <!-- fruta com contorno branco -->
+    <circle cx="256" cy="268" r="82" fill="#FFFFFF"/>
+    <circle cx="256" cy="268" r="70" fill="url(#fruit)"/>
+    <!-- faceta em losango (o glifo VERDE da identidade) -->
+    <path d="M256 204 320 268 256 332 192 268z" fill="#FF8A2E" opacity=".55"/>
+    <path d="M256 268 320 268 256 332z" fill="#E8590C" opacity=".35"/>
+    <text x="256" y="290" text-anchor="middle" font-family="Inter, 'Helvetica Neue', Arial, sans-serif"
+          font-size="62" font-weight="800" letter-spacing="-1" fill="#FFFFFF">OS</text>
+  </g>
+</svg>

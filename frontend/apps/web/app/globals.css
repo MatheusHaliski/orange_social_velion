@@ -1,0 +1,975 @@
+@import 'tailwindcss';
+@import '@orange-social/tokens/tokens.css';
+
+/* As utilidades do Tailwind leem as variáveis dos tokens (claro/escuro trocam sem recompilar). */
+@theme inline {
+  --color-bg: var(--os-color-bg);
+  --color-surface: var(--os-color-surface);
+  --color-sunken: var(--os-color-surface-sunken);
+  --color-fg: var(--os-color-text);
+  --color-muted: var(--os-color-text-muted);
+  --color-line: var(--os-color-border);
+  --color-line-strong: var(--os-color-border-strong);
+  --color-focus: var(--os-color-focus);
+  --color-brand: var(--os-color-brand);
+  --color-primary: var(--os-color-primary);
+  --color-on-primary: var(--os-color-on-primary);
+  --color-error: var(--os-color-feedback-error);
+  --color-success: var(--os-color-feedback-success);
+  --color-alert: var(--os-color-alert-border);
+  --color-hazard: var(--os-color-alert-hazard);
+  --color-hazard-ink: var(--os-color-alert-hazard-ink);
+  --font-sans: var(--os-font-family-sans);
+  --font-mono: var(--os-font-family-mono);
+  --radius-sm: var(--os-radius-sm);
+  --radius-md: var(--os-radius-md);
+  --radius-pill: var(--os-radius-pill);
+}
+
+@layer base {
+  html {
+    background: var(--os-color-bg);
+    color: var(--os-color-text);
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    min-height: 100dvh;
+    font-family: var(--os-font-family-sans);
+    line-height: 1.5;
+    /* palavra longa ("Compartilhamentos") quebra em vez de rolar para o lado com fonte grande em tela estreita */
+    overflow-wrap: anywhere;
+    hyphens: auto;
+  }
+
+  a {
+    text-underline-offset: 0.18em;
+  }
+
+  /* Foco visível em tudo que é interativo (WCAG 2.4.7 / 2.4.11). */
+  :focus-visible {
+    outline: 3px solid var(--os-color-focus);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  [id] {
+    scroll-margin-top: 5rem;
+  }
+
+  /* Item de grid não estoura a coluna com texto comprido ou fonte larga (sem rolagem horizontal em 320 px). */
+  .grid > * {
+    min-width: 0;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
+
+@layer components {
+  .sr-only-focusable:not(:focus):not(:focus-within) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+
+  .os-input {
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--os-color-border-strong);
+    border-radius: var(--os-radius-sm);
+    background: var(--os-color-surface);
+    color: var(--os-color-text);
+  }
+
+  .os-input[aria-invalid='true'] {
+    border-width: 2px;
+    border-color: var(--os-color-feedback-error);
+  }
+
+  .os-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+    padding: 0.5rem 1rem;
+    border-radius: var(--os-radius-pill);
+    border: 1px solid var(--os-color-border-strong);
+    background: transparent;
+    color: var(--os-color-text);
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 120ms ease;
+    /* encolhe e quebra o texto em vez de empurrar a página (320 px, fonte larga, texto a 150 %) */
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+    max-width: 100%;
+    overflow-wrap: anywhere;
+  }
+
+  .os-btn svg {
+    flex: none;
+  }
+
+  .os-btn:hover {
+    background: var(--os-color-surface-sunken);
+  }
+
+  .os-btn[disabled],
+  .os-btn[aria-disabled='true'] {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  .os-btn-primary {
+    background: var(--os-color-primary);
+    border-color: var(--os-color-primary);
+    color: var(--os-color-on-primary);
+  }
+
+  .os-btn-primary:hover {
+    background: var(--os-color-primary);
+    text-decoration: underline;
+  }
+
+  /* Ação do card (RF26): ícone + número; o número por extenso fica no aria-label. Alvo ≥ 44 × 44 px. */
+  .os-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 2.75rem;
+    min-width: 2.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: var(--os-radius-pill);
+    color: var(--os-color-text-muted);
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  .os-action:hover {
+    background: var(--os-color-surface-sunken);
+    color: var(--os-color-text);
+  }
+  .os-action[aria-pressed='true'] {
+    color: var(--os-color-brand);
+  }
+  .os-action[disabled] {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+  .os-btn[aria-pressed='true'] {
+    border-color: var(--os-color-brand);
+    color: var(--os-color-brand);
+  }
+
+  .os-btn-sm {
+    min-height: 2rem;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .os-card {
+    border: 1px solid var(--os-color-border);
+    border-radius: var(--os-radius-md);
+    background: var(--os-color-surface);
+  }
+
+  /* Chip neutro (tipo de mídia, Arquivado): contorno ≥ 3:1, texto ≥ 4,5:1. */
+  .os-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-height: 1.75rem;
+    padding: 0.125rem 0.625rem;
+    border: 1.5px solid var(--os-color-border-strong);
+    border-radius: var(--os-radius-pill);
+    color: var(--os-color-text);
+    font-family: var(--os-font-family-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  /* Chip de classificação (ageRating): texto branco sobre a cor da faixa, igual nos dois temas. */
+  .os-rating {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.75rem;
+    padding: 0.125rem 0.625rem;
+    border: 1.5px solid var(--os-color-border-strong);
+    border-radius: var(--os-radius-sm);
+    background: var(--rating);
+    color: var(--os-color-rating-ink);
+    font-family: var(--os-font-family-mono);
+    font-size: 0.75rem;
+    font-weight: 800;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .os-rating[data-rating='LIVRE'] {
+    --rating: var(--os-color-rating-livre);
+  }
+  .os-rating[data-rating='AGE_12'] {
+    --rating: var(--os-color-rating-12);
+  }
+  .os-rating[data-rating='AGE_16'] {
+    --rating: var(--os-color-rating-16);
+  }
+  .os-rating[data-rating='AGE_18'] {
+    --rating: var(--os-color-rating-18);
+  }
+  .os-rating[data-rating='SENSITIVE'] {
+    --rating: var(--os-color-rating-sensivel);
+  }
+
+  /* Bolinha da categoria (SVG): preenchimento + glifo; PRETO ganha o anel (DESIGN_SYSTEM.md §3). */
+  .os-dot {
+    display: inline-block;
+    flex: none;
+    overflow: visible;
+  }
+  .os-dot-fill {
+    fill: var(--cat-fill);
+  }
+  .os-dot-glyph {
+    fill: var(--cat-glyph);
+    color: var(--cat-glyph);
+  }
+  .os-dot[data-category='PRETO'] .os-dot-fill {
+    stroke: var(--cat-ring);
+    stroke-width: 2px;
+  }
+  /* Rótulo escrito na cor da categoria (≥ 4,5:1 nos dois temas). */
+  .os-cat-ink {
+    color: var(--cat-ink);
+  }
+
+  [data-category='VERDE'] {
+    --cat-fill: var(--os-color-category-verde-fill);
+    --cat-ink: var(--os-color-category-verde-ink);
+    --cat-ring: var(--os-color-category-verde-ring);
+    --cat-glyph: var(--os-color-category-verde-glyph);
+  }
+  [data-category='AMARELO'] {
+    --cat-fill: var(--os-color-category-amarelo-fill);
+    --cat-ink: var(--os-color-category-amarelo-ink);
+    --cat-ring: var(--os-color-category-amarelo-ring);
+    --cat-glyph: var(--os-color-category-amarelo-glyph);
+  }
+  [data-category='AZUL'] {
+    --cat-fill: var(--os-color-category-azul-fill);
+    --cat-ink: var(--os-color-category-azul-ink);
+    --cat-ring: var(--os-color-category-azul-ring);
+    --cat-glyph: var(--os-color-category-azul-glyph);
+  }
+  [data-category='LARANJA'] {
+    --cat-fill: var(--os-color-category-laranja-fill);
+    --cat-ink: var(--os-color-category-laranja-ink);
+    --cat-ring: var(--os-color-category-laranja-ring);
+    --cat-glyph: var(--os-color-category-laranja-glyph);
+  }
+  [data-category='VERMELHO'] {
+    --cat-fill: var(--os-color-category-vermelho-fill);
+    --cat-ink: var(--os-color-category-vermelho-ink);
+    --cat-ring: var(--os-color-category-vermelho-ring);
+    --cat-glyph: var(--os-color-category-vermelho-glyph);
+  }
+  [data-category='PRETO'] {
+    --cat-fill: var(--os-color-category-preto-fill);
+    --cat-ink: var(--os-color-category-preto-ink);
+    --cat-ring: var(--os-color-category-preto-ring);
+    --cat-glyph: var(--os-color-category-preto-glyph);
+  }
+
+  /* Rádio transparente por cima do rótulo (o clique cai no próprio controle); o foco aparece no rótulo. */
+  .os-visually-hidden-input {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .os-visually-hidden-input:focus-visible + label,
+  .os-visually-hidden-input:focus-visible + .os-pill {
+    outline: 3px solid var(--os-color-focus);
+    outline-offset: 2px;
+  }
+
+  /* Miniatura do fundo do app (RF2): a escolhida ganha borda grossa, fundo e o ✓. */
+  .os-bg-opt {
+    display: grid;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border: 2px solid transparent;
+    border-radius: var(--os-radius-md);
+    cursor: pointer;
+    text-align: center;
+  }
+  .os-bg-thumb {
+    position: relative;
+    display: block;
+    height: 4rem;
+    border: 1px solid var(--os-color-border-strong);
+    border-radius: var(--os-radius-sm);
+    background: #17120d center / cover no-repeat;
+  }
+  .os-bg-thumb[data-kind='plain'] {
+    background: var(--os-color-bg);
+  }
+  .os-bg-thumb[data-kind='network'] {
+    background-size: 130%;
+  }
+  .os-visually-hidden-input:checked + .os-bg-opt {
+    border-color: var(--os-color-brand);
+    background: var(--os-color-surface-sunken);
+  }
+  .os-visually-hidden-input:checked + .os-bg-opt .os-bg-thumb::after {
+    content: '✓';
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    display: grid;
+    place-items: center;
+    width: 1.375rem;
+    height: 1.375rem;
+    border-radius: 999px;
+    background: var(--os-color-primary);
+    color: var(--os-color-on-primary);
+    font-size: 0.8rem;
+    font-weight: 800;
+  }
+  .os-visually-hidden-input:focus-visible + .os-bg-opt {
+    outline: 3px solid var(--os-color-focus);
+    outline-offset: 2px;
+  }
+
+  .os-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    min-height: 2.25rem;
+    padding: 0.25rem 0.75rem;
+    border: 1.5px solid var(--os-color-border-strong);
+    border-radius: var(--os-radius-pill);
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+
+  .os-pill[aria-pressed='true'] {
+    border-width: 3px;
+    background: var(--os-color-surface-sunken);
+    font-weight: 800;
+  }
+
+  .os-visually-hidden-input:checked + .os-pill {
+    border-width: 3px;
+    background: var(--os-color-surface-sunken);
+  }
+
+
+  /* Interruptor (role="switch"): a posição do botão e o texto "Ligado/Desligado" dizem o estado, não só a cor. */
+  .os-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding: 0.25rem;
+    border-radius: var(--os-radius-pill);
+    background: transparent;
+    color: var(--os-color-text);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    flex: none;
+  }
+
+  .os-switch[disabled] {
+    cursor: not-allowed;
+    opacity: 0.7;
+  }
+
+  .os-switch-track {
+    position: relative;
+    display: inline-block;
+    width: 2.75rem;
+    height: 1.625rem;
+    border: 2px solid var(--os-color-border-strong);
+    border-radius: var(--os-radius-pill);
+    background: var(--os-color-surface);
+    transition: background-color 120ms ease;
+  }
+
+  .os-switch-track::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 1.125rem;
+    height: 1.125rem;
+    border-radius: 999px;
+    background: var(--os-color-border-strong);
+    transition: transform 120ms ease;
+  }
+
+  .os-switch[aria-checked='true'] .os-switch-track {
+    border-color: var(--os-color-primary);
+    background: var(--os-color-primary);
+  }
+
+  .os-switch[aria-checked='true'] .os-switch-track::after {
+    background: var(--os-color-on-primary);
+    transform: translateX(1.125rem);
+  }
+
+  .os-switch-state {
+    min-width: 4.75rem;
+    text-align: left;
+  }
+
+  /* Diálogo modal: fundo escurecido; o conteúdo atrás fica inerte enquanto ele está aberto. */
+  .os-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 40;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    overflow-y: auto;
+    background: var(--os-color-scrim);
+  }
+
+  .os-dialog {
+    width: 100%;
+    max-width: 36rem;
+    max-height: calc(100dvh - 2rem);
+    overflow-y: auto;
+    border: 1px solid var(--os-color-border-strong);
+    border-radius: var(--os-radius-md);
+    background: var(--os-color-bg);
+    color: var(--os-color-text);
+  }
+
+  .os-sheet {
+    max-width: 48rem;
+    max-height: 92dvh;
+    align-self: end;
+  }
+  @media (min-width: 640px) {
+    .os-sheet {
+      align-self: center;
+    }
+  }
+
+  /* Rótulo do tipo de dado ou base legal ("Art. 7º, I"): contorno ≥ 3:1 e texto na cor normal. */
+  .os-law {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0 0.5rem;
+    border: 1.5px solid var(--os-color-border-strong);
+    border-radius: var(--os-radius-sm);
+    font-family: var(--os-font-family-mono);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+  }
+
+  /* QR code: sempre escuro sobre claro, nos dois temas, para o leitor do app autenticador. */
+  .os-qr {
+    display: block;
+    width: 12rem;
+    height: 12rem;
+    padding: 0;
+    border-radius: var(--os-radius-sm);
+    background: var(--os-color-qr-light);
+    color: var(--os-color-qr-dark);
+  }
+
+  /* ---------------------------------------------------------------- posts (RF24) e moldura (RF28) */
+
+  /* Container do post: opaco, com autor, mídia e texto. A borda esquerda de 3 px leva a cor da categoria do autor,
+     sempre junto da bolinha com glifo e do rótulo (a cor nunca é o único sinal). */
+  .os-post {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem;
+    min-width: 0;
+    padding: 1rem 1rem 0.875rem 1.125rem;
+    border: 1px solid var(--os-color-border);
+    border-radius: var(--os-radius-md);
+    background: var(--os-color-surface);
+    color: var(--os-color-text);
+    box-shadow: inset 3px 0 0 var(--cat-fill, var(--os-color-border-strong));
+  }
+  .os-post[data-feed='ALERT'] {
+    border: 2px solid var(--os-color-alert-border);
+    background: color-mix(in srgb, var(--os-color-alert-border) 8%, var(--os-color-surface));
+    box-shadow: inset 4px 0 0 var(--os-color-alert-border);
+  }
+  .os-post-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+    padding-top: 0.625rem;
+    border-top: 1px dashed var(--os-color-border-strong);
+  }
+
+  /* Faixa hazard do Alert Feed (OS-34): listras laranja × carvão, sempre com ícone e texto ao lado. */
+  .os-hazard {
+    height: 0.75rem;
+    border-radius: var(--os-radius-pill);
+    background: repeating-linear-gradient(-45deg, var(--os-color-alert-hazard) 0 14px, var(--os-color-alert-hazard-ink) 14px 28px);
+  }
+
+  /* Bolinha dentro do card emoldurado: fica numa pílula com o fundo do tema, onde as cores foram medidas. */
+  .os-badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0 0.5rem;
+    border-radius: var(--os-radius-pill);
+    background: var(--os-badge-bg, transparent);
+    color: var(--os-badge-ink, inherit);
+    font-size: 0.875rem;
+    font-weight: 600;
+  }
+  .os-post:not([data-framed='true']) .os-badge-pill {
+    padding: 0;
+  }
+
+  /* Moldura: a arte fica só na faixa de 11 px entre a borda externa e o container (TAXONOMIA §5.3). */
+  .os-frame {
+    position: relative;
+    isolation: isolate;
+    min-width: 0;
+    padding: 11px;
+    border-radius: calc(var(--os-radius-md) + 11px);
+    overflow: hidden;
+  }
+  .os-frame[data-layout='POLAROID'] {
+    padding: 11px 11px 2.5rem;
+    border-radius: 0.375rem;
+    box-shadow: 0 1px 0 var(--os-color-border);
+  }
+  .os-frame[data-layout='POSTER'] {
+    padding: 1.25rem 11px 11px;
+    border-radius: 0.375rem;
+  }
+  .os-frame-art {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    background: var(--os-color-surface-sunken);
+  }
+  .os-frame-paint {
+    position: absolute;
+    inset: 0;
+  }
+  .os-frame-art[data-soft='true'] .os-frame-paint {
+    filter: saturate(0.6) brightness(0.9);
+  }
+  .os-frame-art[data-mosaic='true'] {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+  }
+  .os-frame-art[data-mosaic='true'] .os-frame-tile {
+    position: relative;
+    overflow: hidden;
+  }
+  /* Pôster: o layout traz a própria arte (o mosaico da marca). */
+  .os-frame-poster {
+    background: #17120d url('/brand/backgrounds/mosaico-laranja-thumb.webp') center / cover;
+  }
+  /* Aura Plus: o pôster fica sempre por baixo; o vídeo aparece por cima só enquanto toca. */
+  .os-aura-plus img,
+  .os-aura-plus video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+  .os-aura-plus video {
+    opacity: 0;
+    transition: opacity 200ms ease;
+  }
+  .os-aura-plus[data-state='playing'] video {
+    opacity: 1;
+  }
+  /* Materiais: o catálogo manda só o nome; a textura é desenhada aqui, por cima da arte (vidro "falso", sem
+     backdrop-filter, pelo desempenho do feed). */
+  .os-frame-mat {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .os-mat-papel {
+    background:
+      repeating-linear-gradient(8deg, #ffffff14 0 2px, #0000 2px 7px),
+      linear-gradient(135deg, #fff8e81f, #ffffff08);
+  }
+  .os-mat-cetim {
+    background: linear-gradient(115deg, #ffffff00 20%, #ffffff3a 40%, #ffffff00 55%, #ffffff26 75%, #ffffff00 90%);
+  }
+  .os-mat-metal {
+    mix-blend-mode: overlay;
+    background:
+      repeating-linear-gradient(90deg, #ffffff22 0 1px, #00000026 1px 3px),
+      linear-gradient(120deg, #fff0, #fff6 30%, #fff0 55%, #fff5 80%, #fff0);
+  }
+  .os-mat-vidro {
+    background: linear-gradient(135deg, #ffffff38, #ffffff0a 38%, #ffffff24 58%, #ffffff08);
+    box-shadow: inset 0 0 0 1px #ffffff4d, inset 0 1px 0 #ffffff70;
+  }
+  /* Metamorfose: textura fixa por cima da arte (a versão animada fica para o app nativo). */
+  .os-frame-meta {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  .os-meta-prisma {
+    mix-blend-mode: screen;
+    background: linear-gradient(110deg, #ff2e8840, #f7c94840 25%, #3ddc6b40 50%, #4a93ff40 75%, #7b2ff740);
+  }
+  .os-meta-constelacao {
+    background:
+      radial-gradient(#ffffffcc 1px, #0000 1.6px) 0 0 / 23px 19px,
+      radial-gradient(#ffffff88 1px, #0000 1.6px) 9px 7px / 31px 27px;
+  }
+  .os-meta-fio_vivo {
+    background: repeating-linear-gradient(135deg, #0000 0 9px, #ffffff55 9px 10px);
+  }
+  .os-meta-holografia {
+    mix-blend-mode: overlay;
+    background: conic-gradient(from 30deg, #ff2e88, #f7c948, #3ddc6b, #4a93ff, #7b2ff7, #ff2e88);
+    opacity: 0.55;
+  }
+  /* Aura Hype (só em alta): anel na borda; o texto "em alta" do rodapé continua sendo o sinal. */
+  .os-frame-hype {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+    pointer-events: none;
+    box-shadow: inset 0 0 0 3px var(--os-color-primary);
+  }
+  .os-frame[data-hype='BRILHO'] .os-frame-hype {
+    box-shadow: inset 0 0 0 3px var(--os-color-primary), inset 0 0 18px #ff6a2b99;
+  }
+  .os-frame[data-hype='SCANNER'][data-motion='true'] .os-frame-hype {
+    background: linear-gradient(90deg, #0000 0%, #ffffff55 50%, #0000 100%) no-repeat;
+    background-size: 30% 100%;
+    animation: os-scanner 2.4s ease-in-out 2;
+  }
+  .os-frame[data-hype='BRILHO'][data-motion='true'] .os-frame-hype {
+    animation: os-brilho 1.6s ease-in-out 3;
+  }
+  /* Animações leves da arte: tocam uma vez (no máximo 5 s) e não existem com "Reduzir movimento". */
+  .os-frame[data-anim='DERIVA'] .os-frame-paint {
+    inset: -12%;
+    animation: os-deriva 4.8s ease-in-out 1 both;
+  }
+  .os-frame[data-anim='RESPIRAR'] .os-frame-paint {
+    animation: os-respirar 2.4s ease-in-out 2;
+  }
+  @keyframes os-deriva {
+    from {
+      transform: translate(-6%, -6%);
+    }
+    to {
+      transform: translate(6%, 6%);
+    }
+  }
+  @keyframes os-respirar {
+    50% {
+      transform: scale(1.06);
+    }
+  }
+  @keyframes os-scanner {
+    from {
+      background-position: -40% 0;
+    }
+    to {
+      background-position: 140% 0;
+    }
+  }
+  @keyframes os-brilho {
+    50% {
+      opacity: 0.55;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .os-frame-paint,
+    .os-frame-hype {
+      animation: none !important;
+    }
+  }
+
+  /* Abas (role="tablist"): a escolhida fica preenchida e com o texto em negrito. */
+  .os-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+    padding: 0.25rem;
+    border: 1.5px solid var(--os-color-border-strong);
+    border-radius: var(--os-radius-md);
+    background: var(--os-color-surface);
+  }
+  .os-tab {
+    display: inline-flex;
+    flex: 1 1 auto;
+    align-items: center;
+    justify-content: center;
+    gap: 0.375rem;
+    min-height: 2.75rem;
+    padding: 0.375rem 0.875rem;
+    border-radius: var(--os-radius-sm);
+    color: var(--os-color-text);
+    font-weight: 600;
+    cursor: pointer;
+  }
+  @media (max-width: 479px) {
+    .os-tabs-compact .os-tab {
+      flex: 1 1 0;
+      flex-direction: column;
+      gap: 0.125rem;
+      padding: 0.375rem 0.25rem;
+      font-size: 0.875rem;
+    }
+  }
+  .os-tab:hover {
+    background: var(--os-color-surface-sunken);
+  }
+  .os-tab[aria-selected='true'] {
+    background: var(--os-color-primary);
+    color: var(--os-color-on-primary);
+    font-weight: 800;
+  }
+
+  /* Miniaturas do estúdio: a escolhida ganha contorno grosso e o ícone de confirmação (não só a cor). */
+  .os-strip {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .os-swatch {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
+    width: 5.25rem;
+    padding: 0.25rem;
+    border: 2px solid transparent;
+    border-radius: var(--os-radius-sm);
+    background: transparent;
+    color: var(--os-color-text);
+    font-size: 0.8125rem;
+    font-weight: 600;
+    line-height: 1.2;
+    text-align: center;
+    cursor: pointer;
+  }
+  .os-swatch:hover {
+    background: var(--os-color-surface-sunken);
+  }
+  .os-swatch[aria-pressed='true'] {
+    border-color: var(--os-color-text);
+    background: var(--os-color-surface-sunken);
+  }
+  .os-swatch[disabled] {
+    cursor: not-allowed;
+    opacity: 0.6;
+  }
+  .os-swatch-paint {
+    position: relative;
+    display: block;
+    width: 3.5rem;
+    height: 3.5rem;
+    overflow: hidden;
+    border: 1px solid var(--os-color-border-strong);
+    border-radius: var(--os-radius-sm);
+  }
+  .os-swatch-check {
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    display: none;
+    place-items: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 999px;
+    background: var(--os-color-primary);
+    color: var(--os-color-on-primary);
+  }
+  .os-swatch[aria-pressed='true'] .os-swatch-check {
+    display: grid;
+  }
+  .os-seg {
+    display: inline-flex;
+    flex-wrap: wrap;
+    gap: 0.25rem;
+  }
+  .os-seg > button {
+    min-height: 2.25rem;
+    padding: 0.25rem 0.75rem;
+    border: 1.5px solid var(--os-color-border-strong);
+    border-radius: var(--os-radius-pill);
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .os-seg > button[aria-pressed='true'] {
+    border-width: 3px;
+    background: var(--os-color-surface-sunken);
+    font-weight: 800;
+  }
+
+  /* Texto corrido dos Termos. */
+  .os-prose {
+    max-width: 72ch;
+  }
+  .os-prose h1 {
+    font-size: 2rem;
+    font-weight: 800;
+    line-height: 1.2;
+    margin-bottom: 1rem;
+  }
+  .os-prose h2 {
+    font-size: 1.375rem;
+    font-weight: 700;
+    margin: 2rem 0 0.75rem;
+  }
+  .os-prose h3 {
+    font-size: 1.125rem;
+    font-weight: 700;
+    margin: 1.5rem 0 0.5rem;
+  }
+  .os-prose p,
+  .os-prose ul,
+  .os-prose ol,
+  .os-prose blockquote,
+  .os-prose .table-wrap {
+    margin: 0 0 1rem;
+  }
+  .os-prose ul {
+    list-style: disc;
+    padding-left: 1.5rem;
+  }
+  .os-prose ol {
+    list-style: decimal;
+    padding-left: 1.5rem;
+  }
+  .os-prose li + li {
+    margin-top: 0.25rem;
+  }
+  .os-prose blockquote {
+    border-left: 4px solid var(--os-color-border-strong);
+    padding: 0.5rem 1rem;
+    color: var(--os-color-text-muted);
+  }
+  .os-prose code {
+    font-family: var(--os-font-family-mono);
+    font-size: 0.875em;
+    background: var(--os-color-surface-sunken);
+    padding: 0.05rem 0.3rem;
+    border-radius: 4px;
+    color: var(--os-color-text);
+  }
+  .os-prose a {
+    text-decoration: underline;
+  }
+  .os-prose hr {
+    border: 0;
+    border-top: 1px solid var(--os-color-border);
+    margin: 2rem 0;
+  }
+  .os-prose .table-wrap {
+    overflow-x: auto;
+  }
+  .os-prose table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.9375rem;
+  }
+  .os-prose th,
+  .os-prose td {
+    border: 1px solid var(--os-color-border);
+    padding: 0.375rem 0.625rem;
+    text-align: left;
+    vertical-align: top;
+  }
+}
+
+
+/* ---------------------------------------------------------------- fundo do app (RF2) e topbar
+   Fora das camadas para valer sobre a utilidade bg-bg do body. O véu do tema fica entre a arte e o conteúdo. */
+html[data-app-bg] body {
+  background:
+    linear-gradient(var(--os-color-veil), var(--os-color-veil)),
+    var(--os-app-bg-art) var(--os-app-bg-pos, center) / var(--os-app-bg-size, cover) no-repeat fixed,
+    var(--os-color-bg);
+}
+html[data-app-bg='NETWORK'] {
+  --os-app-bg-art: url('/brand/orange-social-logo.svg');
+  --os-app-bg-pos: center 40%;
+  --os-app-bg-size: min(150vw, 1400px);
+}
+html[data-app-bg='MOSAIC'] {
+  --os-app-bg-art: url('/brand/backgrounds/mosaico-laranja.webp');
+}
+html[data-app-bg='MOSAIC_CLASSIC'] {
+  --os-app-bg-art: url('/brand/backgrounds/mosaico-classico.webp');
+}
+html[data-app-bg='MOSAIC_DEEP'] {
+  --os-app-bg-art: url('/brand/backgrounds/mosaico-profundo.webp');
+}
+html[data-app-bg='MOSAIC_GLOW'] {
+  --os-app-bg-art: url('/brand/backgrounds/mosaico-brilho.webp');
+}
+html[data-app-bg='MOSAIC_SKY'] {
+  --os-app-bg-art: url('/brand/backgrounds/mosaico-ceu.webp');
+}
+html[data-app-bg='MOSAIC_SAND'] {
+  --os-app-bg-art: url('/brand/backgrounds/mosaico-areia.webp');
+}
+.os-topbar {
+  background: var(--os-color-bg);
+}
+/* Entrar e cadastro: o mosaico laranja da marca atrás do cartão do formulário (protótipo 13-login). */
+.os-auth-bg {
+  background:
+    linear-gradient(var(--os-color-veil), var(--os-color-veil)),
+    url('/brand/backgrounds/mosaico-laranja.webp') center / cover;
+}

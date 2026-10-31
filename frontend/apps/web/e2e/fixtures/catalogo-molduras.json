@@ -1,0 +1,558 @@
+{
+  "version": "9f3a1c2b7d4e5f60",
+  "activeSeasonId": "outubro-rosa",
+  "colors": [
+    {
+      "id": "#2B2217",
+      "name": "Café",
+      "css": "#2B2217",
+      "palette": [
+        "#2B2217"
+      ]
+    },
+    {
+      "id": "#3B1F33",
+      "name": "Ameixa",
+      "css": "#3B1F33",
+      "palette": [
+        "#3B1F33"
+      ]
+    },
+    {
+      "id": "#1E2A38",
+      "name": "Noite",
+      "css": "#1E2A38",
+      "palette": [
+        "#1E2A38"
+      ]
+    },
+    {
+      "id": "#24382E",
+      "name": "Musgo",
+      "css": "#24382E",
+      "palette": [
+        "#24382E"
+      ]
+    },
+    {
+      "id": "#5B3A29",
+      "name": "Telha",
+      "css": "#5B3A29",
+      "palette": [
+        "#5B3A29"
+      ]
+    },
+    {
+      "id": "#FF6A2B",
+      "name": "Orange",
+      "css": "#FF6A2B",
+      "palette": [
+        "#FF6A2B"
+      ]
+    },
+    {
+      "id": "#E9C46A",
+      "name": "Mel",
+      "css": "#E9C46A",
+      "palette": [
+        "#E9C46A"
+      ]
+    },
+    {
+      "id": "#F5EDE3",
+      "name": "Areia clara",
+      "css": "#F5EDE3",
+      "palette": [
+        "#F5EDE3"
+      ]
+    }
+  ],
+  "gradients": [
+    {
+      "id": "por-do-sol",
+      "name": "Pôr do sol",
+      "css": "linear-gradient(135deg,#FF6A2B,#C1121F 55%,#3A0E0A)",
+      "palette": [
+        "#FF6A2B",
+        "#C1121F",
+        "#3A0E0A"
+      ]
+    },
+    {
+      "id": "oceano",
+      "name": "Oceano",
+      "css": "linear-gradient(135deg,#00B4D8,#0D47A1)",
+      "palette": [
+        "#00B4D8",
+        "#0D47A1"
+      ]
+    },
+    {
+      "id": "uva",
+      "name": "Uva",
+      "css": "linear-gradient(135deg,#7B2FF7,#2E1A47)",
+      "palette": [
+        "#7B2FF7",
+        "#2E1A47"
+      ]
+    },
+    {
+      "id": "mate",
+      "name": "Mate",
+      "css": "linear-gradient(135deg,#95D5B2,#2D6A4F)",
+      "palette": [
+        "#95D5B2",
+        "#2D6A4F"
+      ]
+    },
+    {
+      "id": "caramelo",
+      "name": "Caramelo",
+      "css": "linear-gradient(135deg,#E9C46A,#8D5524)",
+      "palette": [
+        "#E9C46A",
+        "#8D5524"
+      ]
+    },
+    {
+      "id": "grafite",
+      "name": "Grafite",
+      "css": "linear-gradient(135deg,#4A4A4A,#141414)",
+      "palette": [
+        "#4A4A4A",
+        "#141414"
+      ]
+    }
+  ],
+  "seasons": [
+    {
+      "id": "verao",
+      "name": "Verão",
+      "window": "21/12–20/03",
+      "priority": 4,
+      "colors": [
+        "#FFB703",
+        "#FB8500",
+        "#00B4D8",
+        "#90E0EF",
+        "#F4E1C1"
+      ],
+      "auto": true
+    },
+    {
+      "id": "outono",
+      "name": "Outono",
+      "window": "20/03–21/06",
+      "priority": 4,
+      "colors": [
+        "#C8553D",
+        "#E09F3E",
+        "#9E2A2B",
+        "#7A6C5D",
+        "#F2D0A4"
+      ],
+      "auto": true
+    },
+    {
+      "id": "inverno",
+      "name": "Inverno",
+      "window": "21/06–22/09",
+      "priority": 4,
+      "colors": [
+        "#2E4A62",
+        "#7FA7C9",
+        "#C9D6E3",
+        "#8C6E5D",
+        "#E8DCC8"
+      ],
+      "auto": true
+    },
+    {
+      "id": "primavera",
+      "name": "Primavera (ipês)",
+      "window": "22/09–21/12",
+      "priority": 4,
+      "colors": [
+        "#F6C90E",
+        "#A05EB5",
+        "#F28AB2",
+        "#5CB85C",
+        "#9AD0EC"
+      ],
+      "auto": true
+    },
+    {
+      "id": "junina",
+      "name": "Festa Junina",
+      "window": "01/06–30/06",
+      "priority": 3,
+      "colors": [
+        "#E63946",
+        "#F4A261",
+        "#2A9D8F",
+        "#F1C453",
+        "#8D5524"
+      ],
+      "auto": true
+    },
+    {
+      "id": "namorados",
+      "name": "Dia dos Namorados",
+      "window": "05/06–12/06",
+      "priority": 1,
+      "colors": [
+        "#E5383B",
+        "#FF758F",
+        "#FFB3C1",
+        "#9D0208",
+        "#FFF0F3"
+      ],
+      "auto": true
+    },
+    {
+      "id": "patria",
+      "name": "Semana da Pátria",
+      "window": "01/09–07/09",
+      "priority": 1,
+      "colors": [
+        "#009C3B",
+        "#FFDF00",
+        "#002776",
+        "#3DA35D",
+        "#F5EDE3"
+      ],
+      "auto": true
+    },
+    {
+      "id": "outubro-rosa",
+      "name": "Outubro Rosa",
+      "window": "01/10–31/10",
+      "priority": 2,
+      "colors": [
+        "#F48FB1",
+        "#EC407A",
+        "#AD1457",
+        "#FCE4EC",
+        "#6D2C4A"
+      ],
+      "auto": true
+    },
+    {
+      "id": "novembro-azul",
+      "name": "Novembro Azul",
+      "window": "01/11–30/11",
+      "priority": 2,
+      "colors": [
+        "#1E88E5",
+        "#64B5F6",
+        "#0D47A1",
+        "#BBDEFB",
+        "#263238"
+      ],
+      "auto": true
+    },
+    {
+      "id": "natal",
+      "name": "Natal e Réveillon",
+      "window": "01/12–06/01",
+      "priority": 3,
+      "colors": [
+        "#C1121F",
+        "#2D6A4F",
+        "#E9C46A",
+        "#F5EDE3",
+        "#00B4D8"
+      ],
+      "auto": true
+    },
+    {
+      "id": "carnaval",
+      "name": "Carnaval",
+      "window": "sexta a Quarta de Cinzas (Páscoa − 51 a − 46)",
+      "priority": 2,
+      "colors": [
+        "#FF2E88",
+        "#FFD23F",
+        "#00C2A8",
+        "#7B2FF7",
+        "#FF6A2B"
+      ],
+      "auto": true
+    },
+    {
+      "id": "black-friday",
+      "name": "Black Friday (só por escolha)",
+      "window": "dia seguinte à 4ª quinta de novembro",
+      "priority": 1,
+      "colors": [
+        "#2B2B2B",
+        "#F7C948",
+        "#FF6A2B",
+        "#8A8F96",
+        "#F5EDE3"
+      ],
+      "auto": false
+    }
+  ],
+  "animations": [
+    {
+      "id": "NONE",
+      "name": "Sem animação",
+      "css": null,
+      "palette": []
+    },
+    {
+      "id": "RESPIRAR",
+      "name": "Respirar",
+      "css": "scale 1 → 1,06, 2 × 2,4 s",
+      "palette": []
+    },
+    {
+      "id": "DERIVA",
+      "name": "Deriva",
+      "css": "background-position 0 → 100 %, 4,8 s",
+      "palette": []
+    }
+  ],
+  "auras": [
+    {
+      "id": "eclipse",
+      "name": "Eclipse",
+      "archetype": "Mago",
+      "palette": [
+        "#7B2FF7",
+        "#4A93FF",
+        "#1A1033",
+        "#F5EDE3"
+      ],
+      "technique": "aurora + constelação gerada com a seed do post",
+      "css": null
+    },
+    {
+      "id": "entardecer",
+      "name": "Entardecer",
+      "archetype": "Amante",
+      "palette": [
+        "#FF758F",
+        "#FF6A2B",
+        "#9D0208",
+        "#FFB3C1"
+      ],
+      "technique": "mesh quente",
+      "css": "radial-gradient(70% 60% at 15% 85%,#FF6A2Bcc,#0000 70%),radial-gradient(60% 50% at 85% 20%,#FF758Fbb,#0000 70%),radial-gradient(50% 50% at 50% 50%,#9D0208aa,#0000 75%),#2A0F12"
+    },
+    {
+      "id": "mare",
+      "name": "Maré",
+      "archetype": "Inocente",
+      "palette": [
+        "#90E0EF",
+        "#00B4D8",
+        "#0077B6",
+        "#F5EDE3"
+      ],
+      "technique": "ondas",
+      "css": "radial-gradient(120% 60% at 50% 120%,#0077B6,#0000 60%),repeating-linear-gradient(170deg,#90E0EF2e 0 9px,#0000 9px 22px),linear-gradient(180deg,#00B4D866,#0B2233)"
+    },
+    {
+      "id": "varanda",
+      "name": "Varanda",
+      "archetype": "Cara comum",
+      "palette": [
+        "#E76F51",
+        "#2A9D8F",
+        "#F4A261",
+        "#F1FAEE"
+      ],
+      "technique": "azulejo",
+      "css": "conic-gradient(from 45deg,#E76F51 0 25%,#F4A261 0 50%,#2A9D8F 0 75%,#F1FAEE 0) 0 0/18px 18px"
+    },
+    {
+      "id": "ouro-velho",
+      "name": "Ouro Velho",
+      "archetype": "Governante",
+      "palette": [
+        "#E9C46A",
+        "#B08D57",
+        "#2B2118",
+        "#F5EDE3"
+      ],
+      "technique": "metal escovado",
+      "css": "repeating-linear-gradient(90deg,#ffffff12 0 1px,#0000001a 1px 3px),conic-gradient(from 20deg,#B08D57,#E9C46A 12%,#7A5C2E 25%,#F3DFA2 40%,#6B4F2A 55%,#E9C46A 72%,#8C6A3A 88%,#B08D57)"
+    },
+    {
+      "id": "confete",
+      "name": "Confete",
+      "archetype": "Bobo da corte",
+      "palette": [
+        "#FF2E88",
+        "#F7C948",
+        "#3DDC6B",
+        "#4A93FF",
+        "#FF6A2B"
+      ],
+      "technique": "confete em SVG gerado com a seed do post",
+      "css": null
+    },
+    {
+      "id": "colo",
+      "name": "Colo",
+      "archetype": "Cuidador",
+      "palette": [
+        "#F2D0A4",
+        "#E09F3E",
+        "#A7C957",
+        "#FFF3E0"
+      ],
+      "technique": "blobs desfocados",
+      "css": "radial-gradient(45% 45% at 25% 30%,#F2D0A4aa,#0000 70%),radial-gradient(40% 45% at 75% 70%,#A7C957aa,#0000 70%),radial-gradient(50% 40% at 70% 20%,#E09F3E99,#0000 70%),#3A2E22"
+    },
+    {
+      "id": "asfalto",
+      "name": "Asfalto",
+      "archetype": "Rebelde",
+      "palette": [
+        "#14110E",
+        "#FF2E88",
+        "#3DDC6B",
+        "#F7C948"
+      ],
+      "technique": "meio-tom",
+      "css": "radial-gradient(#FF2E8877 1.2px,#0000 1.7px) 0 0/7px 7px,radial-gradient(#3DDC6B55 1px,#0000 1.6px) 3.5px 3.5px/7px 7px,#14110E"
+    }
+  ],
+  "auraPlus": [
+    {
+      "id": "brasa",
+      "name": "Brasa",
+      "archetype": "Herói",
+      "poster": "/brand/auras/brasa-poster.webp",
+      "av1": "/brand/auras/brasa-hq.mp4",
+      "h264": "/brand/auras/brasa-leve.mp4",
+      "loopSeconds": 4
+    },
+    {
+      "id": "aurora",
+      "name": "Aurora",
+      "archetype": "Mago",
+      "poster": "/brand/auras/aurora-poster.webp",
+      "av1": "/brand/auras/aurora-hq.mp4",
+      "h264": "/brand/auras/aurora-leve.mp4",
+      "loopSeconds": 4
+    }
+  ],
+  "materials": [
+    {
+      "id": "papel",
+      "name": "Papel",
+      "css": null,
+      "palette": []
+    },
+    {
+      "id": "cetim",
+      "name": "Cetim",
+      "css": null,
+      "palette": []
+    },
+    {
+      "id": "metal",
+      "name": "Metal",
+      "css": null,
+      "palette": []
+    },
+    {
+      "id": "vidro",
+      "name": "Vidro",
+      "css": null,
+      "palette": []
+    }
+  ],
+  "hypeStyles": [
+    "OFF",
+    "SCANNER",
+    "BRILHO"
+  ],
+  "metamorphoseModes": [
+    "OFF",
+    "PRISMA",
+    "CONSTELACAO",
+    "FIO_VIVO",
+    "HOLOGRAFIA"
+  ],
+  "layouts": [
+    {
+      "id": "CLASSICO",
+      "name": "Clássico",
+      "ownArt": false
+    },
+    {
+      "id": "POLAROID",
+      "name": "Polaroid",
+      "ownArt": false
+    },
+    {
+      "id": "POSTER",
+      "name": "Pôster",
+      "ownArt": true
+    }
+  ],
+  "skins": [
+    {
+      "id": "PADRAO",
+      "name": "Padrão",
+      "containerColor": "#211A12"
+    },
+    {
+      "id": "MONO",
+      "name": "Mono",
+      "containerColor": "#191714"
+    },
+    {
+      "id": "LEVE",
+      "name": "Leve",
+      "containerColor": "#2A2119"
+    }
+  ],
+  "containerColors": [
+    {
+      "id": "#2B2217",
+      "name": "Café",
+      "css": "#2B2217",
+      "palette": [
+        "#2B2217"
+      ]
+    },
+    {
+      "id": "#1E2A38",
+      "name": "Noite",
+      "css": "#1E2A38",
+      "palette": [
+        "#1E2A38"
+      ]
+    },
+    {
+      "id": "#F5EDE3",
+      "name": "Areia clara",
+      "css": "#F5EDE3",
+      "palette": [
+        "#F5EDE3"
+      ]
+    },
+    {
+      "id": "#FF6A2B",
+      "name": "Orange",
+      "css": "#FF6A2B",
+      "palette": [
+        "#FF6A2B"
+      ]
+    }
+  ],
+  "rules": {
+    "minContrast": 4.5,
+    "maxConfigBytes": 2048,
+    "maxAnimationSeconds": 5,
+    "feedsWithoutFrame": [
+      "ALERT"
+    ]
+  }
+}
