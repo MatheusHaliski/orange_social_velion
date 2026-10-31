@@ -1,13 +1,16 @@
 ---
 rf: RF28
 titulo: Moldura do post (Background Studio) com auras, materiais e Aura Plus animada
-status: planejado
+status: parcial
 numeracao_provisoria: true
 cards: [OS-65, OS-66, OS-67, OS-68, OS-69, OS-70, OS-71, OS-72]
 paths:
   - design/prototype/index.html
   - design/prototype/studio-smoke.mjs
   - design/brand/auras/**
+  - src/main/java/com/orangesocial/application/background/**
+  - src/main/java/com/orangesocial/api/BackgroundController.java
+  - src/main/resources/db/migration/V4__post_background.sql
 ---
 
 # RF28 · Moldura do post (Background Studio)
@@ -22,7 +25,7 @@ paths:
 | **Origem** | Proposta do Background Studio (FashionAI), adaptada ao Orange na pesquisa [`PESQUISA_BACKGROUND_STUDIO.md`](../PESQUISA_BACKGROUND_STUDIO.md) |
 | **Base legal (LGPD)** | Art. 7º, V (execução do serviço). A configuração da moldura não é dado pessoal sensível. Arte enviada ou gerada por IA é conteúdo do usuário: moderação e notificação de direito autoral (§8 da pesquisa) |
 | **Acessibilidade** | WCAG 1.4.3 (contraste do container), 2.2.2 (animação para em ≤ 5 s), 2.3.1 (no máximo 3 flashes/s), `prefers-reduced-motion` e preferência `reduceMotion` |
-| **Status** | ⚪ Planejado. Já existem: protótipo navegável com as 4 abas, artes da Aura Plus no formato final e teste de fumaça. A API depende da publicação de post (OS-23) |
+| **Status** | 🟡 Parcial. Pronto, com testes: protótipo com as 4 abas, artes da Aura Plus, coluna `post.background`, catálogo público com ETag, cartela automática, recomendações, validação no servidor e moldura resolvida no detalhe e no feed. Falta: arte própria (envio e IA), preferência "Animações de fundo", Hype pelo ranking e telas no app |
 
 ## Critérios de aceite
 
@@ -73,7 +76,7 @@ paths:
     - Nunca guarda URL externa nem CSS livre.
     - O catálogo vem de `GET /api/v1/backgrounds/catalog`.
 11. **Restrições.**
-    - Alerta oficial e vaga (`ALERT`) **não** têm moldura.
+    - Alerta oficial e vaga (`ALERT`) **não** têm moldura: a API recusa com `422` e o banco tem um CHECK.
     - Menor de 16 usa só presets do catálogo: sem upload, sem IA e sem Aura Plus de terceiros.
 
 ## Caso de uso
@@ -114,7 +117,7 @@ sequenceDiagram
     APP->>APP: prévia ao vivo · limpa as escolhas incompatíveis
     A->>APP: Publicar
     APP->>API: POST /api/v1/posts {…, background: {auraPlusId: "brasa", container: {ink: "AUTO"}}} + X-XSRF-TOKEN
-    API->>CAT: ids existem? exclusões? ALERT ignora · menor de 16 só presets
+    API->>CAT: ids existem? exclusões? ALERT sem moldura · menor de 16 só presets
     API->>API: contraste tinta × container ≥ 4,5:1
     alt inválido
         API-->>APP: 422 {errors, suggestion}
@@ -206,9 +209,13 @@ flowchart TD
 | Protótipo | [22-studio-cor](../../design/prototype/screens/22-studio-cor.png) · [23-studio-aura](../../design/prototype/screens/23-studio-aura.png) · [24-studio-aura-plus](../../design/prototype/screens/24-studio-aura-plus.png) · [25-studio-sazonal](../../design/prototype/screens/25-studio-sazonal.png) · [26-studio-container](../../design/prototype/screens/26-studio-container.png) · [27-studio-layout](../../design/prototype/screens/27-studio-layout.png) · [28-feed-molduras](../../design/prototype/screens/28-feed-molduras.png). Os renders mostram a versão estática, como vê quem usa "Reduzir movimento" | ✅ protótipo |
 | Artes | Aura Plus "Brasa" e "Aurora" em [`design/brand/auras/`](../../design/brand/auras/): AV1 11–56 KB, H.264 21–66 KB, pôster 2–4 KB, checagem de flashes em `verificacao.json`; gerador `gerar_aura_plus.py`. 8 auras procedurais em CSS/SVG no protótipo | ✅ |
 | Testes | `design/prototype/studio-smoke.mjs`: troca de aba, limpeza de escolhas incompatíveis, modal com rascunho, contraste automático, JSON e Aura Plus (toca, para em 5 s, pôster com Reduzir movimento) | ✅ protótipo |
-| Banco | `V4__post_background.sql` (`post.background JSONB`, `background_asset`) | ⏳ OS-65 |
-| API | `GET /api/v1/backgrounds/catalog`, `/recommendations`, `POST /api/v1/backgrounds/assets`; `background` em `POST/PATCH /api/v1/posts` e nas views | ⏳ OS-65, OS-66 (depende de OS-23) |
-| Cartela automática no servidor | Janelas e prioridades da pesquisa §6.2 | ⏳ OS-67 |
+| Banco | `V4__post_background.sql`: `post.background JSONB` (objeto ≤ 2 KB; `ALERT` sem moldura por CHECK). `remove()` e a eliminação LGPD apagam a moldura | ✅ OS-65 |
+| Domínio e regras | `BackgroundCatalog` (ids do protótipo, versão por hash), `SeasonalCalendar` (Hemisfério Sul, Carnaval = Páscoa − 47, Black Friday só por escolha), `BackgroundValidator` (chaves e ids, uma arte por vez, Pôster, ALERT, menor de 16, contraste ≥ 4,5:1), `Contrast` | ✅ |
+| Tabela de assets | `background_asset` para arte enviada ou gerada, com status de moderação | ⏳ OS-69, OS-70 |
+| API | `GET /api/v1/backgrounds/catalog` (público, ETag = versão + cartela do dia, `304`), `GET /api/v1/backgrounds/recommendations`; `background` em `POST/PATCH /api/v1/posts` ([RF29](RF29-publicar-post.md)); `background` resolvido em `PostDetailView` e `PostCardView` (`artKind`, `palette`, `css`, `auraPlus` com pôster, AV1 e H.264, `container` com tinta e contraste) | ✅ OS-65, OS-66 |
+| Envio de arte | `POST /api/v1/backgrounds/assets` | ⏳ OS-70 |
+| Cartela automática no servidor | `SeasonalCalendar` + `BackgroundService.today()` em America/Sao_Paulo; a cartela é resolvida na leitura | ✅ OS-67 |
+| Testes do backend | `BackgroundRulesTest` (cartelas, validação, contraste, catálogo), `PostPublishingApiIT` (publicar com moldura, 422, menor, catálogo com ETag, recomendações), `PostApiIT` (eliminação LGPD apaga a moldura) | ✅ |
 | Aura Plus e upload | Pipeline ffprobe → ffmpeg → EA IRIS → moderação → variantes | ⏳ OS-69, OS-70 |
 | Preferência do leitor | "Animações de fundo: Sempre / Só no Wi-Fi / Nunca" em Configurações → Exibição | ⏳ (RF2) |
 | Jurídico | Parecer sobre licenças, IA, retirada por direito autoral e marcas | ⏳ OS-72 |

@@ -18,20 +18,23 @@ flowchart TB
         subgraph Security["Camada de Segurança & LGPD (RF27)"]
             SEC["SessionRepositoryFilter + SecurityConfig<br/>(sessão opaca no Valkey · CSRF SPA ·<br/>AbsoluteSessionTimeoutFilter)"]
             RATE["LoginThrottle<br/>(conta e IP · Valkey)"]
-            CONSENT["ConsentGuard<br/>(Art. 7º I / Art. 11)"]:::planned
+            CONSENT["ConsentGuard<br/>(Art. 7º I / Art. 11 · consumidores conferem ConsentService.granted)"]:::planned
             AUDIT["LgpdAuditInterceptor<br/>(Art. 37 – registro de operações)"]:::planned
         end
 
         subgraph Controllers["Controllers (REST /api/v1)"]
             AUTHC["AuthController<br/>(cadastro · login · 2FA · reativar · sair)"]
-            USERC["MeController<br/>(perfil · preferências · sessões · 2FA · excluir)"]
+            USERC["MeController<br/>(perfil · foto · preferências · sessões · 2FA · excluir)"]
             LEGALC["LegalController<br/>(Termos de Uso vigentes)"]
             POSTC["PostController<br/>(detalhe · curtir · comentar · compartilhar · salvar)"]
+            PUBC["PostPublishingController<br/>(criar · editar · arquivar · restaurar · apagar)"]
+            BGC["BackgroundController<br/>(catálogo público · recomendações)"]
             PROFC["UserProfileController<br/>(perfil público · feed do autor)"]
             VIEWER["ViewerResolver<br/>(OrangePrincipal da sessão)"]
             FEEDC["FeedController<br/>(profile · post · audio · alert)"]:::planned
-            MEDIAC["MediaController<br/>(URLs pré-assinadas)"]:::planned
-            PRIVC["PrivacyController<br/>(exportar · consentimentos)"]:::planned
+            MEDIAC["MediaUploadController<br/>(URL pré-assinada da foto · RF29 · RF2)"]
+            CONSC["ConsentController<br/>(GET/PUT /me/consents · RF3)"]
+            PRIVC["PrivacyController<br/>(exportar dados)"]:::planned
             VELC["VelionIntegrationController"]:::planned
         end
 
@@ -39,15 +42,17 @@ flowchart TB
             AUTHS["AuthService · MfaService · StepUp<br/>SessionService"]
             USERS["RegistrationService · ProfileService ·<br/>PreferencesService · AccountService ·<br/>EmailVerificationService"]
             LEGALS["LegalDocuments"]
+            CONSS["ConsentService · ConsentPurpose<br/>(RF3 · 6 finalidades · revogação imediata · trava por idade)"]
             NOTIF["AccountNotifier<br/>(hoje LoggingAccountNotifier)"]
             JOB["AccountDeletionJob<br/>(diário 03:15)"]
             POSTQ["PostQueryService<br/>(RF24 · RF25)"]
             POSTI["PostInteractionService<br/>(RF26 · contadores atômicos)"]
             ERASER["PostContentEraser<br/>(RF23 · passo da saga)"]
             FEEDS["FeedService<br/>(filtro 6 eixos)"]:::planned
-            POSTS["PostPublishingService"]:::planned
+            POSTS["PostPublishingService<br/>(RF29 · publicar · editar · arquivar)"]
+            BGS["BackgroundService · BackgroundCatalog ·<br/>BackgroundValidator · SeasonalCalendar<br/>(RF28 · moldura do post)"]
             TRENDS["TrendingService"]:::planned
-            MEDIAS["MediaStorageService"]:::planned
+            MEDIAS["MediaUploads · ImageSanitizer ·<br/>MediaJanitor<br/>(RF29 post · RF2 perfil · sem EXIF/GPS)"]
             LGPDS["LgpdService<br/>(portabilidade)"]:::planned
             POINTS["VelionPointsService"]:::planned
             EVENTS["DomainEventPublisher"]:::planned
@@ -61,8 +66,8 @@ flowchart TB
             TIMER["PostTimelineRepository<br/>(Spring Data Cassandra)"]
             TRENDR["TrendingScoreRepository<br/>(StringRedisTemplate · ZSET)"]
             SESSR["Spring Session<br/>(Valkey · indexado)"]
-            CONSR["ConsentEventRepository<br/>(hoje JDBC no cadastro)"]:::planned
-            S3A["S3StorageAdapter<br/>(AWS SDK v2)"]:::planned
+            CONSR["consent_event · user_consent_current<br/>(JDBC no ConsentService · append-only)"]
+            S3A["S3MediaStorage<br/>(AWS SDK v2 · MediaStorage)"]
         end
     end
 
@@ -75,16 +80,20 @@ flowchart TB
 
     WEB & MOBILE & VELION -->|HTTPS + cookie de sessão + X-XSRF-TOKEN| SEC
     SEC --> RATE --> CONSENT --> AUDIT
-    AUDIT --> AUTHC & USERC & LEGALC & POSTC & PROFC & FEEDC & MEDIAC & PRIVC & VELC
-    POSTC & PROFC & USERC --> VIEWER
+    AUDIT --> AUTHC & USERC & LEGALC & POSTC & PUBC & BGC & PROFC & FEEDC & MEDIAC & CONSC & PRIVC & VELC
+    POSTC & PROFC & USERC & CONSC --> VIEWER
+    CONSC --> CONSS
+    CONSS --> USERR & CONSR
 
     AUTHC --> AUTHS & USERS
     USERC --> USERS & AUTHS
     LEGALC --> LEGALS
     FEEDC --> FEEDS
-    POSTC --> POSTS & POSTQ & POSTI
+    POSTC --> POSTQ & POSTI
+    PUBC --> POSTS
+    BGC --> BGS
     PROFC --> POSTQ
-    POSTQ --> POSTR & USERR
+    POSTQ --> POSTR & USERR & BGS
     POSTI --> POSTR & COMR & USERR
     MEDIAC --> MEDIAS
     PRIVC --> LGPDS
@@ -92,9 +101,10 @@ flowchart TB
     JOB --> USERS
 
     AUTHS --> USERR & ACCR & SESSR & RATE & NOTIF
-    USERS --> USERR & ACCR & CONSR & SESSR & NOTIF & ERASER
+    USERS --> USERR & ACCR & CONSS & SESSR & NOTIF & ERASER & MEDIAS
     FEEDS --> TIMER & TRENDR & USERR
-    POSTS --> POSTR & TIMER & TRENDS & EVENTS
+    POSTS --> POSTR & USERR & BGS & POSTQ & MEDIAS
+    POSTS -.->|alvo: ranking e timeline| TIMER & TRENDS & EVENTS
     TRENDS --> TRENDR
     MEDIAS --> S3A
     LGPDS --> USERR & CONSR & TIMER & S3A
@@ -120,7 +130,7 @@ flowchart TB
 | Controllers | `com.orangesocial.api` | DTOs de entrada/saída, validação Bean Validation, códigos HTTP |
 | Services | `com.orangesocial.application` | Casos de uso, transações (`@Transactional` só no PostgreSQL), orquestração entre armazenamentos |
 | Domínio | `com.orangesocial.domain.model` | Entidades, enums (`UserCategoryEnum`, `AccountStatus`, `FeedType`), regras de transição |
-| Infraestrutura | `com.orangesocial.infrastructure.*` | Adaptadores PostgreSQL (`persistence.postgres`), Cassandra (`persistence.cassandra`), Valkey (`cache.redis`), S3 |
+| Infraestrutura | `com.orangesocial.infrastructure.*` | Adaptadores PostgreSQL (`persistence.postgres`), Cassandra (`persistence.cassandra`), Valkey (`cache.redis`), S3 (`storage`) |
 
 ## Consistência entre armazenamentos
 
@@ -128,7 +138,10 @@ flowchart TB
 - A gravação no PostgreSQL acontece dentro da transação; Cassandra e Valkey são atualizados **após o commit**
   (`@TransactionalEventListener(phase = AFTER_COMMIT)`), com retentativa idempotente
   (o `post.id` é um UUID v7 gerado uma única vez).
-- Mídia é enviada **antes** da publicação (URL pré-assinada); o post só referencia a chave do objeto.
+- Mídia é enviada **antes** da publicação (URL pré-assinada, direto ao bucket); o post só referencia a chave do objeto.
+  Ao publicar, a API limpa a foto (sem EXIF/GPS) e grava a versão pública; o original sai **depois do commit** e a
+  versão limpa sai se a transação voltar atrás (`MediaJanitor`). Apagar o post ou eliminar a conta (RF23) apaga a
+  foto do bucket da mesma forma.
 - **Contadores de interação** (`like_count`, `comment_count`, `share_count`) vivem na linha do `post` e mudam
   na mesma transação da reação/comentário/compartilhamento, só quando a linha de associação realmente entrou
   ou saiu (`ON CONFLICT DO NOTHING`). O JPA nunca os grava (`insertable/updatable = false`).

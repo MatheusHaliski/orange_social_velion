@@ -47,6 +47,8 @@ paths:
    entrou ou saiu de fato. Nunca `COUNT(*)` na leitura.
 4. Caixa de mensagens: lista do mais antigo para o mais novo, paginada; campo com limite de 2.000
    caracteres e contador; quem escreveu ou o dono do post pode apagar; comentário vazio é recusado.
+   A exclusão é **atômica** (`UPDATE … WHERE status = 'VISIBLE'`): se quem escreveu e o dono do post apagam ao
+   mesmo tempo, só uma vale (`204`), a outra recebe `404` e o contador desce uma vez só.
 5. Compartilhar: Web Share API / folha nativa quando houver; senão, folha própria com Copiar link,
    WhatsApp, Telegram, X e e-mail. O número conta **pares distintos (usuário, canal)**.
 6. Exige conta **ativa**: anônimo recebe 401 ("Entre na sua conta…"), conta pendente/suspensa 403.
@@ -129,6 +131,17 @@ sequenceDiagram
     S->>PG: INSERT post_comment · UPDATE comment_count + 1
     S-->>APP: 201 {comment, comments: 185}
     APP-->>U: mensagem no fim da lista · contador 185 no card e no modal
+    U->>APP: apaga o próprio comentário (o dono do post pode apagar ao mesmo tempo)
+    APP->>API: DELETE /api/v1/posts/{id}/comments/{commentId}
+    API->>S: removeComment(id, commentId, viewer)
+    S->>S: quem escreveu ou dono do post? (senão 403)
+    S->>PG: UPDATE post_comment SET status = REMOVED, body = NULL WHERE id = ? AND status = VISIBLE
+    alt 0 linhas (a outra exclusão chegou antes)
+        S-->>APP: 404 · o contador não mexe
+    else 1 linha
+        S->>PG: UPDATE comment_count - 1
+        S-->>APP: 204
+    end
 ```
 
 ## Sequência · compartilhar
@@ -221,9 +234,9 @@ erDiagram
 | Camada | Artefato | Situação |
 |---|---|---|
 | Domínio | `PostComment` (trim, limite, quem pode apagar), `ReactionKind`, `ShareChannel`, `CommentStatus` | ✅ |
-| Persistência | `post_reaction`, `post_comment`, `post_share` (V2); `PostRepository` (insert/delete idempotentes, contadores), `PostCommentRepository` | ✅ |
+| Persistência | `post_reaction`, `post_comment`, `post_share` (V2); `PostRepository` (insert/delete idempotentes, contadores), `PostCommentRepository` (`removeIfVisible`: exclusão atômica) | ✅ |
 | Aplicação / API | `PostInteractionService`; `PUT/DELETE …/like`, `PUT/DELETE …/save`, `GET/POST …/comments`, `DELETE …/comments/{id}`, `POST …/shares` | ✅ |
-| Testes | `PostDomainTest.commentIsTrimmedValidatedAndRemovableByWriterOrPostOwner`; `PostApiIT` (curtir idempotente, 401/403/409, caixa de comentários, compartilhar por canal, eliminação LGPD) | ✅ |
+| Testes | `PostDomainTest.commentIsTrimmedValidatedAndRemovableByWriterOrPostOwner`; `PostApiIT` (curtir idempotente, 401/403/409, caixa de comentários, compartilhar por canal, eliminação LGPD; `removingTheSameCommentTwiceDecrementsTheCounterOnce`: autor e dono do post apagam em paralelo em 5 rodadas) | ✅ |
 | Tela | Protótipo: botões com contagem em [01-post-feed](../../design/prototype/screens/01-post-feed.png), [11-comentarios](../../design/prototype/screens/11-comentarios.png), [12-compartilhar](../../design/prototype/screens/12-compartilhar.png) | ✅ protótipo |
 | Identidade | `ViewerResolver` lê a sessão autenticada ([RF27](RF27-autenticacao-sessao.md)); o cabeçalho de dev `X-Orange-Dev-User` foi removido e os testes entram com login real (sessão + CSRF) | ✅ |
 | Pendências | tempo real dos contadores (SSE, OS-2B); notificação ao autor (OS-27); moderação de comentários (OS-4D); rate limit (OS-47); repost como ação separada | ⏳ OS-59 |

@@ -1,5 +1,7 @@
 package com.orangesocial.application.post;
 
+import com.orangesocial.application.background.BackgroundService.BackgroundView;
+
 import com.orangesocial.domain.model.AgeRating;
 import com.orangesocial.domain.model.FeedType;
 import com.orangesocial.domain.model.MediaType;
@@ -43,19 +45,21 @@ public final class PostViews {
         static final ViewerStateView ANONYMOUS = new ViewerStateView(false, false, false);
     }
 
-    /** Modal de detalhe (RF24): todos os dados do post. */
+    /** Modal de detalhe (RF24): todos os dados do post; {@code background} = moldura resolvida (RF28) ou {@code null}. */
     public record PostDetailView(UUID id, FeedType feed, MediaType mediaType, String title, String subtitle,
                                  String body, String mediaUrl, Integer durationSeconds, AgeRating ageRating,
                                  String ageRatingLabel, PostStatus status, String country, String city,
                                  Instant publishedAt, AuthorView author, CountersView counts,
-                                 ViewerStateView viewer, boolean interactionsOpen, String shareUrl) {
+                                 ViewerStateView viewer, boolean interactionsOpen, String shareUrl,
+                                 BackgroundView background) {
     }
 
     /** Card do feed: sem texto corrido (DESIGN_SYSTEM.md §6), o resto igual ao detalhe. */
     public record PostCardView(UUID id, FeedType feed, MediaType mediaType, String title, String subtitle,
                                String mediaUrl, Integer durationSeconds, AgeRating ageRating,
                                String ageRatingLabel, PostStatus status, Instant publishedAt, AuthorView author,
-                               CountersView counts, ViewerStateView viewer, String detailPath) {
+                               CountersView counts, ViewerStateView viewer, String detailPath,
+                               BackgroundView background) {
     }
 
     public record FeedPageView(List<PostCardView> items, String nextCursor) {
@@ -66,7 +70,7 @@ public final class PostViews {
      * cidade, e-mail, telefone e demais campos do cadastro nunca saem aqui.
      */
     public record PublicProfileView(Long id, String name, CategoryView category, String avatarUrl,
-                                    Instant memberSince, long postCount, String postsPath) {
+                                    Instant memberSince, long postCount, String postsPath, String shareUrl) {
     }
 
     public record CommentView(Long id, AuthorView author, String body, Instant createdAt, boolean canDelete) {

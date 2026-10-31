@@ -27,7 +27,7 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
             ORDER BY created_at DESC, id DESC
             LIMIT :limit
             """, nativeQuery = true)
-    List<Post> findAuthorFeed(Long authorId, int limit);
+    List<Post> findProfileFeed(Long authorId, int limit);
 
     /** Página seguinte por cursor (created_at, id): estável mesmo com posts novos chegando. */
     @Query(value = """
@@ -37,7 +37,7 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
             ORDER BY created_at DESC, id DESC
             LIMIT :limit
             """, nativeQuery = true)
-    List<Post> findAuthorFeedBefore(Long authorId, Instant beforeCreatedAt, UUID beforeId, int limit);
+    List<Post> findProfileFeedBefore(Long authorId, Instant beforeCreatedAt, UUID beforeId, int limit);
 
     long countByAuthorUserIdAndStatusIn(Long authorUserId, Collection<PostStatus> statuses);
 
@@ -135,7 +135,7 @@ public interface PostRepository extends JpaRepository<Post, UUID> {
     @Modifying
     @Query(value = """
             UPDATE post SET status = 'REMOVED', title = 'Conteúdo removido', subtitle = NULL, body = NULL,
-                            media_object_key = NULL, country = NULL, city = NULL,
+                            media_object_key = NULL, country = NULL, city = NULL, background = NULL,
                             removed_at = now(), updated_at = now(), version = version + 1
             WHERE author_user_id = :userId AND status <> 'REMOVED'
             """, nativeQuery = true)

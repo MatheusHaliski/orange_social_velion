@@ -172,7 +172,7 @@ Um mesmo usuário assume papéis diferentes conforme o objeto. A API calcula ess
 | Entrar / 2FA | ✅ | ✅ | ✅ | ✅ | ❌ | oferta de reativar | — |
 | Editar perfil e preferências | 401 | ✅ | ✅ | ✅ (proteções travadas) | — | — | — |
 | Curtir, comentar, compartilhar, salvar | 401 | 403 | ✅ | ✅ | — | — | — |
-| Publicar post | 401 | 403 | ⏳ OS-23 | ⏳ | — | — | — |
+| Publicar post de texto ([RF29](rf/RF29-publicar-post.md)) | 401 | 403 | ✅ (instituição e banco só com selo) | ✅ sem 18+/sensível; moldura só do catálogo | — | — | — |
 | Publicar alerta oficial | — | — | só VERMELHO verificado | ❌ | — | — | curadoria |
 | Encerrar sessões, ativar 2FA, trocar senha | 401 | ✅ | ✅ | ✅ | — | — | — |
 | Excluir conta (30 dias para voltar) | — | ✅ | ✅ | ✅ | ✅ (sem login: pelo suporte ⏳) | reativar | — |
@@ -287,7 +287,7 @@ flowchart LR
 | `bio` (≤ 150) | perfil público | opcional | público | comum | informado | titular | texto |
 | `pronouns` (≤ 4, lista) | perfil público | opcional | configurável | comum | informado | titular | texto |
 | `links` (≤ 5, `https`) | perfil público | opcional | público | comum | informado | titular | texto |
-| `photoObjectKey` | perfil público | opcional | público | comum (biometria só com `FACIAL_RECOGNITION`) | informado | titular | chave S3 |
+| `photoObjectKey` | perfil público | opcional | público | comum (biometria só com `FACIAL_RECOGNITION`) | informado | titular | chave S3 da versão limpa em `avatars/` (quadrado 512 px, sem EXIF/GPS · `PUT /api/v1/me/photo`) |
 | `citizenship` | identidade | opcional | só eu | comum | informado | titular | texto |
 | `countryOfResidence`, `stateOfResidence`, `cityOfResidence` | localização | opcional | configurável | comum | informado | titular | texto |
 | `address` | localização | opcional | só eu | comum | informado | titular | texto |
@@ -303,15 +303,22 @@ flowchart LR
 | `deletionRequestedAt`, `deletionScheduledFor`, `statusBeforeDeletion` | ciclo de vida | sistema | só eu | — | sistema | ninguém | — |
 | `deletedAt` | ciclo de vida | sistema | interno | — | sistema | ninguém | — |
 | **`terms_acceptance`**: `document`, `version`, `acceptedAt`, `channel`, `ipHash` | legal | obrigatório | só eu | comum | sistema | ninguém (append-only) | HMAC do IP |
-| **`consent_event`** × 6: `purpose`, `legalBasis`, `granted`, `policyVersion` | legal | sistema (todos `false`) | só eu | comum | informado | titular (RF3) | — |
+| **`consent_event`** × 6: `purpose`, `legalBasis`, `granted`, `policyVersion`, `channel`, `ipHash`, `occurredAt` | legal | sistema (todos `false`) | só eu | comum | informado | titular (RF3, `PUT /api/v1/me/consents/{purpose}`; append-only) | HMAC do IP |
 | **`user_mfa`**: `secret`, `lastUsedStep`, `enabledAt` | acesso | opcional | nunca exibido | comum | sistema | fluxo próprio | AES-256-GCM (AAD = id) |
 | **`user_recovery_code`** × 10: `codeHash`, `usedAt` | acesso | com 2FA | mostrado 1 vez | comum | sistema | fluxo próprio | Argon2id |
 | **`user_preference`** (§3.5) | preferências | sistema (padrões) | só eu | comum | informado | titular | — |
 | **Sessão** (Valkey): principal, `authAt`, `device`, `channel`, criação, último acesso | acesso | sistema | só eu (sem o id real) | comum | sistema | titular encerra | id opaco; `handle` = HMAC |
 
-Finalidades de consentimento (`consent_event.purpose`, todas começam `false`): `MARKETING`,
-`LOCATION_TRACKING`, `PERSONALIZED_FEED`, `THIRD_PARTY_SHARING` (Art. 7º, I) e `FACIAL_RECOGNITION`,
-`SENSITIVE_PROFILE_DATA` (Art. 11, I).
+Finalidades de consentimento (`ConsentPurpose`, `consent_event.purpose`, todas começam `false`), na ordem da tela:
+
+| Finalidade | Rótulo | Base | Sensível | Travada para | Ao revogar |
+|---|---|---|---|---|---|
+| `LOCATION_TRACKING` | Guardar minha localização | Art. 7º, I | — | menor de 16 | apaga `lastSavedLocation` |
+| `PERSONALIZED_FEED` | Feed pelos meus interesses | Art. 7º, I | — | menor de 16 | — |
+| `SENSITIVE_PROFILE_DATA` | Orientação sexual no perfil | Art. 11, I | ✅ | menor de 18 | apaga `sexualPreference` |
+| `FACIAL_RECOGNITION` | Reconhecimento facial no aparelho | Art. 11, I | ✅ | menor de 18 | o app apaga o modelo local |
+| `MARKETING` | Novidades e ofertas da Velion e de marcas | Art. 7º, I | — | menor de 16 | — |
+| `THIRD_PARTY_SHARING` | Compartilhar com parceiros | Art. 7º, I | — | — | — |
 
 ### 3.3 Atributos por tipo (`type_details`)
 
@@ -354,14 +361,14 @@ Finalidades de consentimento (`consent_event.purpose`, todas começam `false`): 
 | | `mediaType` | O | público | `TEXT` · `IMAGE` · `VIDEO` · `AUDIO` |
 | | `title` | O | público | Sempre presente em todo card |
 | | `subtitle`, `body` | o | público | Card corta; modal mostra tudo |
-| | `mediaObjectKey`, `durationSeconds` | por mídia | público | Chave no S3; duração para áudio e vídeo |
+| | `mediaObjectKey`, `durationSeconds` | por mídia | público | Chave no S3: para foto, a versão limpa em `posts/` (sem EXIF/GPS, até 2.048 px · RF29); duração para áudio e vídeo |
 | | `ageRating` | O (padrão `LIVRE`) | público | `LIVRE` · `12+` · `16+` · `18+` · `Sensível` |
 | | `status` | sistema | autor | `DRAFT` · `PUBLISHED` · `ARCHIVED` · `REMOVED` |
 | | `country`, `city` | o | público | Filtros País e Cidade |
 | | `likeCount`, `commentCount`, `shareCount`, `viewCount` | sistema | público | Só leitura no JPA; mudam em UPDATE atômico |
 | | `createdAt`, `updatedAt`, `removedAt` | sistema | `createdAt` = `publishedAt` | — |
 | | ⏳ `sponsored`, `mediaAlt` | propostos | público | Selo de publicidade (CDC art. 36) e texto alternativo |
-| | ⏳ `background` (JSONB) | o (nulo = moldura padrão) | público | Moldura do post ([RF28](rf/RF28-moldura-post.md)): só ids do catálogo e chaves de asset, nunca URL nem CSS; `ALERT` ignora |
+| | ✅ `background` (JSONB) | o (nulo = moldura padrão) | público | Moldura do post ([RF28](rf/RF28-moldura-post.md)): só ids do catálogo e chaves de asset, nunca URL nem CSS; `ALERT` não aceita (422 + CHECK); apagado ao remover o post e na eliminação LGPD |
 | **AudioContent** ⏳ | `kind`, `transcript`, `tags`, picos da onda | — | público | `PODCAST` · `PERSONAL_AUDIO` · `MUSIC` |
 | **AlertContent** ⏳ | `category`, `severity`, `epicenter`, `radiusKm`, `expiresAt`, `verifiedSource`, `instruction` | — | público | `EMERGENCY` · `NATURAL_DISASTER` · `OFFICIAL_COMMUNICATION` · `JOB_OPENING`; severidade segue o CAP 1.2 (`Extreme` · `Severe` · `Moderate` · `Minor`) |
 | **Comentário** | `body` (1–2.000), `status`, `createdAt`, `removedAt` | O | público | Removido: texto apagado, id mantido |

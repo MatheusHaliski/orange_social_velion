@@ -1,5 +1,6 @@
 package com.orangesocial.application.account;
 
+import com.orangesocial.application.consent.ConsentService;
 import com.orangesocial.domain.model.TermsAcceptance;
 import com.orangesocial.domain.model.UserCategoryEnum;
 import com.orangesocial.domain.model.UserControlList;
@@ -8,7 +9,6 @@ import com.orangesocial.infrastructure.persistence.postgres.TermsAcceptanceRepos
 import com.orangesocial.infrastructure.persistence.postgres.UserControlListRepository;
 import com.orangesocial.infrastructure.persistence.postgres.UserPreferenceRepository;
 import com.orangesocial.security.ClientInfo;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,11 +30,6 @@ public class RegistrationService {
     private static final Pattern EMAIL = Pattern.compile("^[^@\\s]{1,64}@[^@\\s]+\\.[^@\\s]{2,}$");
     private static final Pattern HANDLE = Pattern.compile("^[a-z0-9._]{3,30}$");
 
-    /** Finalidades opcionais e base legal (RF3); todas nascem com granted = false. */
-    private static final Map<String, String> CONSENTS = Map.of(
-            "MARKETING", "ART_7_I", "LOCATION_TRACKING", "ART_7_I", "PERSONALIZED_FEED", "ART_7_I",
-            "FACIAL_RECOGNITION", "ART_11_I", "SENSITIVE_PROFILE_DATA", "ART_11_I", "THIRD_PARTY_SHARING", "ART_7_I");
-
     private final UserControlListRepository users;
     private final TermsAcceptanceRepository terms;
     private final UserPreferenceRepository preferences;
@@ -42,11 +37,11 @@ public class RegistrationService {
     private final LegalDocuments legal;
     private final AgePolicy age;
     private final EmailVerificationService verification;
-    private final JdbcTemplate jdbc;
+    private final ConsentService consents;
 
     public RegistrationService(UserControlListRepository users, TermsAcceptanceRepository terms,
                                UserPreferenceRepository preferences, PasswordEncoder passwords, LegalDocuments legal,
-                               AgePolicy age, EmailVerificationService verification, JdbcTemplate jdbc) {
+                               AgePolicy age, EmailVerificationService verification, ConsentService consents) {
         this.users = users;
         this.terms = terms;
         this.preferences = preferences;
@@ -54,7 +49,7 @@ public class RegistrationService {
         this.legal = legal;
         this.age = age;
         this.verification = verification;
-        this.jdbc = jdbc;
+        this.consents = consents;
     }
 
     public record Registration(String name, String handle, String email, String password, UserCategoryEnum userType,
@@ -119,12 +114,7 @@ public class RegistrationService {
 
         terms.save(new TermsAcceptance(user.getId(), TermsAcceptance.TERMS_OF_USE, legal.termsVersion(),
                 client.channel(), client.ipHash()));
-        for (Map.Entry<String, String> c : CONSENTS.entrySet()) {
-            jdbc.update("""
-                    INSERT INTO consent_event (user_id, purpose, legal_basis, granted, policy_version, channel, ip_hash)
-                    VALUES (?, ?, ?, FALSE, ?, ?, ?)
-                    """, user.getId(), c.getKey(), c.getValue(), legal.privacyVersion(), client.channel(), client.ipHash());
-        }
+        consents.recordDefaults(user.getId(), client);   // as 6 finalidades de ConsentPurpose, desligadas
         preferences.save(UserPreference.defaultsFor(user.getId(), minor));
         verification.issue(user);
         return user;

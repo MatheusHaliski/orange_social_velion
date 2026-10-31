@@ -45,25 +45,27 @@ services:
     container_name: os-garage
     ports:
       - "3900:3900"   # API S3
+      - "3902:3902"   # leitura pública das mídias (s3_web), o papel da CDN em dev
       - "3903:3903"   # Admin API
     volumes:
       - ./infra/garage/garage.toml:/etc/garage.toml:ro
       - garage-meta:/var/lib/garage/meta
       - garage-data:/var/lib/garage/data
     healthcheck:
-      test: ["CMD-SHELL", "wget -qO- http://localhost:3903/health || exit 1"]
+      # a imagem não tem shell nem wget: o próprio binário consulta o nó
+      test: ["CMD", "/garage", "status"]
       interval: 5s
       timeout: 3s
       retries: 20
 
   garage-init:
-    image: dxflrs/garage:v2.4.1
+    # init.sh fala com a Admin API v2 por HTTP; a imagem do curl traz o sh que a do Garage não tem
+    image: curlimages/curl:8.11.1
     container_name: os-garage-init
     depends_on:
       garage:
         condition: service_healthy
     volumes:
-      - ./infra/garage/garage.toml:/etc/garage.toml:ro
       - ./infra/garage/init.sh:/init.sh:ro
     entrypoint: ["/bin/sh", "/init.sh"]
     restart: "no"

@@ -1,5 +1,7 @@
 package com.orangesocial.application.post;
 
+import java.util.List;
+
 /** Erros de negócio dos posts; o {@code ApiExceptionHandler} os traduz em Problem Details (RFC 9457). */
 public final class PostExceptions {
 
@@ -23,6 +25,27 @@ public final class PostExceptions {
     /** 403: conta sem permissão (não ativa) ou ação sobre conteúdo de outra pessoa. */
     public static class Forbidden extends RuntimeException {
         public Forbidden(String message) {
+            super(message);
+        }
+    }
+
+    /** 422: dados do post ou da moldura inválidos; todos os problemas vão juntos em {@code errors}. */
+    public static class Invalid extends RuntimeException {
+        private final List<String> errors;
+
+        public Invalid(List<String> errors) {
+            super(errors.isEmpty() ? "Dados inválidos." : errors.getFirst());
+            this.errors = List.copyOf(errors);
+        }
+
+        public List<String> errors() {
+            return errors;
+        }
+    }
+
+    /** 409: transição de estado que o post não aceita (ex.: arquivar um post já arquivado). */
+    public static class Conflict extends RuntimeException {
+        public Conflict(String message) {
             super(message);
         }
     }

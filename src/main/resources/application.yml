@@ -85,9 +85,19 @@ orange-social:
   storage:
     # API S3: AWS S3 (sa-east-1) em produção, Garage em desenvolvimento
     endpoint: ${S3_ENDPOINT:http://localhost:3900}
+    # endereço que vai nas URLs pré-assinadas (o celular precisa alcançar; o app pode usar a rede interna)
+    presign-endpoint: ${S3_PRESIGN_ENDPOINT:${orange-social.storage.endpoint}}
     region: ${S3_REGION:sa-east-1}
     bucket: ${S3_BUCKET:orange-social-media}
-    # de onde o app baixa mídias e avatares (CDN em produção)
-    public-url: ${S3_PUBLIC_URL:http://localhost:3900/orange-social-media}
+    # privado: originais enviados pelo app (uploads/, com EXIF/GPS), nunca com leitura pública
+    uploads-bucket: ${S3_UPLOADS_BUCKET:orange-social-uploads}
+    # vazio = cadeia padrão da AWS (papel da instância, AWS_ACCESS_KEY_ID...); nada de segredo aqui
+    access-key: ${S3_ACCESS_KEY:}
+    secret-key: ${S3_SECRET_KEY:}
+    # de onde o app baixa mídias e avatares (CDN em produção; em dev, a leitura pública do Garage na :3902)
+    public-url: ${S3_PUBLIC_URL:http://orange-social-media.web.garage.localhost:3902}
+  backgrounds:
+    # artes da Aura Plus (RF28): vídeos e pôsteres de design/brand/auras/ publicados no bucket, servidos pela CDN
+    asset-base-url: ${BACKGROUNDS_ASSET_URL:${orange-social.storage.public-url}/backgrounds}
   trending:
     window-hours: 48

@@ -32,7 +32,7 @@ paths:
 | **Base legal (LGPD)** | Art. 18, V (portabilidade) · Art. 18, VI (eliminação) · Art. 16 (conservação permitida) · Art. 37 (registro das operações) |
 | **Retenção legal** | Registros de acesso: 6 meses (Marco Civil, Art. 15) |
 | **Exclusão com carência** | Modal explica as consequências e pede senha (+2FA) e confirmação; a conta fica `PENDING_DELETION` por **30 dias** (oculta, todas as sessões encerradas); entrar de novo no prazo oferece **reativar**; vencido o prazo, o job diário elimina |
-| **Status** | 🟡 Parcial — carência de 30 dias com reativação, job de eliminação (posts, interações, 2FA, preferências, anonimização), `user_key` (DEK) e TTLs prontos; exportação, S3, Cassandra e destruição da DEK na saga ainda não |
+| **Status** | 🟡 Parcial — carência de 30 dias com reativação, job de eliminação (posts, interações, fotos dos posts e foto de perfil no S3, 2FA, preferências, anonimização), `user_key` (DEK) e TTLs prontos; exportação, Cassandra e destruição da DEK na saga ainda não |
 
 ## Exportar meus dados (Art. 18, V)
 
@@ -121,7 +121,9 @@ sequenceDiagram
     SG->>PG: apaga 2FA, códigos de recuperação e preferências
     SG->>PG: anonymizeForLgpdDeletion() · status = ANONYMOUS_LGPD_DELETED (sem @, sem type_details)
     SG->>CS: DELETE partições da timeline e notificações
-    SG->>S3: DELETE objetos e versões (foto + mídias devolvidas pelo eraser)
+    SG->>PG: COMMIT
+    SG->>S3: DELETE fotos dos posts e foto de perfil (MediaJanitor, depois do commit)
+    Note over SG,S3: ⏳ versões antigas do objeto
     SG->>KMS: destrói a DEK em user_key (crypto-shredding)
     Note over SG,KMS: Backups e SSTables antigas ficam ilegíveis sem a DEK
     SG->>CS: INSERT activity_log ACCOUNT_DELETED (recibo)
@@ -152,12 +154,13 @@ Ciclo de vida da conta: [`MAQUINA_ESTADOS.md`](../MAQUINA_ESTADOS.md) (estado te
 |---|---|---|
 | Domínio | `UserControlList.anonymizeForLgpdDeletion`, `AccountStatus` (terminal) | ✅ |
 | Persistência | `user_key` (DEK), TTL em `post_timeline`/`notification`, `TrendingScoreRepository.remove` | ✅ |
-| Posts e interações | `PostContentEraser` + consultas de eliminação em `PostRepository` / `PostCommentRepository` (idempotente) | ✅ |
-| Testes | `DomainModelTest.lgpdDeletionIsTerminalAndErasesPersonalData`, `TrendingScoreRepositoryIT.removeClearsEveryRankingOfTheFeed`, `PostApiIT.lgpdErasureRemovesContentAndFixesOtherPostsCounters` | ✅ |
+| Posts e interações | `PostContentEraser` + consultas de eliminação em `PostRepository` / `PostCommentRepository` (idempotente); a eliminação também apaga a moldura (`post.background`, V4 · [RF28](RF28-moldura-post.md)) | ✅ |
+| Testes | `DomainModelTest.lgpdDeletionIsTerminalAndErasesPersonalData`, `TrendingScoreRepositoryIT.removeClearsEveryRankingOfTheFeed`, `PostApiIT.lgpdErasureRemovesContentAndFixesOtherPostsCounters` (inclui a moldura) | ✅ |
 | Perfil público | conta eliminada some do perfil público e aparece como "Conta excluída" sem link ([RF25](RF25-perfil-publico-autor.md)) | ✅ |
 | Exportação | job + ZIP cifrado + URL pré-assinada | ⏳ OS-43 |
 | Exclusão com carência | `UserControlList.requestDeletion/reactivate`, `AccountService.requestDeletion/eliminate`, `AccountDeletionJob`, `POST /api/v1/me/deletion`, `POST /api/v1/auth/reactivate` | ✅ |
 | Testes da carência | `AccountRulesTest.deletionGraceAllowsReactivationOnlyWithinTheWindow`, `AuthApiIT.deletionHidesAccountAllowsReactivationWithin30DaysAndEliminatesAfter` | ✅ |
-| Exclusão — passos fora do PostgreSQL | S3, Cassandra, Valkey (ranking), destruição da DEK, reconciliação | ⏳ OS-44, OS-46 |
+| Exclusão — fotos no S3 | `AccountService.eliminate` → `MediaJanitor.deleteAfterCommit` com as chaves devolvidas pelo `PostContentEraser` e a foto de perfil: o banco perde a referência na transação e o objeto sai do bucket depois do commit (falha vira aviso no log) · teste `PostPublishingApiIT.accountEliminationDeletesThePhotosFromTheBucket` com Garage | ✅ |
+| Exclusão — demais passos fora do PostgreSQL | versões antigas no S3, Cassandra, Valkey (ranking), destruição da DEK, reconciliação | ⏳ OS-44, OS-46 |
 | Auditoria | registro de operações (Art. 37) | ⏳ OS-45, OS-4A |
 | Tela | Protótipo: [Configurações → Seus dados](../../design/prototype/screens/05-config-lgpd.png); modal de exclusão [19-excluir-conta](../../design/prototype/screens/19-excluir-conta.png) (`alertdialog` com consequências, data final, "Baixar uma cópia", caixa "Entendo" + senha + código; o botão só habilita após marcar); oferta de reativação no login [20-reativar-conta](../../design/prototype/screens/20-reativar-conta.png) | ✅ protótipo |

@@ -59,6 +59,10 @@ paths:
    - segredo de 160 bits cifrado com AES-256-GCM;
    - **10 códigos de recuperação** de uso único, guardados em Argon2id.
    - Ativar, regenerar e desativar exigem senha (+ código); cada mudança gera aviso por e-mail. **Sem SMS.**
+   - **Uso único atômico:** o passo do TOTP e o código de recuperação são consumidos por `UPDATE` condicional no
+     banco (`last_used_step < passo`; `used_at IS NULL`); com várias requisições ao mesmo tempo, só uma entra.
+   - **Nunca sobrescreve o fator ativo:** confirmar uma configuração quando o 2FA já foi ligado em outra sessão dá
+     `409` (`INSERT … ON CONFLICT DO NOTHING`), e o segredo que está valendo continua o mesmo.
 8. **Controle de acesso:**
    - leitura de posts, perfis e Termos é pública;
    - todo o resto exige sessão;
@@ -120,7 +124,11 @@ sequenceDiagram
         U->>APP: código de 6 dígitos (ou xxxxx-xxxxx)
         APP->>API: POST /api/v1/auth/login/2fa
         API->>A: completeMfa
-        A->>DB: decifra segredo · TOTP ±1 passo · passo > último usado?
+        A->>DB: decifra segredo · TOTP ±1 passo
+        A->>DB: UPDATE user_mfa SET last_used_step = passo WHERE last_used_step < passo
+        alt 0 linhas (código já usado, mesmo por outra requisição simultânea)
+            A-->>APP: 401
+        end
         A->>VK: changeSessionId · grava OrangePrincipal(id)
         A-->>APP: 200 {status: AUTHENTICATED, user}
     end
@@ -162,7 +170,11 @@ sequenceDiagram
     API-->>APP: {secret, otpauthUri} → QR code + chave para digitar
     U->>APP: código do app autenticador
     APP->>API: POST /api/v1/me/mfa/totp/confirm {code}
-    M->>DB: INSERT user_mfa (segredo AES-256-GCM) · 10 user_recovery_code (Argon2id)
+    M->>DB: INSERT user_mfa … ON CONFLICT (user_id) DO NOTHING (segredo AES-256-GCM)
+    alt 2FA já ligado por outra sessão
+        M-->>APP: 409 "O 2FA já está ativo"
+    end
+    M->>DB: 10 user_recovery_code (Argon2id)
     API-->>APP: 10 códigos xxxxx-xxxxx (mostrados uma vez)
     M-->>U: e-mail "2FA ativado"
 ```
@@ -171,10 +183,14 @@ sequenceDiagram
 
 | Rota | Visitante | Sessão (conta pendente) | Sessão (conta ativa) |
 |---|---|---|---|
-| `GET /api/v1/posts/**`, `GET /api/v1/users/**`, `GET /api/v1/legal/**` | ✅ | ✅ | ✅ |
+| `GET /api/v1/posts/**`, `GET /api/v1/users/**`, `GET /api/v1/legal/**`, `GET /api/v1/backgrounds/**` | ✅ | ✅ | ✅ |
 | `/api/v1/auth/**` (cadastro, login, 2FA, reativar, sair) | ✅ | ✅ | ✅ |
 | `/api/v1/me/**` (perfil, preferências, sessões, 2FA, excluir) | 401 | ✅ | ✅ |
 | Curtir, comentar, compartilhar, salvar | 401 | 403 | ✅ |
+| Publicar, editar, arquivar, apagar post ([RF29](RF29-publicar-post.md)) | 401 | 403 | ✅ (instituição e banco só com selo conferido) |
+| `POST /api/v1/media/uploads` (URL pré-assinada da foto · [RF29](RF29-publicar-post.md), [RF2](RF02-editar-perfil.md)) | 401 | 403 | ✅ |
+| `PUT`/`DELETE /api/v1/me/photo` (foto de perfil, com a chave do envio) | 401 | ✅ (o `PUT` dá 422: sem conta ativa não há envio) | ✅ |
+| `PUT` na URL pré-assinada (direto no bucket, fora da API) | 403 do bucket | 403 do bucket | ✅ com a assinatura recebida: até 15 min, mesmo tipo e tamanho |
 
 ## Rastreabilidade
 
@@ -182,8 +198,10 @@ sequenceDiagram
 |---|---|---|
 | Segurança | `SecurityConfig` (CSRF SPA, regras, cabeçalhos), `SessionService`, `AbsoluteSessionTimeoutFilter`, `LoginThrottle`, `PendingLogin`, `OrangePrincipal`, `ClientInfo`, `AppSecrets`, `SecretCipher`, `Totp`, `ProblemResponses` | ✅ |
 | Aplicação | `AuthService` (login em etapas), `MfaService`, `StepUp` (modo sudo), `AccountNotifier` | ✅ |
+| Erros | `ApiExceptionHandler`: Problem Details em pt-BR; corrida que viola chave única (cadastro simultâneo, [RF1](RF01-cadastro-usuario.md)) ou lock otimista vira `409`, nunca `500` | ✅ |
+| Concorrência do 2FA | `UserMfaRepository.consumeStep` / `enableIfAbsent` e `RecoveryCodeRepository.markUsed`: `UPDATE`/`INSERT` condicionais, 1 = aceito, 0 = já usado ou já ativo | ✅ |
 | Persistência | `user_mfa`, `user_recovery_code` (V3); sessões no Valkey `orange:session` | ✅ |
 | API | `/api/v1/auth/{csrf,session,register,login,login/2fa,reactivate,logout}`; `/api/v1/me/{password,sessions,mfa,…}` | ✅ |
-| Testes | `TotpTest` (vetores da RFC 6238, cifra, timeout absoluto); `AuthApiIT` (aba anônima, cookie, CSRF, limite, logout entre abas, 2FA com anti-replay e códigos de recuperação, sessões) | ✅ |
+| Testes | `TotpTest` (vetores da RFC 6238, cifra, timeout absoluto); `AuthApiIT` (aba anônima, cookie, CSRF, limite, logout entre abas, 2FA com anti-replay e códigos de recuperação, sessões; `secondFactorIsSingleUseUnderConcurrencyAndSetupNeverOverwritesAnActiveFactor`: 8 logins simultâneos com o mesmo código TOTP e de recuperação entram só uma vez, e duas configurações concorrentes dão 409 na segunda) | ✅ |
 | Pendências | passkeys/WebAuthn; "lembrar este navegador por 30 dias"; e-mail transacional (OS-12); CAPTCHA após 20 falhas/24 h; SSO Velion via Keycloak (OS-13) | ⏳ OS-61, OS-62 |
 | Tela | Protótipo: [13-login](../../design/prototype/screens/13-login.png) sobre o mosaico com o logo oficial, [16-login-2fa](../../design/prototype/screens/16-login-2fa.png), [17-seguranca](../../design/prototype/screens/17-seguranca.png) (2FA ativada, sessões por aparelho, "Sair" em cada uma, "Sair de todos os outros", "Sair desta conta" avisando as outras abas via `BroadcastChannel`) | ✅ protótipo |

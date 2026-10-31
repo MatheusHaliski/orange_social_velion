@@ -28,7 +28,7 @@ classDiagram
         -LocalDate userDateOfBirth
         -String gender
         -String sexualPreference «sensível»
-        -String photoObjectKey
+        -String photoObjectKey «avatars/… · quadrado 512 px, RF2»
         -UserCategoryEnum userType
         -List~CommunityInterest~ listOfCommunitiesOfInterest
         -GeoLocation lastSavedLocation
@@ -115,14 +115,13 @@ classDiagram
     class UserMfa {
         <<Entity · PostgreSQL user_mfa>>
         -byte[] totpSecret «AES-256-GCM»
-        -long lastUsedStep «anti-replay»
-        +consumeStep(long) boolean
+        -long lastUsedStep «anti-replay atômico: UPDATE condicional no repositório»
     }
 
     class RecoveryCode {
         <<Entity · PostgreSQL user_recovery_code>>
         -String codeHash «Argon2id»
-        -Instant usedAt
+        -Instant usedAt «uso único: UPDATE … WHERE used_at IS NULL»
     }
 
     class GeoLocation {
@@ -140,15 +139,27 @@ classDiagram
     }
 
     class ConsentEvent {
-        <<Entity · PostgreSQL>>
+        <<Tabela append-only consent_event · JDBC>>
         -Long id
         -ConsentPurpose purpose
         -String legalBasis
         -boolean granted
         -String policyVersion
-        -Instant grantedAt
-        -Instant revokedAt
-        +revoke() void
+        -String channel
+        -String ipHash «HMAC»
+        -Instant occurredAt
+    }
+
+    class ConsentPurpose {
+        <<enumeration · RF3>>
+        LOCATION_TRACKING
+        PERSONALIZED_FEED
+        SENSITIVE_PROFILE_DATA
+        FACIAL_RECOGNITION
+        MARKETING
+        THIRD_PARTY_SHARING
+        +getMinorRule() MinorRule
+        +isSensitive() boolean
     }
 
     class FeedType {
@@ -169,11 +180,12 @@ classDiagram
         #String title
         #String subtitle
         #String body
-        #String mediaObjectKey
+        #String mediaObjectKey «posts/… · foto limpa, RF29»
         #AgeRating ageRating
         #PostStatus status
         #String country
         #String city
+        #Map background «JSONB · moldura RF28»
         #long likeCount «somente leitura»
         #long commentCount «somente leitura»
         #long shareCount «somente leitura»
@@ -310,6 +322,7 @@ classDiagram
     VSusercontrolist "1" *-- "0..1" GeoLocation : lastSavedLocation
     VSusercontrolist "1" *-- "0..*" CommunityInterest : communities
     VSusercontrolist "1" *-- "0..*" ConsentEvent : consents
+    ConsentEvent --> ConsentPurpose : purpose
     VSusercontrolist "1" *-- "1..*" TermsAcceptance : aceita
     VSusercontrolist "1" *-- "1" UserPreference : configura
     VSusercontrolist "1" *-- "0..1" UserMfa : 2FA
@@ -361,4 +374,9 @@ classDiagram
 - **`ANONYMOUS_LGPD_DELETED` é terminal:** nenhum método de domínio aceita transição a partir dele.
 - **Visibilidade do post (RF24):** `PUBLISHED`/`ARCHIVED` para todos, `DRAFT` só para o autor, `REMOVED` para
   ninguém; autor não `ACTIVE` esconde o post de terceiros. Só `PUBLISHED` aceita interações (RF26).
+- **Moldura do post (RF28):** `Post.background` guarda só ids do catálogo, validados pelo `BackgroundValidator`
+  (uma arte por vez, contraste ≥ 4,5:1, sem moldura em `ALERT`); `remove()` e a eliminação LGPD apagam a moldura.
+- **Foto do post (RF29):** `Post.mediaObjectKey` só aponta para a versão limpa em `posts/` (sem EXIF/GPS), gravada pelo
+  `MediaUploads`; o envio em `uploads/{autor}/` nunca vira `mediaUrl`. `remove()` zera a chave e o objeto sai do
+  bucket depois do commit.
 - **Contadores somente leitura no JPA:** quem altera é o `PostInteractionService`, com UPDATE atômico.

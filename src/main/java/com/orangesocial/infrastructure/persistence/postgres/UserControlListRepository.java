@@ -6,6 +6,10 @@ import com.orangesocial.domain.model.UserControlList;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import jakarta.persistence.LockModeType;
 
 import java.util.Optional;
 
@@ -27,4 +31,9 @@ public interface UserControlListRepository extends JpaRepository<UserControlList
     /** Profile Feed: filtro por Nome. */
     Page<UserControlList> findByNameContainingIgnoreCaseAndAccountStatus(
             String name, AccountStatus status, Pageable pageable);
+
+    /** SELECT … FOR UPDATE: mudanças de consentimento da mesma conta ficam em fila (RF3). */
+    @Lock(LockModeType.PESSIMISTIC_WRITE)
+    @Query("SELECT u FROM UserControlList u WHERE u.id = :id")
+    Optional<UserControlList> lockById(@Param("id") long id);
 }

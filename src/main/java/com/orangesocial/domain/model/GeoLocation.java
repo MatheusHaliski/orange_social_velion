@@ -9,10 +9,11 @@ import java.time.Instant;
 public record GeoLocation(double lat, double lng, Instant timestamp) {
 
     public GeoLocation {
-        if (lat < -90 || lat > 90) {
+        // forma positiva: toda comparação com NaN é falsa, e "lat < -90 || lat > 90" deixava NaN passar
+        if (!(lat >= -90 && lat <= 90)) {
             throw new IllegalArgumentException("Latitude fora do intervalo: " + lat);
         }
-        if (lng < -180 || lng > 180) {
+        if (!(lng >= -180 && lng <= 180)) {
             throw new IllegalArgumentException("Longitude fora do intervalo: " + lng);
         }
         if (timestamp == null) {

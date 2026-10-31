@@ -47,5 +47,10 @@ class DomainModelTest {
     void geoLocationRejectsInvalidCoordinates() {
         assertThatThrownBy(() -> new GeoLocation(91, 0, Instant.now()))
                 .isInstanceOf(IllegalArgumentException.class);
+        // NaN não é número nenhum: toda comparação com ele é falsa, então a validação tem de ser na forma positiva
+        assertThatThrownBy(() -> new GeoLocation(Double.NaN, 0, Instant.now()))
+                .isInstanceOf(IllegalArgumentException.class);
+        assertThatThrownBy(() -> new GeoLocation(0, Double.NaN, Instant.now()))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }

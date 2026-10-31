@@ -14,10 +14,13 @@ import jakarta.persistence.Transient;
 import jakarta.persistence.Version;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import org.springframework.data.domain.Persistable;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -85,6 +88,11 @@ public class Post implements Persistable<UUID> {
 
     @Column(name = "city", length = 120)
     private String city;
+
+    /** Moldura do post (RF28): configuração canônica validada por {@code BackgroundValidator}; {@code null} = padrão. */
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "background")
+    private Map<String, Object> background;
 
     @Column(name = "like_count", insertable = false, updatable = false)
     private long likeCount;
@@ -168,6 +176,7 @@ public class Post implements Persistable<UUID> {
         this.mediaObjectKey = null;
         this.country = null;
         this.city = null;
+        this.background = null;
         this.removedAt = Instant.now().truncatedTo(ChronoUnit.MICROS);
     }
 
@@ -318,5 +327,13 @@ public class Post implements Persistable<UUID> {
 
     public Instant getRemovedAt() {
         return removedAt;
+    }
+
+    public Map<String, Object> getBackground() {
+        return background;
+    }
+
+    public void setBackground(Map<String, Object> background) {
+        this.background = background;
     }
 }

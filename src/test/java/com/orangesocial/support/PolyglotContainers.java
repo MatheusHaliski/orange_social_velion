@@ -3,6 +3,7 @@ package com.orangesocial.support;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.context.annotation.Bean;
+import org.springframework.test.context.DynamicPropertyRegistrar;
 import org.testcontainers.cassandra.CassandraContainer;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.postgresql.PostgreSQLContainer;
@@ -13,7 +14,8 @@ import java.time.Duration;
 /**
  * Containers da persistência poliglota para testes de integração (*IT).
  * Os mesmos serviços/imagens do docker-compose.yml. {@code @ServiceConnection}
- * injeta host/porta/credenciais no Spring Boot sem propriedades manuais.
+ * injeta host/porta/credenciais no Spring Boot sem propriedades manuais; o Garage (API S3),
+ * que não tem {@code @ServiceConnection}, entra pelas propriedades {@code orange-social.storage.*}.
  * Os containers são reutilizados entre as classes de teste da mesma JVM.
  */
 @TestConfiguration(proxyBeanMethods = false)
@@ -51,5 +53,23 @@ public class PolyglotContainers {
                 .withEnv("HEAP_NEWSIZE", "256M")
                 .withStartupTimeout(Duration.ofMinutes(4))
                 .withReuse(true);
+    }
+
+    @Bean
+    GarageContainer garage() {
+        return new GarageContainer().withReuse(true);
+    }
+
+    @Bean
+    DynamicPropertyRegistrar storageProperties(GarageContainer garage) {
+        return registry -> {
+            registry.add("orange-social.storage.endpoint", garage::s3Endpoint);
+            registry.add("orange-social.storage.presign-endpoint", garage::s3Endpoint);
+            registry.add("orange-social.storage.region", () -> GarageContainer.REGION);
+            registry.add("orange-social.storage.bucket", () -> GarageContainer.BUCKET);
+            registry.add("orange-social.storage.uploads-bucket", () -> GarageContainer.UPLOADS_BUCKET);
+            registry.add("orange-social.storage.access-key", () -> GarageContainer.ACCESS_KEY);
+            registry.add("orange-social.storage.secret-key", () -> GarageContainer.SECRET_KEY);
+        };
     }
 }

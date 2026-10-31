@@ -114,7 +114,7 @@ class PostApiIT {
         assertThat(body).containsEntry("title", published.getTitle())
                 .containsEntry("subtitle", "Seis meses depois")
                 .containsEntry("body", "Texto completo do post.")
-                .containsEntry("mediaUrl", "http://localhost:3900/orange-social-media/posts/video.mp4")
+                .containsEntry("mediaUrl", "http://orange-social-media.web.garage.localhost:3902/posts/video.mp4")
                 .containsEntry("ageRatingLabel", "Livre")
                 .containsEntry("interactionsOpen", true)
                 .containsEntry("shareUrl", "http://localhost:3000/p/" + published.getId());
@@ -123,7 +123,7 @@ class PostApiIT {
         Map<String, Object> owner = map(body, "author");
         assertThat(owner).containsEntry("name", "techblog.br")
                 .containsEntry("profilePath", "/api/v1/users/" + author.getId() + "/profile")
-                .containsEntry("avatarUrl", "http://localhost:3900/orange-social-media/users/1/avatar.webp")
+                .containsEntry("avatarUrl", "http://orange-social-media.web.garage.localhost:3902/users/1/avatar.webp")
                 .containsEntry("available", true);
         assertThat(map(owner, "category")).containsEntry("code", "AMARELO").containsEntry("color", "#F7C948");
         assertThat(map(body, "counts")).containsEntry("likes", 0).containsEntry("comments", 0).containsEntry("shares", 0);
@@ -156,6 +156,7 @@ class PostApiIT {
         assertThat(profile).containsEntry("name", "techblog.br")
                 .containsEntry("postCount", 3)
                 .containsEntry("postsPath", "/api/v1/users/" + author.getId() + "/posts")
+                .containsEntry("shareUrl", "http://localhost:3000/u/" + author.getId())   // rota do app web
                 .doesNotContainKeys("email", "cityOfResidence", "city", "cellphoneNumber");
 
         Map<String, Object> page1 = get("/api/v1/users/" + author.getId() + "/posts?limit=2", reader.getId()).getBody();
@@ -242,6 +243,36 @@ class PostApiIT {
                 .containsEntry("comments", 1);
     }
 
+    @Test
+    void removingTheSameCommentTwiceDecrementsTheCounterOnce() throws Exception {
+        String box = "/api/v1/posts/" + published.getId() + "/comments";
+        send(HttpMethod.POST, box, author.getId(), Map.of("body", "Eu começo: Java ou Python?"));
+        get("/api/v1/posts/" + published.getId(), reader.getId());   // abre a sessão das duas contas antes das threads
+        for (int round = 0; round < 5; round++) {
+            Number commentId = (Number) map(send(HttpMethod.POST, box, reader.getId(), Map.of("body", "Rodada " + round))
+                    .getBody(), "comment").get("id");
+            // quem escreveu e o dono do post apagam ao mesmo tempo: só uma exclusão vale
+            java.util.concurrent.CountDownLatch start = new java.util.concurrent.CountDownLatch(1);
+            List<Integer> statuses = new java.util.ArrayList<>();
+            try (var pool = java.util.concurrent.Executors.newFixedThreadPool(2)) {
+                List<java.util.concurrent.Future<Integer>> results = List.of(reader.getId(), author.getId()).stream()
+                        .map(who -> pool.submit(() -> {
+                            start.await();
+                            return send(HttpMethod.DELETE, box + "/" + commentId, who, null).getStatusCode().value();
+                        })).toList();
+                start.countDown();
+                for (java.util.concurrent.Future<Integer> r : results) {
+                    statuses.add(r.get());
+                }
+            }
+            assertThat(statuses).isSubsetOf(204, 404).containsOnlyOnce(204);
+            assertThat(map(get("/api/v1/posts/" + published.getId(), null).getBody(), "counts"))
+                    .containsEntry("comments", 1);
+        }
+        assertThat(jdbc.queryForObject("SELECT comment_count FROM post WHERE id = ?", Integer.class, published.getId()))
+                .isEqualTo(1);
+    }
+
     // ------------------------------------------------------------ RF26 · compartilhar
 
     @Test
@@ -268,7 +299,11 @@ class PostApiIT {
         send(HttpMethod.PUT, base + "/save", reader.getId(), null);
         send(HttpMethod.POST, base + "/comments", reader.getId(), Map.of("body", "comentário pessoal"));
         send(HttpMethod.POST, base + "/shares", reader.getId(), Map.of("channel", "X"));
-        Post readersPost = newPost(reader, "Post da Ana", p -> { p.setMediaObjectKey("posts/ana.jpg"); p.publish(); });
+        Post readersPost = newPost(reader, "Post da Ana", p -> {
+            p.setMediaObjectKey("posts/ana.jpg");
+            p.setBackground(Map.of("v", 1, "auraPlusId", "brasa"));     // moldura do RF28 também some
+            p.publish();
+        });
 
         PostContentEraser.ErasureReport report = eraser.eraseContentOf(reader.getId());
 
@@ -283,6 +318,8 @@ class PostApiIT {
         assertThat(jdbc.queryForObject("SELECT count(*) FROM post_comment WHERE body IS NOT NULL AND author_user_id = ?",
                 Integer.class, reader.getId())).isZero();
         assertThat(get("/api/v1/posts/" + readersPost.getId(), null).getStatusCode().value()).isEqualTo(404);
+        assertThat(jdbc.queryForObject("SELECT background IS NULL FROM post WHERE id = ?", Boolean.class,
+                readersPost.getId())).isTrue();
 
         PostContentEraser.ErasureReport again = eraser.eraseContentOf(reader.getId());
         assertThat(again.postsRemoved() + again.commentsRemoved() + again.reactionsDeleted()).isZero();

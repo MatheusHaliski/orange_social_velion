@@ -1,5 +1,7 @@
 package com.orangesocial.application.post;
 
+import com.orangesocial.application.background.BackgroundService;
+
 import com.orangesocial.application.post.PostViews.AuthorView;
 import com.orangesocial.application.post.PostViews.CategoryView;
 import com.orangesocial.application.post.PostViews.CountersView;
@@ -39,11 +41,14 @@ public class PostQueryService {
     private final PostRepository posts;
     private final AuthorDirectory authors;
     private final PublicLinks links;
+    private final BackgroundService backgrounds;
 
-    public PostQueryService(PostRepository posts, AuthorDirectory authors, PublicLinks links) {
+    public PostQueryService(PostRepository posts, AuthorDirectory authors, PublicLinks links,
+                            BackgroundService backgrounds) {
         this.posts = posts;
         this.authors = authors;
         this.links = links;
+        this.backgrounds = backgrounds;
     }
 
     // ------------------------------------------------------------ RF24 · detalhe
@@ -67,7 +72,7 @@ public class PostQueryService {
                 post.getSubtitle(), post.getBody(), links.mediaUrl(post.getMediaObjectKey()),
                 post.getDurationSeconds(), post.getAgeRating(), post.getAgeRating().getLabel(), post.getStatus(),
                 post.getCountry(), post.getCity(), post.getCreatedAt(), authors.view(author), counters(post),
-                viewer, post.acceptsInteractions(), links.shareUrl(post.getId()));
+                viewer, post.acceptsInteractions(), links.shareUrl(post.getId()), backgrounds.resolve(post.getBackground()));
     }
 
     // ------------------------------------------------------------ RF25 · perfil público + feed do autor
@@ -77,17 +82,18 @@ public class PostQueryService {
         long postCount = posts.countByAuthorUserIdAndStatusIn(userId, PostStatus.PUBLIC);
         return new PublicProfileView(user.getId(), user.getName(), CategoryView.of(user.getUserType()),
                 links.mediaUrl(user.getPhotoObjectKey()), user.getCreatedAt(), postCount,
-                links.userPostsPath(user.getId()));
+                links.userPostsPath(user.getId()), links.profileShareUrl(user.getId()));
     }
 
     public FeedPageView authorFeed(Long userId, Optional<String> cursor, int limit, Optional<Long> viewerId) {
         UserControlList user = publicUser(userId);
         int size = Math.clamp(limit, 1, MAX_PAGE);
 
-        // pede um a mais para saber se existe próxima página sem COUNT(*)
+        // pede um a mais para saber se existe próxima página sem COUNT(*); o cursor só escolhe a página: o acesso
+        // (conta ativa) já foi conferido em publicUser
         List<Post> page = cursor.map(FeedCursor::decode)
-                .map(c -> posts.findAuthorFeedBefore(userId, c.createdAt(), c.id(), size + 1))
-                .orElseGet(() -> posts.findAuthorFeed(userId, size + 1));
+                .map(c -> posts.findProfileFeedBefore(userId, c.createdAt(), c.id(), size + 1))
+                .orElseGet(() -> posts.findProfileFeed(userId, size + 1));
         boolean hasMore = page.size() > size;
         List<Post> items = hasMore ? page.subList(0, size) : page;
 
@@ -102,7 +108,7 @@ public class PostQueryService {
                 p.getCreatedAt(), author, counters(p),
                 new ViewerStateView(liked.contains(p.getId()), saved.contains(p.getId()),
                         p.isAuthoredBy(viewerId.orElse(null))),
-                links.postPath(p.getId()))).toList();
+                links.postPath(p.getId()), backgrounds.resolve(p.getBackground()))).toList();
 
         String next = hasMore ? FeedCursor.encode(items.getLast()) : null;
         return new FeedPageView(cards, next);

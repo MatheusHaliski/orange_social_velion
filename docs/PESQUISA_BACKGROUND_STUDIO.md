@@ -394,7 +394,7 @@ cor de categoria.
 - **Regras de exclusão no servidor:**
   - `customArt` ⇄ `aura`/`auraPlusId`;
   - um layout com arte própria limpa os campos dele;
-  - `ALERT` ignora tudo;
+  - `ALERT` não aceita moldura (implementado como `422`);
   - menor de 16 não usa `customArt` nem `auraPlusId` de upload.
 - **Versão do esquema** (`v`), para migrar sem quebrar posts antigos.
 

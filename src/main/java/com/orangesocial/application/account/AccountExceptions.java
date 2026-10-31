@@ -46,6 +46,13 @@ public final class AccountExceptions {
         }
     }
 
+    /** 404: recurso da própria conta que não existe (ex.: finalidade de consentimento desconhecida, RF3). */
+    public static class NotFound extends RuntimeException {
+        public NotFound(String message) {
+            super(message);
+        }
+    }
+
     /** 409: e-mail ou @usuário em uso, 2FA já ativo. */
     public static class Conflict extends RuntimeException {
         public Conflict(String message) {

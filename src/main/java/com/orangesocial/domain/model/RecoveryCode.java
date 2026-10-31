@@ -46,10 +46,6 @@ public class RecoveryCode {
         createdAt = Instant.now();
     }
 
-    public void markUsed(Instant when) {
-        usedAt = when;
-    }
-
     public Long getId() {
         return id;
     }
