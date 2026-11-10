@@ -8,7 +8,7 @@ name: orange-social
 
 services:
   postgres:
-    image: postgis/postgis:17-3.5
+    image: postgis/postgis:18-3.6
     container_name: os-postgres
     environment:
       POSTGRES_DB: orange_social
